@@ -1,25 +1,40 @@
-# cadence-student-planner
+# Cadence
 
-Generated automatically by fullstack-gen.
+**Find your rhythm.** — A student timetable and study management app.
 
-## Stack
-- Frontend: React 19 + Vite 6 + Tailwind CSS v4 (via @tailwindcss/vite, no config file needed)
-- Backend: Express + PostgreSQL (pg)
+## Status: Work in progress 🚧
 
-## Run it
+This project is under active development. Currently building:
 
-```bash
-# Terminal 1
+- [x] Project scaffolding (frontend + backend)
+- [x] Dark/light theme system with persistence
+- [ ] Custom UI component library (buttons, inputs, dropdowns, checkboxes, modal)
+- [ ] Authentication (signup/login/logout, JWT)
+- [ ] Profile creation & editing
+- [ ] Timetable workspace builder (name → days → slots → empty grid)
+
+Not built yet, later phases: subjects, homework tracking, attendance, analytics, files, sharing.
+
+## Tech stack
+
+- **Frontend:** React + Vite + Tailwind CSS v4
+- **Backend:** Node.js + Express
+- **Database:** PostgreSQL
+- **Auth:** JWT (email/password)
+
+## Running locally
+
+\`\`\`bash
+# backend
+cd backend
+npm install
+cp .env.example .env
+npm run dev
+
+# frontend
 cd frontend
 npm install
 npm run dev
+\`\`\`
 
-# Terminal 2
-cd backend
-npm install
-cp .env.example .env   # then edit DB credentials if needed
-npm run dev
-```
-
-Frontend: http://localhost:5173
-Backend:  http://localhost:4000/api/hello
+This README will be updated as features are completed.
