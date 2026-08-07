@@ -4,6 +4,7 @@ import Signup from "./pages/Signup";
 import ProfileSetup from "./pages/ProfileSetup";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedLayout from "./layouts/ProtectedLayout";
 
 export default function App() {
   return (
@@ -19,13 +20,14 @@ export default function App() {
         }
       />
       <Route
-        path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <ProtectedLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route path="/" element={<Dashboard />} />
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
