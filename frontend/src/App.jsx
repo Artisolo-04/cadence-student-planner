@@ -3,6 +3,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProfileSetup from "./pages/ProfileSetup";
 import Dashboard from "./pages/Dashboard";
+import TimetablePage from "./pages/timetable/TimetablePage";
+import SubjectsPage from "./pages/subjects/SubjectsPage";
+import HomeworkPage from "./pages/homework/HomeworkPage";
+import SettingsPage from "./pages/settings/SettingsPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 
@@ -27,6 +31,10 @@ export default function App() {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/timetable" element={<TimetablePage />} />
+        <Route path="/subjects" element={<SubjectsPage />} />
+        <Route path="/homework" element={<HomeworkPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

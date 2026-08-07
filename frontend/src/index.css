@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./styles/theme.css";
+@plugin "tailwindcss-animate";
 
 body {
   background-color: var(--color-bg);
