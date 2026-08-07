@@ -28,9 +28,10 @@ CREATE TABLE IF NOT EXISTS timetable_days (
 CREATE TABLE IF NOT EXISTS timetable_slots (
   id SERIAL PRIMARY KEY,
   timetable_id INTEGER NOT NULL REFERENCES timetables(id) ON DELETE CASCADE,
-  day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  label VARCHAR(50),
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CHECK (end_time > start_time)
 );
