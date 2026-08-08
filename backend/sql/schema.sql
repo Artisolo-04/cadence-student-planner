@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
 CREATE TABLE IF NOT EXISTS profiles (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
@@ -12,6 +13,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   class_year VARCHAR(100) NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
 CREATE TABLE IF NOT EXISTS timetables (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -19,12 +21,14 @@ CREATE TABLE IF NOT EXISTS timetables (
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
 CREATE TABLE IF NOT EXISTS timetable_days (
   id SERIAL PRIMARY KEY,
   timetable_id INTEGER NOT NULL REFERENCES timetables(id) ON DELETE CASCADE,
   day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
   UNIQUE (timetable_id, day_of_week)
 );
+
 CREATE TABLE IF NOT EXISTS timetable_slots (
   id SERIAL PRIMARY KEY,
   timetable_id INTEGER NOT NULL REFERENCES timetables(id) ON DELETE CASCADE,
@@ -35,7 +39,20 @@ CREATE TABLE IF NOT EXISTS timetable_slots (
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CHECK (end_time > start_time)
 );
+
 CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_timetables_user_id ON timetables(user_id);
 CREATE INDEX IF NOT EXISTS idx_timetable_days_timetable_id ON timetable_days(timetable_id);
 CREATE INDEX IF NOT EXISTS idx_timetable_slots_timetable_id ON timetable_slots(timetable_id);
+
+CREATE TABLE IF NOT EXISTS subjects (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  color VARCHAR(7) NOT NULL DEFAULT '#14b8a6',
+  teacher VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_subjects_user_id ON subjects(user_id);
