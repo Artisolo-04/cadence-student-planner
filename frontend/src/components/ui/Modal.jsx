@@ -33,7 +33,7 @@ export default function Modal({ open, onClose, title, children, footer }) {
   if (!mounted) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
       <div
         className={`absolute inset-0 bg-black/50 transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
@@ -51,13 +51,8 @@ export default function Modal({ open, onClose, title, children, footer }) {
       >
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <h2 className="text-base font-semibold">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
-          >
+          <button type="button" onClick={onClose} aria-label="Close"
+            className="rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]">
             <X size={18} />
           </button>
         </div>

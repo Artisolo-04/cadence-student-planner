@@ -79,7 +79,7 @@ export default function Dropdown({
         {mounted && (
           <ul
             role="listbox"
-            className={`absolute z-20 mt-2 w-full max-h-64 overflow-y-auto scrollbar-cadence
+            className={`absolute z-20 mt-2 w-full max-h-64 overflow-y-auto scrollbar-cadence p-1
               rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg py-1
               transition-all duration-150 ease-out origin-top
               ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1"}`}
@@ -93,7 +93,7 @@ export default function Dropdown({
                     role="option"
                     aria-selected={isSelected}
                     onClick={() => select(opt)}
-                    className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left
+                    className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left rounded-sm
                       hover:bg-[var(--color-surface-alt)] transition-colors
                       ${isSelected ? "text-[var(--color-primary)] font-medium" : "text-[var(--color-text)]"}`}
                   >

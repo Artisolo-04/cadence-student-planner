@@ -13,7 +13,7 @@ export default function Tooltip({ label, children }) {
       {visible && (
         <div
           role="tooltip"
-          className="absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap px-2.5 py-1.5 rounded-md text-xs font-medium shadow-md z-50 pointer-events-none animate-in fade-in zoom-in-95 slide-in-from-left-1 duration-150"
+          className="absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap px-2.5 py-1.5 rounded-md text-xs font-medium shadow-md z-[9999] pointer-events-none animate-in fade-in zoom-in-95 slide-in-from-left-1 duration-150"
           style={{
             backgroundColor: "var(--color-text)",
             color: "var(--color-bg)",
