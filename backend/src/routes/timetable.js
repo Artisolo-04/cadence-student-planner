@@ -8,6 +8,7 @@ const {
   renameWorkspace,
   updateDays,
   createSlot,
+  editSlot,
   removeSlot,
   removeWorkspace,
 } = require("../controllers/timetableController");
@@ -17,8 +18,11 @@ router.get("/", requireAuth, listWorkspaces);
 router.get("/:id", requireAuth, getWorkspace);
 router.patch("/:id", requireAuth, renameWorkspace);
 router.delete("/:id", requireAuth, removeWorkspace);
+
 router.put("/:id/days", requireAuth, updateDays);
+
 router.post("/:id/slots", requireAuth, createSlot);
+router.patch("/:id/slots/:slotId", requireAuth, editSlot);
 router.delete("/:id/slots/:slotId", requireAuth, removeSlot);
 
 module.exports = router;

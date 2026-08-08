@@ -35,7 +35,8 @@ async function updateTimetableName(id, name) {
 async function setDays(timetableId, daysOfWeek) {
   await pool.query("DELETE FROM timetable_days WHERE timetable_id = $1", [timetableId]);
   if (daysOfWeek.length === 0) return [];
-  const values = daysOfWeek.map((_, i) => `($1, $${i + 2})`).join(", ");
+
+  const values = daysOfWeek.map((_, index) => `($1, $${index + 2})`).join(", ");
   const result = await pool.query(
     `INSERT INTO timetable_days (timetable_id, day_of_week) VALUES ${values} RETURNING id, day_of_week`,
     [timetableId, ...daysOfWeek]
@@ -55,6 +56,17 @@ async function addSlot(timetableId, { label, startTime, endTime, sortOrder }) {
   const result = await pool.query(
     "INSERT INTO timetable_slots (timetable_id, label, start_time, end_time, sort_order) VALUES ($1, $2, $3, $4, $5) RETURNING id, label, start_time, end_time, sort_order",
     [timetableId, label || null, startTime, endTime, sortOrder || 0]
+  );
+  return result.rows[0];
+}
+
+async function updateSlot(slotId, timetableId, { label, startTime, endTime, sortOrder }) {
+  const result = await pool.query(
+    `UPDATE timetable_slots
+     SET label = $1, start_time = $2, end_time = $3, sort_order = $4
+     WHERE id = $5 AND timetable_id = $6
+     RETURNING id, label, start_time, end_time, sort_order`,
+    [label || null, startTime, endTime, sortOrder || 0, slotId, timetableId]
   );
   return result.rows[0];
 }
@@ -91,6 +103,7 @@ module.exports = {
   setDays,
   findDaysByTimetableId,
   addSlot,
+  updateSlot,
   findSlotsByTimetableId,
   deleteSlot,
   deleteTimetable,

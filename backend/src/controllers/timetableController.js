@@ -6,6 +6,7 @@ const {
   setDays,
   findDaysByTimetableId,
   addSlot,
+  updateSlot,
   findSlotsByTimetableId,
   deleteSlot,
   deleteTimetable,
@@ -41,10 +42,12 @@ async function getWorkspace(req, res) {
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
+
     const [days, slots] = await Promise.all([
       findDaysByTimetableId(timetable.id),
       findSlotsByTimetableId(timetable.id),
     ]);
+
     res.json({ timetable, days, slots });
   } catch (err) {
     console.error("Get workspace error:", err);
@@ -58,10 +61,12 @@ async function renameWorkspace(req, res) {
     if (!name || !name.trim()) {
       return res.status(400).json({ error: "Workspace name is required" });
     }
+
     const timetable = await findTimetableById(req.params.id);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
+
     const updated = await updateTimetableName(req.params.id, name.trim());
     res.json({ timetable: updated });
   } catch (err) {
@@ -73,13 +78,15 @@ async function renameWorkspace(req, res) {
 async function updateDays(req, res) {
   try {
     const { days } = req.body;
-    if (!Array.isArray(days) || days.some((d) => d < 0 || d > 6)) {
+    if (!Array.isArray(days) || days.some((day) => day < 0 || day > 6)) {
       return res.status(400).json({ error: "Days must be an array of numbers between 0 and 6" });
     }
+
     const timetable = await findTimetableById(req.params.id);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
+
     const updatedDays = await setDays(req.params.id, days);
     res.json({ days: updatedDays });
   } catch (err) {
@@ -97,15 +104,50 @@ async function createSlot(req, res) {
     if (startTime >= endTime) {
       return res.status(400).json({ error: "End time must be after start time" });
     }
+
     const timetable = await findTimetableById(req.params.id);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
+
     const slot = await addSlot(req.params.id, { label, startTime, endTime, sortOrder });
     res.status(201).json({ slot });
   } catch (err) {
     console.error("Create slot error:", err);
     res.status(500).json({ error: "Something went wrong adding the slot" });
+  }
+}
+
+async function editSlot(req, res) {
+  try {
+    const { label, startTime, endTime, sortOrder } = req.body;
+    if (!startTime || !endTime) {
+      return res.status(400).json({ error: "Start time and end time are required" });
+    }
+    if (startTime >= endTime) {
+      return res.status(400).json({ error: "End time must be after start time" });
+    }
+
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    const slot = await updateSlot(req.params.slotId, req.params.id, {
+      label,
+      startTime,
+      endTime,
+      sortOrder,
+    });
+
+    if (!slot) {
+      return res.status(404).json({ error: "Slot not found" });
+    }
+
+    res.json({ slot });
+  } catch (err) {
+    console.error("Edit slot error:", err);
+    res.status(500).json({ error: "Something went wrong updating the slot" });
   }
 }
 
@@ -115,10 +157,12 @@ async function removeSlot(req, res) {
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
+
     const deleted = await deleteSlot(req.params.slotId, req.params.id);
     if (!deleted) {
       return res.status(404).json({ error: "Slot not found" });
     }
+
     res.json({ id: deleted.id });
   } catch (err) {
     console.error("Remove slot error:", err);
@@ -146,6 +190,7 @@ module.exports = {
   renameWorkspace,
   updateDays,
   createSlot,
+  editSlot,
   removeSlot,
   removeWorkspace,
 };
