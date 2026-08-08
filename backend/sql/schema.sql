@@ -56,3 +56,17 @@ CREATE TABLE IF NOT EXISTS subjects (
 );
 
 CREATE INDEX IF NOT EXISTS idx_subjects_user_id ON subjects(user_id);
+
+CREATE TABLE IF NOT EXISTS timetable_entries (
+  id SERIAL PRIMARY KEY,
+  timetable_id INTEGER NOT NULL REFERENCES timetables(id) ON DELETE CASCADE,
+  subject_id INTEGER NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
+  slot_id INTEGER NOT NULL REFERENCES timetable_slots(id) ON DELETE CASCADE,
+  day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE (timetable_id, slot_id, day_of_week)
+);
+
+CREATE INDEX IF NOT EXISTS idx_timetable_entries_timetable_id ON timetable_entries(timetable_id);
+CREATE INDEX IF NOT EXISTS idx_timetable_entries_subject_id ON timetable_entries(subject_id);

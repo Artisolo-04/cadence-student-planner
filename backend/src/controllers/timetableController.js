@@ -11,6 +11,12 @@ const {
   deleteSlot,
   deleteTimetable,
 } = require("../models/Timetable");
+const { findSubjectById } = require("../models/Subject");
+const {
+  upsertEntry,
+  findEntriesByTimetableId,
+  deleteEntry,
+} = require("../models/TimetableEntry");
 
 async function createWorkspace(req, res) {
   try {
@@ -43,12 +49,13 @@ async function getWorkspace(req, res) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const [days, slots] = await Promise.all([
+    const [days, slots, entries] = await Promise.all([
       findDaysByTimetableId(timetable.id),
       findSlotsByTimetableId(timetable.id),
+      findEntriesByTimetableId(timetable.id),
     ]);
 
-    res.json({ timetable, days, slots });
+    res.json({ timetable, days, slots, entries });
   } catch (err) {
     console.error("Get workspace error:", err);
     res.status(500).json({ error: "Something went wrong fetching the workspace" });
@@ -183,6 +190,57 @@ async function removeWorkspace(req, res) {
   }
 }
 
+async function setEntry(req, res) {
+  try {
+    const { slotId, dayOfWeek, subjectId } = req.body;
+    if (slotId == null || dayOfWeek == null || subjectId == null) {
+      return res.status(400).json({ error: "slotId, dayOfWeek, and subjectId are required" });
+    }
+    if (dayOfWeek < 0 || dayOfWeek > 6) {
+      return res.status(400).json({ error: "dayOfWeek must be between 0 and 6" });
+    }
+
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    const subject = await findSubjectById(subjectId);
+    if (!subject || subject.user_id !== req.userId) {
+      return res.status(404).json({ error: "Subject not found" });
+    }
+
+    const entry = await upsertEntry(req.params.id, { slotId, dayOfWeek, subjectId });
+    res.json({ entry });
+  } catch (err) {
+    console.error("Set entry error:", err);
+    res.status(500).json({ error: "Something went wrong assigning the subject" });
+  }
+}
+
+async function clearEntry(req, res) {
+  try {
+    const { slotId, dayOfWeek } = req.body;
+    if (slotId == null || dayOfWeek == null) {
+      return res.status(400).json({ error: "slotId and dayOfWeek are required" });
+    }
+
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    const deleted = await deleteEntry(req.params.id, { slotId, dayOfWeek });
+    if (!deleted) {
+      return res.status(404).json({ error: "Entry not found" });
+    }
+    res.json({ id: deleted.id });
+  } catch (err) {
+    console.error("Clear entry error:", err);
+    res.status(500).json({ error: "Something went wrong clearing the cell" });
+  }
+}
+
 module.exports = {
   createWorkspace,
   listWorkspaces,
@@ -193,4 +251,6 @@ module.exports = {
   editSlot,
   removeSlot,
   removeWorkspace,
+  setEntry,
+  clearEntry,
 };
