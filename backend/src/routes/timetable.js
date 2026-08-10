@@ -6,6 +6,7 @@ const {
   listWorkspaces,
   getWorkspace,
   renameWorkspace,
+  updateMyGroup,
   updateDays,
   createSlot,
   editSlot,
@@ -19,6 +20,7 @@ router.post("/", requireAuth, createWorkspace);
 router.get("/", requireAuth, listWorkspaces);
 router.get("/:id", requireAuth, getWorkspace);
 router.patch("/:id", requireAuth, renameWorkspace);
+router.patch("/:id/my-group", requireAuth, updateMyGroup);
 router.delete("/:id", requireAuth, removeWorkspace);
 
 router.put("/:id/days", requireAuth, updateDays);

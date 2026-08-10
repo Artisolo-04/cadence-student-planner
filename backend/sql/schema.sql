@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS timetables (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
+  my_group VARCHAR(10) CHECK (my_group IN ('g1', 'g2')),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -65,9 +66,11 @@ CREATE TABLE IF NOT EXISTS timetable_entries (
   subject_id INTEGER NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
   slot_id INTEGER NOT NULL REFERENCES timetable_slots(id) ON DELETE CASCADE,
   day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  group_tag VARCHAR(10) NOT NULL DEFAULT 'all' CHECK (group_tag IN ('all', 'g1', 'g2')),
+  room VARCHAR(100),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  UNIQUE (timetable_id, slot_id, day_of_week)
+  UNIQUE (timetable_id, slot_id, day_of_week, group_tag)
 );
 
 CREATE INDEX IF NOT EXISTS idx_timetable_entries_timetable_id ON timetable_entries(timetable_id);

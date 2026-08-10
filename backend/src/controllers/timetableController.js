@@ -3,6 +3,7 @@ const {
   findTimetableById,
   findTimetablesByUserId,
   updateTimetableName,
+  updateTimetableMyGroup,
   setDays,
   findDaysByTimetableId,
   addSlot,
@@ -79,6 +80,31 @@ async function renameWorkspace(req, res) {
   } catch (err) {
     console.error("Rename workspace error:", err);
     res.status(500).json({ error: "Something went wrong renaming the workspace" });
+  }
+}
+
+async function updateMyGroup(req, res) {
+  try {
+    const { myGroup } = req.body;
+
+    if (myGroup !== null && !["g1", "g2"].includes(myGroup)) {
+      return res.status(400).json({ error: "myGroup must be 'g1', 'g2', or null" });
+    }
+
+    const timetable = await updateTimetableMyGroup(
+      req.params.id,
+      req.userId,
+      myGroup
+    );
+
+    if (!timetable) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    res.json({ timetable });
+  } catch (err) {
+    console.error("Update timetable group error:", err);
+    res.status(500).json({ error: "Something went wrong updating your group" });
   }
 }
 
@@ -255,6 +281,7 @@ module.exports = {
   listWorkspaces,
   getWorkspace,
   renameWorkspace,
+  updateMyGroup,
   updateDays,
   createSlot,
   editSlot,
