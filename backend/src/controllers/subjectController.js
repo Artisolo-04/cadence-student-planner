@@ -25,6 +25,11 @@ async function addSubject(req, res) {
     });
     res.status(201).json({ subject });
   } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({
+        error: "You already have a subject with this name",
+      });
+    }
     console.error("Create subject error:", err);
     res.status(500).json({ error: "Something went wrong creating the subject" });
   }
@@ -62,6 +67,11 @@ async function editSubject(req, res) {
     });
     res.json({ subject });
   } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({
+        error: "You already have a subject with this name",
+      });
+    }
     console.error("Edit subject error:", err);
     res.status(500).json({ error: "Something went wrong updating the subject" });
   }

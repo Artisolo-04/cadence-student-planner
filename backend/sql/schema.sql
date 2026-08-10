@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS subjects (
 );
 
 CREATE INDEX IF NOT EXISTS idx_subjects_user_id ON subjects(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS unique_subject_name_per_user
+ON subjects (user_id, LOWER(TRIM(name)));
 
 CREATE TABLE IF NOT EXISTS timetable_entries (
   id SERIAL PRIMARY KEY,
