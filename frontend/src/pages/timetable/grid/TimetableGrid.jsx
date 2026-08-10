@@ -22,6 +22,13 @@ function entryKey(slotId, dayOfWeek) {
   return `${slotId}-${dayOfWeek}`;
 }
 
+function pickDisplayEntry(entriesForCell) {
+  if (!entriesForCell || entriesForCell.length === 0) return null;
+  return (
+    entriesForCell.find((e) => e.group_tag === "all") || entriesForCell[0]
+  );
+}
+
 export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   const { timetable, days, slots, entries } = workspace;
 
@@ -42,10 +49,12 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   const isCurrentSlot = (slot) =>
     nowMinutes >= toMinutes(slot.start_time) && nowMinutes < toMinutes(slot.end_time);
 
-  const entryMap = useMemo(() => {
+  const entriesByCell = useMemo(() => {
     const map = {};
     for (const entry of entries || []) {
-      map[entryKey(entry.slot_id, entry.day_of_week)] = entry;
+      const key = entryKey(entry.slot_id, entry.day_of_week);
+      if (!map[key]) map[key] = [];
+      map[key].push(entry);
     }
     return map;
   }, [entries]);
@@ -68,32 +77,22 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
     setActiveCell(null);
   }
 
-  function updateLocalEntries(nextEntries) {
-    onWorkspaceChange?.({ ...workspace, entries: nextEntries });
+  async function refreshWorkspace() {
+    const { data } = await api.get(`/timetables/${timetable.id}`);
+    onWorkspaceChange?.(data);
   }
 
-  async function handleSelect(subjectId) {
+  async function handleSelect({ subjectId, groupTag, room }) {
     if (!activeCell) return;
     try {
       await api.put(`/timetables/${timetable.id}/entries`, {
         slotId: activeCell.slotId,
         dayOfWeek: activeCell.dayOfWeek,
         subjectId,
+        groupTag,
+        room,
       });
-      const subject = subjects.find((s) => s.id === subjectId);
-      const key = entryKey(activeCell.slotId, activeCell.dayOfWeek);
-      const nextEntries = (entries || []).filter(
-        (e) => entryKey(e.slot_id, e.day_of_week) !== key
-      );
-      nextEntries.push({
-        slot_id: activeCell.slotId,
-        day_of_week: activeCell.dayOfWeek,
-        subject_id: subjectId,
-        subject_name: subject?.name,
-        subject_color: subject?.color,
-        subject_teacher: subject?.teacher,
-      });
-      updateLocalEntries(nextEntries);
+      await refreshWorkspace();
       closePicker();
     } catch (err) {
       console.error("Assign subject error:", err);
@@ -103,14 +102,11 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   async function handleClear() {
     if (!activeCell) return;
     try {
+      const groupTag = activeEntry?.group_tag || "all";
       await api.delete(`/timetables/${timetable.id}/entries`, {
-        data: { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek },
+        data: { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek, groupTag },
       });
-      const key = entryKey(activeCell.slotId, activeCell.dayOfWeek);
-      const nextEntries = (entries || []).filter(
-        (e) => entryKey(e.slot_id, e.day_of_week) !== key
-      );
-      updateLocalEntries(nextEntries);
+      await refreshWorkspace();
       closePicker();
     } catch (err) {
       console.error("Clear entry error:", err);
@@ -118,7 +114,7 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   }
 
   const activeEntry = activeCell
-    ? entryMap[entryKey(activeCell.slotId, activeCell.dayOfWeek)]
+    ? pickDisplayEntry(entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)])
     : null;
 
   return (
@@ -185,7 +181,9 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
                   const isToday = day.day_of_week === nowDow;
                   const isLive = isToday && isCurrentSlot(slot);
                   const isLastCol = i === orderedDays.length - 1;
-                  const entry = entryMap[entryKey(slot.id, day.day_of_week)];
+                  const entry = pickDisplayEntry(
+                    entriesByCell[entryKey(slot.id, day.day_of_week)]
+                  );
                   return (
                     <td
                       key={day.id}
@@ -229,6 +227,8 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
         onClose={closePicker}
         subjects={subjects}
         currentSubjectId={activeEntry?.subject_id ?? null}
+        currentGroupTag={activeEntry?.group_tag}
+        currentRoom={activeEntry?.room}
         onSelect={handleSelect}
         onClear={handleClear}
         cellLabel={

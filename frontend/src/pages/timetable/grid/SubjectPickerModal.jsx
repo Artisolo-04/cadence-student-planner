@@ -4,11 +4,19 @@ import Modal from "../../../components/ui/Modal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
 
+const GROUP_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "g1", label: "G1" },
+  { value: "g2", label: "G2" },
+];
+
 export default function SubjectPickerModal({
   open,
   onClose,
   subjects,
   currentSubjectId,
+  currentGroupTag,
+  currentRoom,
   onSelect,
   onClear,
   cellLabel,
@@ -17,10 +25,16 @@ export default function SubjectPickerModal({
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
   const [search, setSearch] = useState("");
+  const [groupTag, setGroupTag] = useState("all");
+  const [room, setRoom] = useState("");
 
   useEffect(() => {
-    if (open) setSearch("");
-  }, [open]);
+    if (open) {
+      setSearch("");
+      setGroupTag(currentGroupTag || "all");
+      setRoom(currentRoom || "");
+    }
+  }, [open, currentGroupTag, currentRoom]);
 
   const filteredSubjects = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -53,9 +67,39 @@ export default function SubjectPickerModal({
     };
   }, [open, filteredSubjects]);
 
+  function handleSelect(subjectId) {
+    onSelect({ subjectId, groupTag, room: room.trim() });
+  }
+
   return (
     <Modal open={open} onClose={onClose} title={cellLabel || "Assign subject"}>
       <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          {GROUP_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setGroupTag(opt.value)}
+              className={`flex-1 rounded-lg border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors duration-150
+                focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
+                ${
+                  groupTag === opt.value
+                    ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                    : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]"
+                }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <Input
+          id="subject-picker-room"
+          placeholder="Room (optional)"
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+        />
+
         {subjects.length === 0 ? (
           <p className="text-sm text-[var(--color-text-muted)]">
             You don't have any subjects yet. Add one from the Subjects page first.
@@ -94,7 +138,7 @@ export default function SubjectPickerModal({
                       <button
                         key={subject.id}
                         type="button"
-                        onClick={() => onSelect(subject.id)}
+                        onClick={() => handleSelect(subject.id)}
                         className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors duration-150
                           focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
                           ${
