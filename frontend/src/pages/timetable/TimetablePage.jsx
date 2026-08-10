@@ -108,7 +108,7 @@ export default function TimetablePage() {
 
   if (view === "grid" && workspace) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex h-full min-h-0 flex-col gap-4">
         <div className="flex items-center justify-between">
           <button
             type="button"

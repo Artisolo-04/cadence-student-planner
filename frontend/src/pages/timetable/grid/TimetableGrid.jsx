@@ -122,8 +122,9 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
     : null;
 
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
-      <table className="w-full table-fixed border-collapse text-sm">
+    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence" style={{ scrollbarGutter: "auto" }}>
+      <table className="h-full w-full table-fixed border-collapse text-sm">
         <colgroup>
           <col style={{ width: "16%" }} />
           {orderedDays.map((day) => (
@@ -221,6 +222,7 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
           })}
         </tbody>
       </table>
+      </div>
 
       <SubjectPickerModal
         open={Boolean(activeCell)}
