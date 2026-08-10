@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { sortDaysByWeekOrder } from "../../../lib/days";
+import api from "../../../lib/api";
+import SubjectPickerModal from "./SubjectPickerModal";
 
 const WEEKDAY_FULL = [
   "SUNDAY",
@@ -16,8 +18,12 @@ function toMinutes(t) {
   return h * 60 + m;
 }
 
-export default function TimetableGrid({ workspace }) {
-  const { days, slots } = workspace;
+function entryKey(slotId, dayOfWeek) {
+  return `${slotId}-${dayOfWeek}`;
+}
+
+export default function TimetableGrid({ workspace, onWorkspaceChange }) {
+  const { timetable, days, slots, entries } = workspace;
 
   const orderedDays = sortDaysByWeekOrder(days);
   const orderedSlots = useMemo(
@@ -35,6 +41,85 @@ export default function TimetableGrid({ workspace }) {
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isCurrentSlot = (slot) =>
     nowMinutes >= toMinutes(slot.start_time) && nowMinutes < toMinutes(slot.end_time);
+
+  const entryMap = useMemo(() => {
+    const map = {};
+    for (const entry of entries || []) {
+      map[entryKey(entry.slot_id, entry.day_of_week)] = entry;
+    }
+    return map;
+  }, [entries]);
+
+  const [subjects, setSubjects] = useState([]);
+  useEffect(() => {
+    api
+      .get("/subjects")
+      .then(({ data }) => setSubjects(data.subjects))
+      .catch((err) => console.error("Load subjects error:", err));
+  }, []);
+
+  const [activeCell, setActiveCell] = useState(null);
+
+  function openCell(slot, day) {
+    setActiveCell({ slotId: slot.id, dayOfWeek: day.day_of_week, slot, day });
+  }
+
+  function closePicker() {
+    setActiveCell(null);
+  }
+
+  function updateLocalEntries(nextEntries) {
+    onWorkspaceChange?.({ ...workspace, entries: nextEntries });
+  }
+
+  async function handleSelect(subjectId) {
+    if (!activeCell) return;
+    try {
+      await api.put(`/timetables/${timetable.id}/entries`, {
+        slotId: activeCell.slotId,
+        dayOfWeek: activeCell.dayOfWeek,
+        subjectId,
+      });
+      const subject = subjects.find((s) => s.id === subjectId);
+      const key = entryKey(activeCell.slotId, activeCell.dayOfWeek);
+      const nextEntries = (entries || []).filter(
+        (e) => entryKey(e.slot_id, e.day_of_week) !== key
+      );
+      nextEntries.push({
+        slot_id: activeCell.slotId,
+        day_of_week: activeCell.dayOfWeek,
+        subject_id: subjectId,
+        subject_name: subject?.name,
+        subject_color: subject?.color,
+        subject_teacher: subject?.teacher,
+      });
+      updateLocalEntries(nextEntries);
+      closePicker();
+    } catch (err) {
+      console.error("Assign subject error:", err);
+    }
+  }
+
+  async function handleClear() {
+    if (!activeCell) return;
+    try {
+      await api.delete(`/timetables/${timetable.id}/entries`, {
+        data: { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek },
+      });
+      const key = entryKey(activeCell.slotId, activeCell.dayOfWeek);
+      const nextEntries = (entries || []).filter(
+        (e) => entryKey(e.slot_id, e.day_of_week) !== key
+      );
+      updateLocalEntries(nextEntries);
+      closePicker();
+    } catch (err) {
+      console.error("Clear entry error:", err);
+    }
+  }
+
+  const activeEntry = activeCell
+    ? entryMap[entryKey(activeCell.slotId, activeCell.dayOfWeek)]
+    : null;
 
   return (
     <div className="w-full overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
@@ -75,7 +160,7 @@ export default function TimetableGrid({ workspace }) {
           {orderedSlots.map((slot, rowIdx) => {
             const isLastRow = rowIdx === orderedSlots.length - 1;
             return (
-              <tr key={slot.id} className="group/row">
+              <tr key={slot.id}>
                 <td
                   className={`border-r border-[var(--color-border)] ${
                     isLastRow ? "" : "border-b"
@@ -99,26 +184,34 @@ export default function TimetableGrid({ workspace }) {
                   const isToday = day.day_of_week === nowDow;
                   const isLive = isToday && isCurrentSlot(slot);
                   const isLastCol = i === orderedDays.length - 1;
+                  const entry = entryMap[entryKey(slot.id, day.day_of_week)];
                   return (
                     <td
                       key={day.id}
-                      className={`relative border-[var(--color-border)] ${
+                      onClick={() => openCell(slot, day)}
+                      className={`group relative cursor-pointer border-[var(--color-border)] ${
                         isLastCol ? "" : "border-r"
-                      } ${isLastRow ? "" : "border-b"} px-2 py-4 text-center align-middle transition-all duration-200 ease-out ${
-                        isToday ? "bg-[var(--color-accent)]/[0.05]" : ""
-                      } hover:bg-[var(--color-surface-alt)]`}
+                      } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-all duration-200 ease-out ${
+                        isToday && !entry ? "bg-[var(--color-accent)]/[0.05]" : ""
+                      } ${entry ? "" : "hover:bg-[var(--color-surface-alt)]"}`}
                     >
                       {isLive && (
-                        <span className="absolute inset-1 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)] pointer-events-none" />
+                        <span className="absolute inset-1 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)] pointer-events-none z-10" />
                       )}
-                      <div className="relative flex h-full min-h-[24px] items-center justify-center">
-                        {isLive && (
-                          <span className="absolute -left-1 top-0 flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-accent)] opacity-75" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-accent)]" />
+                      <div className="relative flex h-full min-h-[56px] items-center justify-center">
+                        {entry ? (
+                          <span
+                            className="absolute inset-0 flex items-center justify-center truncate px-2 text-[12px] font-semibold transition-opacity duration-150 hover:opacity-90"
+                            style={{
+                              backgroundColor: `${entry.subject_color}26`,
+                              color: entry.subject_color,
+                            }}
+                          >
+                            <span className="truncate">{entry.subject_name}</span>
                           </span>
+                        ) : (
+                          <span className="h-1 w-1 rounded-full bg-[var(--color-text-muted)]/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                         )}
-                        <span className="h-1 w-1 rounded-full bg-[var(--color-text-muted)]/30 opacity-0 transition-opacity duration-200 group-hover/row:opacity-100" />
                       </div>
                     </td>
                   );
@@ -128,6 +221,20 @@ export default function TimetableGrid({ workspace }) {
           })}
         </tbody>
       </table>
+
+      <SubjectPickerModal
+        open={Boolean(activeCell)}
+        onClose={closePicker}
+        subjects={subjects}
+        currentSubjectId={activeEntry?.subject_id ?? null}
+        onSelect={handleSelect}
+        onClear={handleClear}
+        cellLabel={
+          activeCell
+            ? `${WEEKDAY_FULL[activeCell.dayOfWeek]} · ${activeCell.slot.start_time.slice(0, 5)}–${activeCell.slot.end_time.slice(0, 5)}`
+            : ""
+        }
+      />
     </div>
   );
 }

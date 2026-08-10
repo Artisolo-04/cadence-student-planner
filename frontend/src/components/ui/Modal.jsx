@@ -35,7 +35,7 @@ export default function Modal({ open, onClose, title, children, footer }) {
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className={`absolute inset-0 bg-black/50 transition-opacity duration-200 ${
+        className={`absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
@@ -56,7 +56,7 @@ export default function Modal({ open, onClose, title, children, footer }) {
             <X size={18} />
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto scrollbar-cadence px-5 py-4">
+        <div className="max-h-[70vh] overflow-hidden px-5 py-4">
           {children}
         </div>
         {footer && (
