@@ -192,12 +192,15 @@ async function removeWorkspace(req, res) {
 
 async function setEntry(req, res) {
   try {
-    const { slotId, dayOfWeek, subjectId } = req.body;
+    const { slotId, dayOfWeek, subjectId, groupTag = "all", room } = req.body;
     if (slotId == null || dayOfWeek == null || subjectId == null) {
       return res.status(400).json({ error: "slotId, dayOfWeek, and subjectId are required" });
     }
     if (dayOfWeek < 0 || dayOfWeek > 6) {
       return res.status(400).json({ error: "dayOfWeek must be between 0 and 6" });
+    }
+    if (!["all", "g1", "g2"].includes(groupTag)) {
+      return res.status(400).json({ error: "groupTag must be 'all', 'g1', or 'g2'" });
     }
 
     const timetable = await findTimetableById(req.params.id);
@@ -210,7 +213,13 @@ async function setEntry(req, res) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    const entry = await upsertEntry(req.params.id, { slotId, dayOfWeek, subjectId });
+    const entry = await upsertEntry(req.params.id, {
+      slotId,
+      dayOfWeek,
+      subjectId,
+      groupTag,
+      room: room?.trim() ? room.trim() : null,
+    });
     res.json({ entry });
   } catch (err) {
     console.error("Set entry error:", err);
@@ -220,7 +229,7 @@ async function setEntry(req, res) {
 
 async function clearEntry(req, res) {
   try {
-    const { slotId, dayOfWeek } = req.body;
+    const { slotId, dayOfWeek, groupTag = "all" } = req.body;
     if (slotId == null || dayOfWeek == null) {
       return res.status(400).json({ error: "slotId and dayOfWeek are required" });
     }
@@ -230,7 +239,7 @@ async function clearEntry(req, res) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const deleted = await deleteEntry(req.params.id, { slotId, dayOfWeek });
+    const deleted = await deleteEntry(req.params.id, { slotId, dayOfWeek, groupTag });
     if (!deleted) {
       return res.status(404).json({ error: "Entry not found" });
     }
