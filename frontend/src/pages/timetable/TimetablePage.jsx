@@ -5,12 +5,17 @@ import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
 import TimetableWizard from "./wizard/TimetableWizard";
 import TimetableGrid from "./grid/TimetableGrid";
+import ViewOptionsPanel from "./ViewOptionsPanel";
+import useTimetableViewOptions from "../../hooks/useTimetableViewOptions";
 
 export default function TimetablePage() {
   const [view, setView] = useState("loading");
   const [wizardMode, setWizardMode] = useState("create");
   const [timetables, setTimetables] = useState([]);
   const [workspace, setWorkspace] = useState(null);
+  const { viewOptions, setViewOption } = useTimetableViewOptions(
+    workspace?.timetable?.id
+  );
 
   useEffect(() => {
     loadTimetables();
@@ -55,6 +60,30 @@ export default function TimetablePage() {
       setView(remaining.length ? "list" : "empty");
       return remaining;
     });
+  }
+
+  async function handleMyGroupChange(myGroup) {
+    if (!workspace) return;
+
+    try {
+      const { data } = await api.patch(
+        `/timetables/${workspace.timetable.id}/my-group`,
+        { myGroup }
+      );
+
+      setWorkspace((current) => ({
+        ...current,
+        timetable: data.timetable,
+      }));
+
+      setTimetables((current) =>
+        current.map((timetable) =>
+          timetable.id === data.timetable.id ? data.timetable : timetable
+        )
+      );
+    } catch (err) {
+      console.error("Update timetable group error:", err);
+    }
   }
 
   function handleBackToList() {
@@ -118,12 +147,25 @@ export default function TimetablePage() {
             <ArrowLeft size={16} />
             All timetables
           </button>
-          <Button variant="secondary" onClick={startEdit}>
-            <Pencil size={16} />
-            Edit
-          </Button>
+          <div className="flex items-center gap-2">
+            <ViewOptionsPanel
+              myGroup={workspace.timetable.my_group}
+              onMyGroupChange={handleMyGroupChange}
+              viewOptions={viewOptions}
+              onViewOptionChange={setViewOption}
+            />
+            <Button variant="secondary" onClick={startEdit}>
+              <Pencil size={16} />
+              Edit
+            </Button>
+          </div>
         </div>
-        <TimetableGrid workspace={workspace} onWorkspaceChange={setWorkspace} />
+        <TimetableGrid
+          workspace={workspace}
+          onWorkspaceChange={setWorkspace}
+          myGroup={workspace.timetable.my_group}
+          viewOptions={viewOptions}
+        />
       </div>
     );
   }

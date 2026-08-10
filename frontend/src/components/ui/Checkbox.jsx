@@ -1,10 +1,10 @@
 import { Check } from "lucide-react";
 
-export default function Checkbox({ label, id, checked, onChange, ...rest }) {
+export default function Checkbox({ label, id, checked, onChange, className = "", ...rest }) {
   return (
     <label
       htmlFor={id}
-      className="inline-flex items-center gap-2.5 cursor-pointer select-none text-sm text-[var(--color-text)]"
+      className={`inline-flex items-center gap-2.5 cursor-pointer select-none text-sm text-[var(--color-text)] ${className}`}
     >
       <span className="relative inline-flex h-5 w-5 shrink-0">
         <input

@@ -16,7 +16,12 @@ const WEEKDAY_FULL = [
   "SATURDAY",
 ];
 
-export default function TimetableGrid({ workspace, onWorkspaceChange }) {
+export default function TimetableGrid({
+  workspace,
+  onWorkspaceChange,
+  myGroup,
+  viewOptions,
+}) {
   const { timetable, days, slots, entries } = workspace;
 
   const orderedDays = sortDaysByWeekOrder(days);
@@ -113,6 +118,7 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
       sourceGroupTag: activeCell.groupTag,
       targetGroupTag: groupTag,
       subjectId,
+      room,
     });
 
     console.log("[planEntrySave] decision:", {
@@ -253,6 +259,8 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
                       isLastCol={isLastCol}
                       isLastRow={isLastRow}
                       onOpen={(groupTag) => openCell(slot, day, groupTag)}
+                      myGroup={myGroup}
+                      viewOptions={viewOptions}
                     />
                   );
                 })}

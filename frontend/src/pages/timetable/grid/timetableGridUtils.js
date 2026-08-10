@@ -48,7 +48,14 @@ function buildState(entriesForCell) {
   };
 }
 
-export function planEntrySave({ cellEntries = [], sourceGroupTag, targetGroupTag, subjectId }) {
+export function planEntrySave({
+  cellEntries = [],
+  sourceGroupTag,
+  targetGroupTag,
+  subjectId,
+  room,
+}) {
+  const normalizedRoom = room?.trim() || null;
   const currentState = buildState(cellEntries);
 
   const simulatedState = {
@@ -100,7 +107,9 @@ export function planEntrySave({ cellEntries = [], sourceGroupTag, targetGroupTag
 
   if (targetCurrent && targetCurrent.subject_id === subjectId) {
     const convertingToAllRemoves = targetGroupTag === "all" && (currentState.g1 || currentState.g2);
-    if (!convertingToAllRemoves) {
+    const roomChanged = (targetCurrent.room || null) !== normalizedRoom;
+
+    if (!convertingToAllRemoves && !roomChanged) {
       return {
         deletions: [],
         swap: null,
