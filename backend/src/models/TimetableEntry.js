@@ -1,9 +1,20 @@
 const pool = require("../config/db");
 
+async function clearConflictingGroupEntries(timetableId, { slotId, dayOfWeek, groupTag }) {
+  const conflictTags = groupTag === "all" ? ["g1", "g2"] : ["all"];
+  await pool.query(
+    `DELETE FROM timetable_entries
+     WHERE timetable_id = $1 AND slot_id = $2 AND day_of_week = $3 AND group_tag = ANY($4)`,
+    [timetableId, slotId, dayOfWeek, conflictTags]
+  );
+}
+
 async function upsertEntry(
   timetableId,
   { slotId, dayOfWeek, subjectId, groupTag = "all", room = null }
 ) {
+  await clearConflictingGroupEntries(timetableId, { slotId, dayOfWeek, groupTag });
+
   const result = await pool.query(
     `INSERT INTO timetable_entries (timetable_id, slot_id, day_of_week, subject_id, group_tag, room)
      VALUES ($1, $2, $3, $4, $5, $6)
