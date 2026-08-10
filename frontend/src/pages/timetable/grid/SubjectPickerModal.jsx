@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, Search, X } from "lucide-react";
+import { BookOpen, Search, X, Check } from "lucide-react";
 import Modal from "../../../components/ui/Modal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
+import { getDuplicateSiblingHint } from "./timetableGridUtils";
 
 const GROUP_OPTIONS = [
   { value: "all", label: "All" },
@@ -20,6 +21,7 @@ export default function SubjectPickerModal({
   onSelect,
   onClear,
   cellLabel,
+  cellEntries,
 }) {
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
@@ -27,14 +29,26 @@ export default function SubjectPickerModal({
   const [search, setSearch] = useState("");
   const [groupTag, setGroupTag] = useState("all");
   const [room, setRoom] = useState("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState(null);
+
+  useMemo(
+    () =>
+      getDuplicateSiblingHint({
+        cellEntries,
+        targetGroupTag: groupTag,
+        subjectId: selectedSubjectId,
+      }),
+    [cellEntries, groupTag, selectedSubjectId]
+  );
 
   useEffect(() => {
     if (open) {
       setSearch("");
       setGroupTag(currentGroupTag || "all");
       setRoom(currentRoom || "");
+      setSelectedSubjectId(currentSubjectId ?? null);
     }
-  }, [open, currentGroupTag, currentRoom]);
+  }, [open, currentGroupTag, currentRoom, currentSubjectId]);
 
   const filteredSubjects = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -67,8 +81,9 @@ export default function SubjectPickerModal({
     };
   }, [open, filteredSubjects]);
 
-  function handleSelect(subjectId) {
-    onSelect({ subjectId, groupTag, room: room.trim() });
+  function handleSave() {
+    if (selectedSubjectId == null) return;
+    onSelect({ subjectId: selectedSubjectId, groupTag, room: room.trim() });
   }
 
   return (
@@ -133,12 +148,12 @@ export default function SubjectPickerModal({
                   className="flex max-h-72 flex-col gap-1.5 overflow-y-auto scrollbar-cadence pr-2"
                 >
                   {filteredSubjects.map((subject) => {
-                    const selected = subject.id === currentSubjectId;
+                    const selected = subject.id === selectedSubjectId;
                     return (
                       <button
                         key={subject.id}
                         type="button"
-                        onClick={() => handleSelect(subject.id)}
+                        onClick={() => setSelectedSubjectId(subject.id)}
                         className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors duration-150
                           focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
                           ${
@@ -163,6 +178,9 @@ export default function SubjectPickerModal({
                             </span>
                           )}
                         </span>
+                        {selected && (
+                          <Check size={16} className="shrink-0 text-[var(--color-primary)]" />
+                        )}
                       </button>
                     );
                   })}
@@ -186,17 +204,28 @@ export default function SubjectPickerModal({
           </>
         )}
 
-        {currentSubjectId != null && (
+        <div className="flex items-center gap-2">
+          {currentSubjectId != null && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onClear}
+              className="flex-1 justify-center"
+            >
+              <X size={16} />
+              Clear this cell
+            </Button>
+          )}
           <Button
             type="button"
-            variant="secondary"
-            onClick={onClear}
-            className="justify-center"
+            onClick={handleSave}
+            disabled={selectedSubjectId == null}
+            className="flex-1 justify-center"
           >
-            <X size={16} />
-            Clear this cell
+            <Check size={16} />
+            Save
           </Button>
-        )}
+        </div>
       </div>
     </Modal>
   );

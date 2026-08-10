@@ -1,10 +1,8 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-
-export default function Modal({ open, onClose, title, children, footer }) {
+export default function Modal({ open, onClose, title, children, footer, elevated = false }) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     let raf1, raf2;
     if (open) {
@@ -22,18 +20,15 @@ export default function Modal({ open, onClose, title, children, footer }) {
       cancelAnimationFrame(raf2);
     };
   }, [open]);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && onClose?.();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
   if (!mounted) return null;
-
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
+    <div className={`absolute inset-0 flex items-center justify-center p-4 ${elevated ? "z-[60]" : "z-50"}`}>
       <div
         className={`absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"

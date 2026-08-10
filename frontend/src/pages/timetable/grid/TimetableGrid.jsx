@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { sortDaysByWeekOrder } from "../../../lib/days";
 import api from "../../../lib/api";
 import SubjectPickerModal from "./SubjectPickerModal";
+import TimetableCell from "./TimetableCell";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog";
+import { toMinutes, entryKey, findEntryForGroup, planEntrySave } from "./timetableGridUtils";
 
 const WEEKDAY_FULL = [
   "SUNDAY",
@@ -12,22 +15,6 @@ const WEEKDAY_FULL = [
   "FRIDAY",
   "SATURDAY",
 ];
-
-function toMinutes(t) {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function entryKey(slotId, dayOfWeek) {
-  return `${slotId}-${dayOfWeek}`;
-}
-
-function pickDisplayEntry(entriesForCell) {
-  if (!entriesForCell || entriesForCell.length === 0) return null;
-  return (
-    entriesForCell.find((e) => e.group_tag === "all") || entriesForCell[0]
-  );
-}
 
 export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   const { timetable, days, slots, entries } = workspace;
@@ -68,9 +55,10 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   }, []);
 
   const [activeCell, setActiveCell] = useState(null);
+  const [pendingSave, setPendingSave] = useState(null);
 
-  function openCell(slot, day) {
-    setActiveCell({ slotId: slot.id, dayOfWeek: day.day_of_week, slot, day });
+  function openCell(slot, day, groupTag) {
+    setActiveCell({ slotId: slot.id, dayOfWeek: day.day_of_week, slot, day, groupTag });
   }
 
   function closePicker() {
@@ -82,9 +70,18 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
     onWorkspaceChange?.(data);
   }
 
-  async function handleSelect({ subjectId, groupTag, room }) {
+  async function commitSave({ subjectId, groupTag, room, deletions, swap }) {
     if (!activeCell) return;
     try {
+      for (const deleteGroupTag of deletions) {
+        await api.delete(`/timetables/${timetable.id}/entries`, {
+          data: {
+            slotId: activeCell.slotId,
+            dayOfWeek: activeCell.dayOfWeek,
+            groupTag: deleteGroupTag,
+          },
+        });
+      }
       await api.put(`/timetables/${timetable.id}/entries`, {
         slotId: activeCell.slotId,
         dayOfWeek: activeCell.dayOfWeek,
@@ -92,6 +89,15 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
         groupTag,
         room,
       });
+      if (swap) {
+        await api.put(`/timetables/${timetable.id}/entries`, {
+          slotId: activeCell.slotId,
+          dayOfWeek: activeCell.dayOfWeek,
+          subjectId: swap.subjectId,
+          groupTag: swap.groupTag,
+          room: swap.room,
+        });
+      }
       await refreshWorkspace();
       closePicker();
     } catch (err) {
@@ -99,10 +105,43 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
     }
   }
 
+  function handleSelect({ subjectId, groupTag, room }) {
+    if (!activeCell) return;
+    const cellEntries = entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)];
+    const plan = planEntrySave({
+      cellEntries,
+      sourceGroupTag: activeCell.groupTag,
+      targetGroupTag: groupTag,
+      subjectId,
+    });
+
+    console.log("[planEntrySave] decision:", {
+      sourceGroupTag: activeCell.groupTag,
+      requestedTargetGroupTag: groupTag,
+      subjectId,
+      plan,
+    });
+
+    if (plan.noop) {
+      closePicker();
+      return;
+    }
+
+    const finalGroupTag = plan.finalGroupTag || groupTag;
+    const payload = { subjectId, groupTag: finalGroupTag, room, deletions: plan.deletions, swap: plan.swap, actionType: plan.actionType, warnings: plan.warnings };
+
+    if (plan.needsConfirm) {
+      setPendingSave(payload);
+      return;
+    }
+
+    commitSave(payload);
+  }
+
   async function handleClear() {
     if (!activeCell) return;
     try {
-      const groupTag = activeEntry?.group_tag || "all";
+      const groupTag = activeCell.groupTag || "all";
       await api.delete(`/timetables/${timetable.id}/entries`, {
         data: { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek, groupTag },
       });
@@ -114,8 +153,32 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
   }
 
   const activeEntry = activeCell
-    ? pickDisplayEntry(entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)])
+    ? findEntryForGroup(
+        entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)],
+        activeCell.groupTag
+      )
     : null;
+
+  function dialogConfigForAction(actionType) {
+    switch (actionType) {
+      case "merge":
+        return { title: "Merge duplicate subjects?", confirmLabel: "Merge into All" };
+      case "swap":
+        return { title: "Swap subjects between groups?", confirmLabel: "Swap subjects" };
+      case "overwrite":
+        return { title: "Replace subject?", confirmLabel: "Replace" };
+      case "convert":
+        return { title: "Convert to shared slot?", confirmLabel: "Convert to All" };
+      case "split":
+        return { title: "Split shared slot?", confirmLabel: "Split" };
+      case "noop":
+        return { title: "No changes", confirmLabel: "OK" };
+      default:
+        return { title: "This will change more than one thing", confirmLabel: "Continue" };
+    }
+  }
+
+  const dialogConfig = pendingSave ? dialogConfigForAction(pendingSave.actionType) : null;
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
@@ -181,38 +244,16 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
                   const isToday = day.day_of_week === nowDow;
                   const isLive = isToday && isCurrentSlot(slot);
                   const isLastCol = i === orderedDays.length - 1;
-                  const entry = pickDisplayEntry(
-                    entriesByCell[entryKey(slot.id, day.day_of_week)]
-                  );
                   return (
-                    <td
+                    <TimetableCell
                       key={day.id}
-                      onClick={() => openCell(slot, day)}
-                      className={`group relative cursor-pointer border-[var(--color-border)] ${
-                        isLastCol ? "" : "border-r"
-                      } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-all duration-200 ease-out ${
-                        isToday && !entry ? "bg-[var(--color-accent)]/[0.05]" : ""
-                      } ${entry ? "" : "hover:bg-[var(--color-surface-alt)]"}`}
-                    >
-                      {isLive && (
-                        <span className="absolute inset-1 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)] pointer-events-none z-10" />
-                      )}
-                      <div className="relative flex h-full min-h-[56px] items-center justify-center">
-                        {entry ? (
-                          <span
-                            className="absolute inset-0 flex items-center justify-center truncate px-2 text-[12px] font-semibold transition-opacity duration-150 hover:opacity-90"
-                            style={{
-                              backgroundColor: `${entry.subject_color}26`,
-                              color: entry.subject_color,
-                            }}
-                          >
-                            <span className="truncate">{entry.subject_name}</span>
-                          </span>
-                        ) : (
-                          <span className="h-1 w-1 rounded-full bg-[var(--color-text-muted)]/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-                        )}
-                      </div>
-                    </td>
+                      entriesForCell={entriesByCell[entryKey(slot.id, day.day_of_week)]}
+                      isToday={isToday}
+                      isLive={isLive}
+                      isLastCol={isLastCol}
+                      isLastRow={isLastRow}
+                      onOpen={(groupTag) => openCell(slot, day, groupTag)}
+                    />
                   );
                 })}
               </tr>
@@ -227,8 +268,11 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
         onClose={closePicker}
         subjects={subjects}
         currentSubjectId={activeEntry?.subject_id ?? null}
-        currentGroupTag={activeEntry?.group_tag}
+        currentGroupTag={activeCell?.groupTag}
         currentRoom={activeEntry?.room}
+        cellEntries={
+          activeCell ? entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)] : null
+        }
         onSelect={handleSelect}
         onClear={handleClear}
         cellLabel={
@@ -236,6 +280,19 @@ export default function TimetableGrid({ workspace, onWorkspaceChange }) {
             ? `${WEEKDAY_FULL[activeCell.dayOfWeek]} · ${activeCell.slot.start_time.slice(0, 5)}–${activeCell.slot.end_time.slice(0, 5)}`
             : ""
         }
+      />
+
+      <ConfirmDialog
+        open={Boolean(pendingSave)}
+        title={dialogConfig?.title || "This will change more than one thing"}
+        messages={pendingSave?.warnings || []}
+        confirmLabel={dialogConfig?.confirmLabel || "Continue"}
+        onCancel={() => setPendingSave(null)}
+        onConfirm={() => {
+          const save = pendingSave;
+          setPendingSave(null);
+          commitSave(save);
+        }}
       />
     </div>
   );
