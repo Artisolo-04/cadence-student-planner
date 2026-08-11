@@ -77,6 +77,7 @@ export default function TimetableGrid({
   const {
     sensors,
     draggingSubject,
+    dragChipSize,
     dropAnimation,
     landing,
     handleDragStart,
@@ -225,7 +226,9 @@ export default function TimetableGrid({
       </div>
 
       <DragOverlay dropAnimation={dropAnimation} modifiers={[magneticModifier]}>
-        {draggingSubject ? <SubjectChipContent subject={draggingSubject} lifted /> : null}
+        {draggingSubject ? (
+          <SubjectChipContent subject={draggingSubject} lifted size={dragChipSize} />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

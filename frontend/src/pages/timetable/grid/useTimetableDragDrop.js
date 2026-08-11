@@ -7,8 +7,11 @@ import {
   unlockPageScroll,
 } from "./dragAnimations";
 
+const DRAG_CHIP_FIT = 0.8;
+
 export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
   const [draggingSubject, setDraggingSubject] = useState(null);
+  const [dragChipSize, setDragChipSize] = useState(null);
   const [dropAnimation, setDropAnimation] = useState(() => CANCEL_FADE_ANIMATION);
   const [landing, setLanding] = useState(null);
   const landingTimeoutRef = useRef(null);
@@ -36,6 +39,18 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
         teacher: data.subjectTeacher,
       });
     }
+
+    const cellEl = document.querySelector("[data-cell-key]");
+    if (cellEl) {
+      const rect = cellEl.getBoundingClientRect();
+      setDragChipSize({
+        width: rect.width * DRAG_CHIP_FIT,
+        height: rect.height * DRAG_CHIP_FIT,
+      });
+    } else {
+      setDragChipSize(null);
+    }
+
     setDropAnimation(() => CANCEL_FADE_ANIMATION);
     lockPageScroll();
   }
@@ -43,6 +58,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
   function handleDragCancel() {
     setDropAnimation(() => CANCEL_FADE_ANIMATION);
     setDraggingSubject(null);
+    setDragChipSize(null);
     unlockPageScroll();
   }
 
@@ -81,11 +97,13 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
     setDropAnimation(() => animation);
     window.setTimeout(unlockPageScroll, animation.duration + 20);
     setDraggingSubject(null);
+    setDragChipSize(null);
   }
 
   return {
     sensors,
     draggingSubject,
+    dragChipSize,
     dropAnimation,
     landing,
     handleDragStart,
