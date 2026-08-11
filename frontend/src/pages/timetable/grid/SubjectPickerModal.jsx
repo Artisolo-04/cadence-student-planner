@@ -3,7 +3,6 @@ import { BookOpen, Search, X, Check } from "lucide-react";
 import Modal from "../../../components/ui/Modal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
-import { getDuplicateSiblingHint } from "./timetableGridUtils";
 
 const GROUP_OPTIONS = [
   { value: "all", label: "All" },
@@ -31,15 +30,6 @@ export default function SubjectPickerModal({
   const [room, setRoom] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState(null);
 
-  useMemo(
-    () =>
-      getDuplicateSiblingHint({
-        cellEntries,
-        targetGroupTag: groupTag,
-        subjectId: selectedSubjectId,
-      }),
-    [cellEntries, groupTag, selectedSubjectId]
-  );
 
   useEffect(() => {
     if (open) {
