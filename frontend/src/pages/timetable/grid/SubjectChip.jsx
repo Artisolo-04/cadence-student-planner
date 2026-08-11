@@ -1,21 +1,27 @@
-import { BookOpen, GripVertical } from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 
-export function SubjectChipContent({ subject, lifted }) {
+export function SubjectChipContent({ subject, lifted, size }) {
   return (
     <div
-      style={{ "--subject-color": subject.color }}
-      className={`flex items-center gap-2.5 overflow-hidden rounded-xl border border-white/10 bg-[var(--color-surface)] px-3 py-2.5 backdrop-blur-xl transition-all duration-150 ease-out
-        ${lifted ? "scale-105 shadow-[0_20px_40px_-16px_color-mix(in_srgb,var(--subject-color)_60%,transparent)]" : "shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]"}
+      style={{
+        "--subject-color": subject.color,
+        ...(size ? { width: size.width, height: size.height } : null),
+      }}
+      className={`relative flex items-center gap-2.5 overflow-hidden rounded-md border bg-[var(--color-surface-alt)] py-2.5 pl-3.5 pr-3 transition-all duration-150 ease-out
+        ${size ? "justify-center" : ""}
+        ${
+          lifted
+            ? "scale-105 border-[color-mix(in_srgb,var(--subject-color)_45%,var(--color-border))] shadow-[0_20px_40px_-16px_color-mix(in_srgb,var(--subject-color)_60%,transparent)]"
+            : "border-[var(--color-border)] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
+        }
       `}
     >
       <span
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-1 ring-inset ring-white/10"
-        style={{ backgroundColor: "color-mix(in srgb, var(--subject-color) 18%, transparent)" }}
         aria-hidden="true"
-      >
-        <BookOpen size={14} style={{ color: subject.color }} />
-      </span>
+        className="absolute inset-y-0 left-0 w-1"
+        style={{ backgroundColor: "var(--subject-color)" }}
+      />
 
       <div className="min-w-0 flex-1">
         <span className="block truncate text-[13px] font-semibold leading-snug text-[var(--color-text)]">
@@ -28,7 +34,7 @@ export function SubjectChipContent({ subject, lifted }) {
         )}
       </div>
 
-      <GripVertical size={14} className="shrink-0 text-[var(--color-text-muted)]/40" />
+      {!size && <GripVertical size={14} className="shrink-0 text-[var(--color-text-muted)]/40" />}
     </div>
   );
 }

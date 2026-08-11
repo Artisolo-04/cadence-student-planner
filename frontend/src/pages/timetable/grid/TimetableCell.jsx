@@ -52,15 +52,16 @@ function SubjectLabel({ entry, groupTag, showTeacher, showRoom, pulseColor, dimm
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const teacherText = showTeacher && entry.subject_teacher ? entry.subject_teacher : null;
+  const roomText = showRoom && entry.room ? entry.room : null;
+
   return (
     <span
       key={`${entry.subject_id}-${groupTag || "all"}-${entry.room || ""}`}
-      className={`absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-2 text-[12px] font-semibold hover:opacity-90 ${
-        dimmed ? "opacity-60" : ""
-      }`}
       style={{
-        backgroundColor: `${entry.subject_color}26`,
-        color: entry.subject_color,
+        "--subject-color": entry.subject_color,
+        backgroundImage:
+          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 55%, var(--color-surface) 45%) 0%, color-mix(in srgb, var(--subject-color) 26%, var(--color-surface) 74%) 55%, color-mix(in srgb, var(--subject-color) 14%, var(--color-surface) 86%) 100%)",
         opacity: dimmed ? undefined : popped ? 1 : 0,
         transform: popped ? "scale(1)" : "scale(0.65)",
         transitionProperty: "transform, opacity",
@@ -68,22 +69,38 @@ function SubjectLabel({ entry, groupTag, showTeacher, showRoom, pulseColor, dimm
         transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         transitionDelay: pulseColor ? "40ms" : "0ms",
       }}
+      className={`absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,inset_0_0_0_1px_color-mix(in_srgb,var(--subject-color)_45%,transparent),0_0_16px_-4px_color-mix(in_srgb,var(--subject-color)_70%,transparent)] backdrop-blur-md transition-opacity duration-150 hover:opacity-90 ${
+        dimmed ? "opacity-60" : ""
+      }`}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-40"
+        style={{
+          backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 100%)",
+        }}
+      />
       {pulseColor && <LandingPulse color={pulseColor} />}
+
       {groupTag && (
-        <span className="absolute left-1.5 top-1.5 rounded bg-[var(--color-surface)]/70 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide">
+        <span className="absolute left-1 top-1 z-10 rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90">
           {groupTag}
         </span>
       )}
-      <span className="max-w-full truncate">{entry.subject_name}</span>
-      {showTeacher && entry.subject_teacher && (
-        <span className="max-w-full truncate text-[10px] font-medium opacity-80">
-          {entry.subject_teacher}
+
+      {roomText && (
+        <span className="absolute right-1 top-1 z-10 max-w-[45%] truncate rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90">
+          {roomText}
         </span>
       )}
-      {showRoom && entry.room && (
-        <span className="max-w-full truncate text-[10px] font-medium opacity-80">
-          {entry.room}
+
+      <span className="relative z-10 flex-1 flex items-center justify-center px-1 text-center text-[12px] font-bold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+        <span className="max-w-full truncate">{entry.subject_name}</span>
+      </span>
+
+      {teacherText && (
+        <span className="relative z-10 truncate text-left text-[9px] font-semibold leading-tight text-white/85">
+          {teacherText}
         </span>
       )}
     </span>
