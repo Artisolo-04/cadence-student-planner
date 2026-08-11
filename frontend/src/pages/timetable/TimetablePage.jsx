@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, Plus, ArrowLeft, Pencil } from "lucide-react";
+import { Calendar, Plus, ArrowLeft, Pencil, Settings2, Check } from "lucide-react";
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
@@ -13,6 +13,7 @@ export default function TimetablePage() {
   const [wizardMode, setWizardMode] = useState("create");
   const [timetables, setTimetables] = useState([]);
   const [workspace, setWorkspace] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const { viewOptions, setViewOption } = useTimetableViewOptions(
     workspace?.timetable?.id
   );
@@ -36,6 +37,7 @@ export default function TimetablePage() {
     try {
       const { data } = await api.get(`/timetables/${id}`);
       setWorkspace(data);
+      setIsEditMode(false);
       setView("grid");
     } catch (err) {
       console.error("Load workspace detail error:", err);
@@ -44,6 +46,7 @@ export default function TimetablePage() {
 
   async function handleWizardComplete(detail) {
     setWorkspace(detail);
+    setIsEditMode(false);
     setView("grid");
     try {
       const { data } = await api.get("/timetables");
@@ -88,6 +91,7 @@ export default function TimetablePage() {
 
   function handleBackToList() {
     setWorkspace(null);
+    setIsEditMode(false);
     setView("list");
   }
 
@@ -96,9 +100,13 @@ export default function TimetablePage() {
     setView("wizard");
   }
 
-  function startEdit() {
+  function startEditSetup() {
     setWizardMode("edit");
     setView("wizard");
+  }
+
+  function toggleEditMode() {
+    setIsEditMode((current) => !current);
   }
 
   function handleWizardCancel() {
@@ -154,9 +162,17 @@ export default function TimetablePage() {
               viewOptions={viewOptions}
               onViewOptionChange={setViewOption}
             />
-            <Button variant="secondary" onClick={startEdit}>
-              <Pencil size={16} />
-              Edit
+            <Button
+              variant="secondary"
+              onClick={startEditSetup}
+              title="Edit timetable setup (name, days, slots)"
+            >
+              <Settings2 size={16} />
+              Edit setup
+            </Button>
+            <Button variant={isEditMode ? "primary" : "secondary"} onClick={toggleEditMode}>
+              {isEditMode ? <Check size={16} /> : <Pencil size={16} />}
+              {isEditMode ? "Done" : "Edit"}
             </Button>
           </div>
         </div>
@@ -165,6 +181,7 @@ export default function TimetablePage() {
           onWorkspaceChange={setWorkspace}
           myGroup={workspace.timetable.my_group}
           viewOptions={viewOptions}
+          isEditMode={isEditMode}
         />
       </div>
     );
