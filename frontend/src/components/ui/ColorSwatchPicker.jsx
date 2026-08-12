@@ -1,16 +1,26 @@
 import { Check } from "lucide-react";
 
 const PRESET_COLORS = [
-  "#3b82f6",
-  "#8b5cf6",
-  "#ec4899",
-  "#f43f5e",
-  "#f97316",
-  "#eab308",
-  "#22c55e",
-  "#14b8a6",
-  "#06b6d4",
-  "#6366f1",
+  "#ef4444", // red
+  "#3b82f6", // blue
+  "#f97316", // orange
+  "#8b5cf6", // violet
+  "#eab308", // yellow
+  "#06b6d4", // cyan
+  "#ec4899", // pink
+  "#22c55e", // green
+  "#a855f7", // purple
+  "#f59e0b", // amber
+  "#0ea5e9", // sky
+  "#f43f5e", // rose
+  "#10b981", // emerald
+  "#6366f1", // indigo
+  "#84cc16", // lime
+  "#d946ef", // fuchsia
+  "#14b8a6", // teal
+  "#db2777", // deep pink
+  "#0891b2", // deep cyan
+  "#7c3aed", // deep violet
 ];
 
 export default function ColorSwatchPicker({ label, value, onChange }) {
