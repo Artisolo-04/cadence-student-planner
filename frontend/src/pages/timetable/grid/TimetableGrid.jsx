@@ -29,6 +29,8 @@ export default function TimetableGrid({
   myGroup,
   viewOptions,
   isEditMode,
+  actionsRef,
+  onEditStateChange,
 }) {
   const { timetable, days, slots, entries } = workspace;
 
@@ -72,7 +74,19 @@ export default function TimetableGrid({
     saveDraggedSubject,
     commitSave,
     setPendingSave,
-  } = useTimetableEntries({ timetable, entriesByCell, onWorkspaceChange });
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useTimetableEntries({ timetable, entriesByCell, onWorkspaceChange, isEditMode });
+
+  if (actionsRef) {
+    actionsRef.current = { undo, redo };
+  }
+
+  useEffect(() => {
+    onEditStateChange?.({ canUndo, canRedo });
+  }, [canUndo, canRedo]);
 
   const {
     sensors,

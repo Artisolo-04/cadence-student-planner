@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Calendar, Plus, ArrowLeft, Pencil, Settings2, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Calendar, Plus, ArrowLeft, Pencil, Settings2, Check, Undo2, Redo2 } from "lucide-react";
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
@@ -14,6 +14,8 @@ export default function TimetablePage() {
   const [timetables, setTimetables] = useState([]);
   const [workspace, setWorkspace] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const editActionsRef = useRef({ undo: () => {}, redo: () => {} });
+  const [editState, setEditState] = useState({ canUndo: false, canRedo: false });
   const { viewOptions, setViewOption } = useTimetableViewOptions(
     workspace?.timetable?.id
   );
@@ -156,25 +158,59 @@ export default function TimetablePage() {
             All timetables
           </button>
           <div className="flex items-center gap-2">
-            <div
-              className={`flex items-center gap-2 transition-opacity duration-500 ease-in-out ${
-                isEditMode ? "opacity-0 pointer-events-none" : "opacity-100"
-              }`}
-            >
-              <ViewOptionsPanel
-                myGroup={workspace.timetable.my_group}
-                onMyGroupChange={handleMyGroupChange}
-                viewOptions={viewOptions}
-                onViewOptionChange={setViewOption}
-              />
-              <Button
-                variant="secondary"
-                onClick={startEditSetup}
-                title="Edit timetable setup (name, days, slots)"
+            <div className="relative flex h-9 items-center">
+              <div
+                className="flex items-center gap-2 transition-opacity duration-500 ease-in-out"
+                style={{
+                  opacity: isEditMode ? 0 : 1,
+                  pointerEvents: isEditMode ? "none" : "auto",
+                  transitionDelay: isEditMode ? "0ms" : "500ms",
+                  visibility: isEditMode ? "hidden" : "visible",
+                }}
               >
-                <Settings2 size={16} />
-                Edit setup
-              </Button>
+                <ViewOptionsPanel
+                  myGroup={workspace.timetable.my_group}
+                  onMyGroupChange={handleMyGroupChange}
+                  viewOptions={viewOptions}
+                  onViewOptionChange={setViewOption}
+                />
+                <Button
+                  variant="secondary"
+                  onClick={startEditSetup}
+                  title="Edit timetable setup (name, days, slots)"
+                >
+                  <Settings2 size={16} />
+                  Edit setup
+                </Button>
+              </div>
+              <div
+                className="absolute right-0 flex items-center gap-2 transition-opacity duration-500 ease-in-out"
+                style={{
+                  opacity: isEditMode ? 1 : 0,
+                  pointerEvents: isEditMode ? "auto" : "none",
+                  transitionDelay: isEditMode ? "500ms" : "0ms",
+                  visibility: isEditMode ? "visible" : "hidden",
+                }}
+              >
+                <Button
+                  variant="secondary"
+                  onClick={() => editActionsRef.current.undo()}
+                  disabled={!editState.canUndo}
+                  title="Undo last change"
+                  className="!px-2.5 !py-2.5"
+                >
+                  <Undo2 size={16} />
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => editActionsRef.current.redo()}
+                  disabled={!editState.canRedo}
+                  title="Redo last change"
+                  className="!px-2.5 !py-2.5"
+                >
+                  <Redo2 size={16} />
+                </Button>
+              </div>
             </div>
             <Button
               variant={isEditMode ? "primary" : "secondary"}
@@ -212,6 +248,8 @@ export default function TimetablePage() {
           myGroup={workspace.timetable.my_group}
           viewOptions={viewOptions}
           isEditMode={isEditMode}
+          actionsRef={editActionsRef}
+          onEditStateChange={setEditState}
         />
       </div>
     );
