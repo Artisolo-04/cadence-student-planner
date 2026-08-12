@@ -7,7 +7,7 @@ import {
   unlockPageScroll,
 } from "./dragAnimations";
 
-const DRAG_CHIP_FIT = 0.8;
+const DRAG_CHIP_FIT = 0.75;
 
 export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
   const [draggingSubject, setDraggingSubject] = useState(null);
