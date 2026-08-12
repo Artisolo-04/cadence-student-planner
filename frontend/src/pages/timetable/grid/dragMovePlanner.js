@@ -96,8 +96,7 @@ export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell }) {
     isMove: Boolean(sourceCell),
   };
 
-  const skipConfirmForDrag =
-    Boolean(sourceCell) && !plan.swap && DRAG_AUTO_CONFIRM_ACTIONS.has(plan.actionType);
+  const skipConfirmForDrag = Boolean(sourceCell);
 
   return {
     kind: "save",
