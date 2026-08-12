@@ -61,7 +61,7 @@ function SubjectLabel({ entry, groupTag, showTeacher, showRoom, pulseColor, dimm
       style={{
         "--subject-color": entry.subject_color,
         backgroundImage:
-          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 30%, var(--color-surface) 70%) 0%, color-mix(in srgb, var(--subject-color) 16%, var(--color-surface) 84%) 55%, color-mix(in srgb, var(--subject-color) 8%, var(--color-surface) 92%) 100%)",
+          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 26%, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface) 92%)) 0%, color-mix(in srgb, var(--subject-color) 14%, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface) 94%)) 55%, color-mix(in srgb, var(--subject-color) 7%, var(--color-surface) 93%) 100%)",
         opacity: dimmed ? undefined : popped ? 1 : 0,
         transform: popped ? "scale(1)" : "scale(0.65)",
         transitionProperty: "transform, opacity",
@@ -69,7 +69,7 @@ function SubjectLabel({ entry, groupTag, showTeacher, showRoom, pulseColor, dimm
         transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         transitionDelay: pulseColor ? "40ms" : "0ms",
       }}
-      className={`group/label absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,inset_0_0_0_1px_color-mix(in_srgb,var(--subject-color)_45%,transparent),0_0_16px_-4px_color-mix(in_srgb,var(--subject-color)_70%,transparent)] backdrop-blur-md backdrop-saturate-150 transition-opacity duration-150 hover:opacity-90 ${
+      className={`group/label absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,inset_0_0_0_1px_rgba(255,255,255,0.08),0_0_16px_-4px_color-mix(in_srgb,var(--subject-color)_65%,transparent)] backdrop-blur-md backdrop-saturate-150 transition-opacity duration-150 hover:opacity-90 ${
         dimmed ? "opacity-60" : ""
       }`}
     >

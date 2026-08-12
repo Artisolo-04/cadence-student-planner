@@ -73,7 +73,11 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete }) {
             {subjects.map((subject) => (
               <article
                 key={subject.id}
-                style={{ "--subject-color": subject.color }}
+                style={{
+                  "--subject-color": subject.color,
+                  backgroundImage:
+                    "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
+                }}
                 className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_55%,transparent)]"
               >
                 <div
