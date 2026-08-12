@@ -92,11 +92,19 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete }) {
 
                 <div className="relative z-10 flex items-start justify-between">
                   <span
-                    className="flex h-9 w-9 items-center justify-center rounded-full ring-1 ring-inset ring-white/10"
-                    style={{ backgroundColor: "color-mix(in srgb, var(--subject-color) 18%, transparent)" }}
+                    className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-white/15 backdrop-blur-md"
+                    style={{
+                      backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${subject.color} 40%, black 20%) 0%, color-mix(in srgb, ${subject.color} 15%, black 45%) 100%)`,
+                      boxShadow:
+                        "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
+                    }}
                     aria-hidden="true"
                   >
-                    <BookOpen size={16} style={{ color: subject.color }} />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
+                    />
+                    <BookOpen size={16} style={{ color: subject.color }} className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
                   </span>
 
                   <div className="flex items-center gap-1">

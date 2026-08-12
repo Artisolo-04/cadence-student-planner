@@ -73,20 +73,45 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
             {timetables.map((timetable) => (
               <article
                 key={timetable.id}
-                className="group relative flex min-h-[160px] flex-col justify-between rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg)] p-5 transition-colors duration-150 hover:border-[var(--color-primary)]"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
+                }}
+                className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)]"
               >
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[var(--color-primary)] opacity-20 blur-3xl transition-opacity duration-300 group-hover:opacity-35"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent"
+                />
+
                 <button
                   type="button"
                   onClick={() => onOpen(timetable.id)}
-                  className="absolute inset-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                  className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
                   aria-label={`Open ${timetable.name}`}
                 />
 
                 <div className="relative z-10 flex items-start justify-between">
-                  <CalendarDays
-                    size={20}
-                    className="text-[var(--color-text-muted)] transition-colors group-hover:text-[var(--color-primary)]"
-                  />
+                  <span
+                    className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-white/15 backdrop-blur-md"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 40%, black 20%) 0%, color-mix(in srgb, var(--color-primary) 15%, black 45%) 100%)",
+                      boxShadow:
+                        "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
+                    }}
+                    aria-hidden="true"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
+                    />
+                    <CalendarDays size={16} className="relative z-10 text-[var(--color-primary)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                  </span>
 
                   <button
                     type="button"
@@ -94,7 +119,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                       setError("");
                       setSelectedTimetable(timetable);
                     }}
-                    className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                    className="relative z-20 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                     aria-label={`Delete ${timetable.name}`}
                     title="Delete timetable"
                   >
