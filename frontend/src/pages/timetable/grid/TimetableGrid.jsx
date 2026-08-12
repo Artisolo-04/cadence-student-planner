@@ -104,7 +104,7 @@ export default function TimetableGrid({
           <div className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence" style={{ scrollbarGutter: "auto" }}>
           <table className="h-full w-full table-fixed border-collapse text-sm">
             <colgroup>
-              <col style={{ width: "104px" }} />
+              <col style={{ width: "150px" }} />
               {orderedDays.map((day) => (
                 <col key={day.id} />
               ))}
