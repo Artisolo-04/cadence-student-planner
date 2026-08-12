@@ -99,19 +99,19 @@ export default function TimetableGrid({
       onDragCancel={handleDragCancel}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-full min-h-0 w-full gap-3">
+      <div className={`flex h-full min-h-0 w-full transition-all duration-500 ${isEditMode ? "gap-3" : "gap-0"}`}>
         <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
           <div className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence" style={{ scrollbarGutter: "auto" }}>
           <table className="h-full w-full table-fixed border-collapse text-sm">
             <colgroup>
-              <col style={{ width: "16%" }} />
+              <col style={{ width: "104px" }} />
               {orderedDays.map((day) => (
-                <col key={day.id} style={{ width: `${84 / orderedDays.length}%` }} />
+                <col key={day.id} />
               ))}
             </colgroup>
             <thead>
               <tr>
-                <th className="border-b border-r border-[var(--color-border)] bg-[var(--color-surface-alt)] px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+                <th className="border-b border-r border-[var(--color-border)] bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
                   Time
                 </th>
                 {orderedDays.map((day, i) => {
@@ -122,7 +122,7 @@ export default function TimetableGrid({
                       key={day.id}
                       className={`relative border-b border-[var(--color-border)] ${
                         isLastCol ? "" : "border-r"
-                      } bg-[var(--color-surface-alt)] px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                      } bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
                         isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
                       }`}
                     >
@@ -141,22 +141,28 @@ export default function TimetableGrid({
                 return (
                   <tr key={slot.id}>
                     <td
-                      className={`border-r border-[var(--color-border)] ${
+                      className={`overflow-hidden border-r border-[var(--color-border)] ${
                         isLastRow ? "" : "border-b"
-                      } bg-[var(--color-surface)] px-8`}
+                      } px-3 bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-2 py-1">
                         {slot.label && (
-                          <span className="shrink-0 rounded-lg bg-[var(--color-surface-alt)] p-1.5 text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
-                            {slot.label}
+                          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
+                            <span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
+                            />
+                            <span className="relative z-10">{slot.label}</span>
                           </span>
                         )}
-                        <span className="h-0 flex-1 border-t border-dashed border-[var(--color-border)]" />
-                        <span className="flex shrink-0 items-center gap-1.5 text-[12px] font-semibold leading-none text-[var(--color-text)] tabular-nums">
-                          {slot.start_time.slice(0, 5)}
-                          <span className="h-0 w-6 border-t border-dashed border-[var(--color-border)]" />
-                          {slot.end_time.slice(0, 5)}
-                        </span>
+                        <div className="flex flex-col items-center gap-1 leading-none">
+                          <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
+                            {slot.start_time.slice(0, 5)}
+                          </span>
+                          <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
+                            {slot.end_time.slice(0, 5)}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     {orderedDays.map((day, i) => {
@@ -222,7 +228,16 @@ export default function TimetableGrid({
 
         </div>
 
-        {isEditMode && <SubjectsDrawer subjects={subjects} />}
+        <div
+          className={`shrink-0 overflow-hidden transition-[width,opacity] duration-500 ease-in-out ${
+            isEditMode ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ width: isEditMode ? "16rem" : "0rem" }}
+        >
+          <div className="h-full w-64">
+            <SubjectsDrawer subjects={subjects} />
+          </div>
+        </div>
       </div>
 
       <DragOverlay dropAnimation={dropAnimation} modifiers={[magneticModifier]}>
