@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, Search, X, Check } from "lucide-react";
+import { Search, X, Check } from "lucide-react";
 import Modal from "../../../components/ui/Modal";
 import Button from "../../../components/ui/Button";
 import Input from "../../../components/ui/Input";
+import SubjectPickerRow from "./SubjectPickerRow";
 
 const GROUP_OPTIONS = [
   { value: "all", label: "All" },
@@ -50,6 +51,8 @@ export default function SubjectPickerModal({
     );
   }, [subjects, search]);
 
+  const scrollFadeRaf = useRef(null);
+
   function updateScrollFades() {
     const element = scrollRef.current;
     if (!element) return;
@@ -58,6 +61,14 @@ export default function SubjectPickerModal({
     setShowBottomFade(
       element.scrollTop + element.clientHeight < element.scrollHeight - 4
     );
+  }
+
+  function handleScroll() {
+    if (scrollFadeRaf.current) return;
+    scrollFadeRaf.current = requestAnimationFrame(() => {
+      updateScrollFades();
+      scrollFadeRaf.current = null;
+    });
   }
 
   useEffect(() => {
@@ -134,46 +145,17 @@ export default function SubjectPickerModal({
               ) : (
                 <div
                   ref={scrollRef}
-                  onScroll={updateScrollFades}
+                  onScroll={handleScroll}
                   className="flex max-h-72 flex-col gap-1.5 overflow-y-auto scrollbar-cadence pr-2"
                 >
-                  {filteredSubjects.map((subject) => {
-                    const selected = subject.id === selectedSubjectId;
-                    return (
-                      <button
-                        key={subject.id}
-                        type="button"
-                        onClick={() => setSelectedSubjectId(subject.id)}
-                        className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors duration-150
-                          focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
-                          ${
-                            selected
-                              ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
-                              : "border-[var(--color-border)] hover:bg-[var(--color-surface-alt)]"
-                          }`}
-                      >
-                        <span
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                          style={{ backgroundColor: `${subject.color}1a` }}
-                        >
-                          <BookOpen size={15} style={{ color: subject.color }} />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium text-[var(--color-text)]">
-                            {subject.name}
-                          </span>
-                          {subject.teacher && (
-                            <span className="block truncate text-xs text-[var(--color-text-muted)]">
-                              {subject.teacher}
-                            </span>
-                          )}
-                        </span>
-                        {selected && (
-                          <Check size={16} className="shrink-0 text-[var(--color-primary)]" />
-                        )}
-                      </button>
-                    );
-                  })}
+                  {filteredSubjects.map((subject) => (
+                    <SubjectPickerRow
+                      key={subject.id}
+                      subject={subject}
+                      selected={subject.id === selectedSubjectId}
+                      onSelect={() => setSelectedSubjectId(subject.id)}
+                    />
+                  ))}
                 </div>
               )}
 
