@@ -41,7 +41,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
         aria-modal="true"
         className={`relative w-full max-w-md rounded-xl border border-[var(--color-border)]
           bg-[var(--color-surface)] text-[var(--color-text)] shadow-xl
-          transition-all duration-200 ease-out
+          transition-[opacity,transform] duration-200 ease-out
           ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
       >
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">

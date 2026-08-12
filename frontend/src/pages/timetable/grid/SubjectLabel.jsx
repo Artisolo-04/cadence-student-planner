@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { useDraggable } from "@dnd-kit/core";
 
 function LandingPulse({ color }) {
@@ -22,7 +22,7 @@ function LandingPulse({ color }) {
   );
 }
 
-export default function SubjectLabel({
+function SubjectLabel({
   entry,
   groupTag,
   showTeacher,
@@ -122,3 +122,5 @@ export default function SubjectLabel({
     </span>
   );
 }
+
+export default memo(SubjectLabel);

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { GripVertical } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 
@@ -10,7 +11,7 @@ export function SubjectChipContent({ subject, lifted, size }) {
           "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 20%, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface) 92%)) 0%, color-mix(in srgb, var(--subject-color) 10%, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface) 94%)) 100%)",
         ...(size ? { width: size.width, height: size.height } : null),
       }}
-      className={`group relative flex items-center gap-2.5 overflow-hidden rounded-md border backdrop-blur-2xl backdrop-saturate-150 py-2.5 pl-3.5 pr-3 transition-all duration-200 ease-out
+      className={`group relative flex items-center gap-2.5 overflow-hidden rounded-md border backdrop-blur-2xl backdrop-saturate-150 py-2.5 pl-3.5 pr-3 transition-[background-color,border-color,box-shadow] duration-200 ease-out
         ${size ? "justify-center" : ""}
         ${
           lifted
@@ -50,7 +51,7 @@ export function SubjectChipContent({ subject, lifted, size }) {
   );
 }
 
-export default function SubjectChip({ subject }) {
+function SubjectChip({ subject }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `subject-${subject.id}`,
     data: {
@@ -74,3 +75,5 @@ export default function SubjectChip({ subject }) {
     </div>
   );
 }
+
+export default memo(SubjectChip);

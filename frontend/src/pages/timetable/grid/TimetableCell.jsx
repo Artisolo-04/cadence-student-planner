@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { getCellDisplay } from "./timetableGridUtils";
 import SubjectLabel from "./SubjectLabel";
@@ -83,7 +84,7 @@ function DragIntentTargets({ cellKey }) {
   );
 }
 
-export default function TimetableCell({
+function TimetableCell({
   entriesForCell,
   isToday,
   isLive,
@@ -127,7 +128,7 @@ export default function TimetableCell({
       data-cell-key={cellKey}
       className={`group relative overflow-hidden border-[var(--color-border)] ${
         isLastCol ? "" : "border-r"
-      } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-all duration-200 ease-out ${
+      } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-[background-color,border-color,box-shadow] duration-200 ease-out ${
         isToday && isEmpty ? "bg-[var(--color-accent)]/[0.05]" : ""
       }`}
     >
@@ -229,3 +230,5 @@ export default function TimetableCell({
     </td>
   );
 }
+
+export default memo(TimetableCell);
