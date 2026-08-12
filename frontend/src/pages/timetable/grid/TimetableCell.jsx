@@ -141,8 +141,8 @@ export default function TimetableCell({
             id={`cell::${cellKey}::g1`}
             disabled={!isEditMode || isDragging}
             isFilled={Boolean(display.g1Entry)}
-            className="group/half flex-1 cursor-pointer"
-            onClick={() => onOpen("g1")}
+            className={`group/half flex-1 ${isEditMode ? "cursor-pointer" : ""}`}
+            onClick={isEditMode ? () => onOpen("g1") : undefined}
           >
             {display.g1Entry ? (
               <SubjectLabel
@@ -166,8 +166,8 @@ export default function TimetableCell({
             id={`cell::${cellKey}::g2`}
             disabled={!isEditMode || isDragging}
             isFilled={Boolean(display.g2Entry)}
-            className="group/half flex-1 cursor-pointer"
-            onClick={() => onOpen("g2")}
+            className={`group/half flex-1 ${isEditMode ? "cursor-pointer" : ""}`}
+            onClick={isEditMode ? () => onOpen("g2") : undefined}
           >
             {display.g2Entry ? (
               <SubjectLabel
@@ -192,10 +192,10 @@ export default function TimetableCell({
           id={`cell::${cellKey}::${display.groupTag || "all"}`}
           disabled={!isEditMode || isDragging}
           isFilled={!isEmpty}
-          className={`flex h-full min-h-[56px] cursor-pointer items-center justify-center ${
-            isEmpty ? "hover:bg-[var(--color-surface-alt)]" : ""
-          }`}
-          onClick={() => onOpen(display.groupTag || "all")}
+          className={`flex h-full min-h-[56px] items-center justify-center ${
+            isEditMode ? "cursor-pointer" : ""
+          } ${isEditMode && isEmpty ? "hover:bg-[var(--color-surface-alt)]" : ""}`}
+          onClick={isEditMode ? () => onOpen(display.groupTag || "all") : undefined}
         >
           {display.mode === "full" || display.mode === "filtered" ? (
             display.entry ? (
