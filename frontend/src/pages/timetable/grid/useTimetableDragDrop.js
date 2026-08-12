@@ -67,7 +67,8 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
     let dropped = false;
 
     if (over) {
-      const subjectId = active?.data?.current?.subjectId;
+      const data = active?.data?.current;
+      const subjectId = data?.subjectId;
 
       if (subjectId) {
         const parts = over.id.split("::");
@@ -84,11 +85,21 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, onDrop }) {
           dropped = true;
 
           const landingKey = `${slotId}-${dayOfWeek}-${groupTag}`;
-          setLanding({ key: landingKey, color: active.data.current.subjectColor });
+          setLanding({ key: landingKey, color: data.subjectColor });
           window.clearTimeout(landingTimeoutRef.current);
           landingTimeoutRef.current = window.setTimeout(() => setLanding(null), 650);
 
-          onDrop({ subjectId, slotId, dayOfWeek, groupTag });
+          const sourceCell =
+            data.source === "cell"
+              ? {
+                  slotId: data.sourceSlotId,
+                  dayOfWeek: data.sourceDayOfWeek,
+                  groupTag: data.sourceGroupTag,
+                  room: data.sourceRoom,
+                }
+              : null;
+
+          onDrop({ subjectId, slotId, dayOfWeek, groupTag, sourceCell });
         }
       }
     }

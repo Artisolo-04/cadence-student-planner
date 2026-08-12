@@ -1,25 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../../lib/api";
-import { entryKey, findEntryForGroup, planEntrySave } from "./timetableGridUtils";
-
-function dialogConfigForAction(actionType) {
-  switch (actionType) {
-    case "merge":
-      return { title: "Merge duplicate subjects?", confirmLabel: "Merge into All" };
-    case "swap":
-      return { title: "Swap subjects between groups?", confirmLabel: "Swap subjects" };
-    case "overwrite":
-      return { title: "Replace subject?", confirmLabel: "Replace" };
-    case "convert":
-      return { title: "Convert to shared slot?", confirmLabel: "Convert to All" };
-    case "split":
-      return { title: "Split shared slot?", confirmLabel: "Split" };
-    case "noop":
-      return { title: "No changes", confirmLabel: "OK" };
-    default:
-      return { title: "This will change more than one thing", confirmLabel: "Continue" };
-  }
-}
+import { entryKey, planEntrySave } from "./timetableGridUtils";
+import { dialogConfigForAction, resolveDragMove } from "./dragMovePlanner";
 
 export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChange }) {
   const [subjects, setSubjects] = useState([]);
@@ -46,15 +28,21 @@ export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChang
     onWorkspaceChange?.(data);
   }
 
+  async function clearEntryAt(slotId, dayOfWeek, groupTag) {
+    await api.delete(`/timetables/${timetable.id}/entries`, {
+      data: { slotId, dayOfWeek, groupTag },
+    });
+  }
+
   async function commitSave(target, { subjectId, groupTag, room, deletions, swap }) {
     if (!target) return;
     try {
-      for (const deleteGroupTag of deletions) {
+      for (const del of deletions) {
         await api.delete(`/timetables/${timetable.id}/entries`, {
           data: {
-            slotId: target.slotId,
-            dayOfWeek: target.dayOfWeek,
-            groupTag: deleteGroupTag,
+            slotId: del.slotId,
+            dayOfWeek: del.dayOfWeek,
+            groupTag: del.groupTag,
           },
         });
       }
@@ -103,7 +91,11 @@ export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChang
       subjectId,
       groupTag: finalGroupTag,
       room,
-      deletions: plan.deletions,
+      deletions: plan.deletions.map((tag) => ({
+        slotId: target.slotId,
+        dayOfWeek: target.dayOfWeek,
+        groupTag: tag,
+      })),
       swap: plan.swap,
       actionType: plan.actionType,
       warnings: plan.warnings,
@@ -122,9 +114,7 @@ export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChang
     if (!activeCell) return;
     try {
       const groupTag = activeCell.groupTag || "all";
-      await api.delete(`/timetables/${timetable.id}/entries`, {
-        data: { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek, groupTag },
-      });
+      await clearEntryAt(activeCell.slotId, activeCell.dayOfWeek, groupTag);
       await refreshWorkspace();
       closePicker();
     } catch (err) {
@@ -132,49 +122,33 @@ export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChang
     }
   }
 
-  function saveDraggedSubject(drop, groupTag) {
+  function saveDraggedSubject(drop, groupTag, sourceCell = null) {
     const cellEntries = entriesByCell[entryKey(drop.slotId, drop.dayOfWeek)];
-    const allEntry = findEntryForGroup(cellEntries, "all");
-    const sourceGroupTag = allEntry ? "all" : groupTag;
-    const currentEntry = allEntry || findEntryForGroup(cellEntries, groupTag);
-    const room = currentEntry?.room || null;
+    const result = resolveDragMove({ cellEntries, drop, groupTag, sourceCell });
 
-    const plan = planEntrySave({
-      cellEntries,
-      sourceGroupTag,
-      targetGroupTag: groupTag,
-      subjectId: drop.subjectId,
-      room,
-    });
+    if (result.kind === "noop") return;
 
-    if (plan.noop) return;
+    if (result.kind === "clear-source") {
+      clearEntryAt(result.sourceCell.slotId, result.sourceCell.dayOfWeek, result.sourceCell.groupTag)
+        .then(refreshWorkspace)
+        .catch((err) => console.error("Move subject error:", err));
+      return;
+    }
 
-    const payload = {
-      subjectId: drop.subjectId,
-      groupTag: plan.finalGroupTag || groupTag,
-      room,
-      deletions: plan.deletions,
-      swap: plan.swap,
-      actionType: plan.actionType,
-      warnings: plan.warnings,
-      target: { slotId: drop.slotId, dayOfWeek: drop.dayOfWeek },
-    };
-
-    if (plan.needsConfirm) {
-      setPendingSave(payload);
+    if (result.needsConfirm) {
+      setPendingSave(result.payload);
     } else {
-      commitSave(payload.target, payload);
+      commitSave(result.payload.target, result.payload);
     }
   }
 
   const activeEntry = activeCell
-    ? findEntryForGroup(
-        entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)],
-        activeCell.groupTag
-      )
+    ? (entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)] || []).find(
+        (e) => e.group_tag === activeCell.groupTag
+      ) || null
     : null;
 
-  const dialogConfig = pendingSave ? dialogConfigForAction(pendingSave.actionType) : null;
+  const dialogConfig = pendingSave ? dialogConfigForAction(pendingSave.actionType, pendingSave.isMove) : null;
 
   return {
     subjects,

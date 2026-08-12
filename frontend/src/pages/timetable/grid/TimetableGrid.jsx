@@ -86,8 +86,8 @@ export default function TimetableGrid({
   } = useTimetableDragDrop({
     orderedSlots,
     orderedDays,
-    onDrop: ({ subjectId, slotId, dayOfWeek, groupTag }) =>
-      saveDraggedSubject({ subjectId, slotId, dayOfWeek }, groupTag),
+    onDrop: ({ subjectId, slotId, dayOfWeek, groupTag, sourceCell }) =>
+      saveDraggedSubject({ subjectId, slotId, dayOfWeek }, groupTag, sourceCell),
   });
 
   return (

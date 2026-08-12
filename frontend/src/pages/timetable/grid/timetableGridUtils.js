@@ -54,6 +54,7 @@ export function planEntrySave({
   targetGroupTag,
   subjectId,
   room,
+  isMove = false,
 }) {
   const normalizedRoom = room?.trim() || null;
   const currentState = buildState(cellEntries);
@@ -155,7 +156,9 @@ export function planEntrySave({
       room: sourceCurrent.room,
     };
     warnings.push(
-      `This will split the shared slot: ${targetGroupTag.toUpperCase()} will become the selected subject, and ${siblingGroupTag.toUpperCase()} will keep "${sourceCurrent.name}".`
+      `This will split the shared slot: ${targetGroupTag.toUpperCase()} will become ${
+        isMove ? "the subject you're moving" : "the selected subject"
+      }, and ${siblingGroupTag.toUpperCase()} will keep "${sourceCurrent.name}".`
     );
     actionType = "split";
     finalGroupTag = targetGroupTag;
@@ -212,13 +215,25 @@ export function planEntrySave({
     }
 
     finalGroupTag = "all";
-    pushDeletion(siblingGroupTag, `Both groups would have the same subject ("${siblingCurrent.name}"). Saving will merge them into a single All slot instead.`);
+    pushDeletion(
+      siblingGroupTag,
+      `Both groups would have the same subject ("${siblingCurrent.name}"). ${
+        isMove ? "Moving here will merge them" : "Saving will merge them"
+      } into a single All slot instead.`
+    );
     actionType = "merge";
     return buildResult("duplicate-merge");
   }
 
   if (targetCurrent && targetCurrent.subject_id && targetCurrent.subject_id !== subjectId) {
-    pushDeletion(targetGroupTag, `${targetGroupTag.toUpperCase()} currently has "${targetCurrent.name}". Saving will remove it and replace with the selected subject.`);
+    pushDeletion(
+      targetGroupTag,
+      `${targetGroupTag.toUpperCase()} currently has "${targetCurrent.name}". ${
+        isMove
+          ? "Moving here will remove it and put the subject you're moving in its place."
+          : "Saving will remove it and replace with the selected subject."
+      }`
+    );
     actionType = "overwrite";
     finalGroupTag = targetGroupTag;
     return buildResult("overwrite");
