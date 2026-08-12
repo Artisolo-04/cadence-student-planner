@@ -156,23 +156,53 @@ export default function TimetablePage() {
             All timetables
           </button>
           <div className="flex items-center gap-2">
-            <ViewOptionsPanel
-              myGroup={workspace.timetable.my_group}
-              onMyGroupChange={handleMyGroupChange}
-              viewOptions={viewOptions}
-              onViewOptionChange={setViewOption}
-            />
-            <Button
-              variant="secondary"
-              onClick={startEditSetup}
-              title="Edit timetable setup (name, days, slots)"
+            <div
+              className={`flex items-center gap-2 transition-opacity duration-500 ease-in-out ${
+                isEditMode ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}
             >
-              <Settings2 size={16} />
-              Edit setup
-            </Button>
-            <Button variant={isEditMode ? "primary" : "secondary"} onClick={toggleEditMode}>
-              {isEditMode ? <Check size={16} /> : <Pencil size={16} />}
-              {isEditMode ? "Done" : "Edit"}
+              <ViewOptionsPanel
+                myGroup={workspace.timetable.my_group}
+                onMyGroupChange={handleMyGroupChange}
+                viewOptions={viewOptions}
+                onViewOptionChange={setViewOption}
+              />
+              <Button
+                variant="secondary"
+                onClick={startEditSetup}
+                title="Edit timetable setup (name, days, slots)"
+              >
+                <Settings2 size={16} />
+                Edit setup
+              </Button>
+            </div>
+            <Button
+              variant={isEditMode ? "primary" : "secondary"}
+              onClick={toggleEditMode}
+              className={isEditMode ? "border border-transparent" : ""}
+            >
+              <span className="relative inline-flex h-5 w-[4.5rem] items-center overflow-hidden">
+                <span
+                  className={`absolute inset-0 flex items-center whitespace-nowrap transition-opacity duration-300 ease-in-out ${
+                    isEditMode ? "opacity-0" : "opacity-100"
+                  }`}
+                >
+                  <span className="flex h-full aspect-square items-center justify-center">
+                    <Pencil size={16} />
+                  </span>
+                  <span className="flex-1 text-center">Edit</span>
+                </span>
+                <span
+                  className={`absolute inset-0 flex items-center whitespace-nowrap transition-opacity duration-300 ease-in-out ${
+                    isEditMode ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <span className="flex h-full aspect-square items-center justify-center">
+                    <Check size={18} />
+                  </span>
+                  <span className="flex-1 text-center">Done</span>
+                </span>
+              </span>
             </Button>
           </div>
         </div>
