@@ -61,7 +61,7 @@ function SubjectLabel({ entry, groupTag, showTeacher, showRoom, pulseColor, dimm
       style={{
         "--subject-color": entry.subject_color,
         backgroundImage:
-          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 55%, var(--color-surface) 45%) 0%, color-mix(in srgb, var(--subject-color) 26%, var(--color-surface) 74%) 55%, color-mix(in srgb, var(--subject-color) 14%, var(--color-surface) 86%) 100%)",
+          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 30%, var(--color-surface) 70%) 0%, color-mix(in srgb, var(--subject-color) 16%, var(--color-surface) 84%) 55%, color-mix(in srgb, var(--subject-color) 8%, var(--color-surface) 92%) 100%)",
         opacity: dimmed ? undefined : popped ? 1 : 0,
         transform: popped ? "scale(1)" : "scale(0.65)",
         transitionProperty: "transform, opacity",
@@ -69,16 +69,24 @@ function SubjectLabel({ entry, groupTag, showTeacher, showRoom, pulseColor, dimm
         transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         transitionDelay: pulseColor ? "40ms" : "0ms",
       }}
-      className={`absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,inset_0_0_0_1px_color-mix(in_srgb,var(--subject-color)_45%,transparent),0_0_16px_-4px_color-mix(in_srgb,var(--subject-color)_70%,transparent)] backdrop-blur-md transition-opacity duration-150 hover:opacity-90 ${
+      className={`group/label absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,inset_0_0_0_1px_color-mix(in_srgb,var(--subject-color)_45%,transparent),0_0_16px_-4px_color-mix(in_srgb,var(--subject-color)_70%,transparent)] backdrop-blur-md backdrop-saturate-150 transition-opacity duration-150 hover:opacity-90 ${
         dimmed ? "opacity-60" : ""
       }`}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent"
+      />
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-40"
         style={{
           backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 100%)",
         }}
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-y-4 -left-8 w-1/2 -skew-x-12 bg-gradient-to-r from-white/[0.12] to-transparent opacity-70"
       />
       {pulseColor && <LandingPulse color={pulseColor} />}
 
