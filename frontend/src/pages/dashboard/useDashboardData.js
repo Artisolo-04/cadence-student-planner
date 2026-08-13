@@ -26,7 +26,7 @@ function toMinutes(hhmm) {
 }
 
 export const DAY_LABELS = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
 ];
 
 const LAST_WORKSPACE_KEY = "cadence_last_workspace";
@@ -113,20 +113,24 @@ export function useDashboardData() {
     localStorage.setItem(LAST_WORKSPACE_KEY, String(id));
   }, []);
 
+  const visibleEntries = useMemo(() => {
+    if (!workspace) return [];
+    const myGroup = workspace.my_group ?? workspace.myGroup ?? null;
+    return entries.filter((e) => {
+      const tag = e.group_tag ?? e.groupTag ?? "all";
+      return tag === "all" || !myGroup || tag === myGroup;
+    });
+  }, [workspace, entries]);
+
   const todaySessions = useMemo(() => {
     if (!workspace) return [];
     const todayIdx = getTodayIndex();
-    const myGroup = workspace.my_group ?? workspace.myGroup ?? null;
 
     const slotsById = {};
     slots.forEach((s) => (slotsById[s.id] = s));
 
-    return entries
+    return visibleEntries
       .filter((e) => (e.day_of_week ?? e.dayOfWeek) === todayIdx)
-      .filter((e) => {
-        const tag = e.group_tag ?? e.groupTag ?? "all";
-        return tag === "all" || !myGroup || tag === myGroup;
-      })
       .map((e) => {
         const slotId = e.slot_id ?? e.slotId;
         const slot = slotsById[slotId];
@@ -145,7 +149,33 @@ export function useDashboardData() {
       })
       .filter((s) => s.start)
       .sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
-  }, [workspace, slots, entries, subjectsById]);
+  }, [workspace, slots, visibleEntries, subjectsById]);
+
+  const weekStats = useMemo(() => {
+    if (!workspace) return { total: 0, busiestDay: null };
+
+    const countByDay = {};
+    visibleEntries.forEach((e) => {
+      const day = e.day_of_week ?? e.dayOfWeek;
+      countByDay[day] = (countByDay[day] || 0) + 1;
+    });
+
+    const total = Object.values(countByDay).reduce((a, b) => a + b, 0);
+
+    let busiestDay = null;
+    Object.entries(countByDay).forEach(([day, count]) => {
+      if (!busiestDay || count > busiestDay.count) {
+        busiestDay = { day: Number(day), count };
+      }
+    });
+
+    return {
+      total,
+      busiestDay: busiestDay
+        ? { label: DAY_LABELS[busiestDay.day], count: busiestDay.count }
+        : null,
+    };
+  }, [workspace, visibleEntries]);
 
   const nowMin = timeNowMinutes();
   const currentKey = todaySessions.find(
@@ -163,6 +193,7 @@ export function useDashboardData() {
     todaySessions,
     currentKey,
     nextSession,
+    weekStats,
     todayLabel: DAY_LABELS[getTodayIndex()],
   };
 }
