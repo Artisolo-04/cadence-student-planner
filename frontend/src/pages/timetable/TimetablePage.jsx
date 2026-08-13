@@ -39,6 +39,7 @@ export default function TimetablePage() {
     try {
       const { data } = await api.get(`/timetables/${id}`);
       setWorkspace(data);
+      localStorage.setItem("cadence_last_workspace", String(id));
       setIsEditMode(false);
       setView("grid");
     } catch (err) {
