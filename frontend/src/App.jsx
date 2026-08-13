@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProfileSetup from "./pages/ProfileSetup";
-import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/dashboard/DashboardPage";
 import TimetablePage from "./pages/timetable/TimetablePage";
 import SubjectsPage from "./pages/subjects/SubjectsPage";
 import HomeworkPage from "./pages/homework/HomeworkPage";
@@ -30,7 +30,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<DashboardPage />} />
         <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/subjects" element={<SubjectsPage />} />
         <Route path="/homework" element={<HomeworkPage />} />
