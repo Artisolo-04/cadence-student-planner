@@ -6,6 +6,7 @@ const apiRoutes = require("./routes/api");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", require("express").static(require("path").join(__dirname, "..", "uploads")));
 
 app.use("/api", apiRoutes);
 

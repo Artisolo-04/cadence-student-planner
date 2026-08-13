@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name VARCHAR(255) NOT NULL,
   faculty VARCHAR(255) NOT NULL,
   class_year VARCHAR(100) NOT NULL,
+  avatar_url VARCHAR(500),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -75,3 +76,9 @@ CREATE TABLE IF NOT EXISTS timetable_entries (
 
 CREATE INDEX IF NOT EXISTS idx_timetable_entries_timetable_id ON timetable_entries(timetable_id);
 CREATE INDEX IF NOT EXISTS idx_timetable_entries_subject_id ON timetable_entries(subject_id);
+
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS avatar_original_url VARCHAR(500),
+  ADD COLUMN IF NOT EXISTS avatar_zoom NUMERIC(6,2),
+  ADD COLUMN IF NOT EXISTS avatar_offset_x NUMERIC(8,2),
+  ADD COLUMN IF NOT EXISTS avatar_offset_y NUMERIC(8,2);
