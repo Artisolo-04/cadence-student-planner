@@ -61,7 +61,6 @@
 .scrollbar-cadence {
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary) transparent;
-  scrollbar-gutter: stable;
 }
 
 .scrollbar-cadence::-webkit-scrollbar {
