@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Settings, LogOut } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { API_ORIGIN } from "../../lib/api";
 
 function getInitials(name, email) {
   if (name && name.trim()) {
@@ -51,6 +52,7 @@ export default function UserMenu() {
   }, []);
 
   const initials = getInitials(profile?.full_name, user?.email);
+  const avatarSrc = profile?.avatar_url ? `${API_ORIGIN}${profile.avatar_url}` : null;
 
   const items = [
     { label: "Profile", icon: User, onClick: () => navigate("/profile") },
@@ -63,14 +65,30 @@ export default function UserMenu() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-center w-9 h-9 rounded-md text-sm font-semibold
-          bg-[var(--color-primary)]/10 text-[var(--color-primary)]
-          hover:bg-[var(--color-primary)]/20 transition-colors duration-150
-          focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+        className="flex items-center justify-center h-9 w-9 rounded-md shrink-0 overflow-hidden
+          border border-[var(--color-border)] bg-[var(--color-surface)]
+          hover:bg-[var(--color-surface-alt)] hover:border-[var(--color-primary)]/60
+          transition-colors duration-200
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+      >
+      <span
+        className="relative z-10 flex items-center justify-center w-full h-full rounded-sm overflow-hidden text-sm font-semibold
+          text-[var(--color-primary)]"
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        {initials}
+          {avatarSrc ? (
+            <>
+              <img src={avatarSrc} alt="Profile" className="w-full h-full object-cover scale-110" />
+              <span
+                className="pointer-events-none absolute inset-0 mix-blend-color
+                  bg-[var(--color-primary)] opacity-15"
+              />
+            </>
+          ) : (
+            initials
+          )}
+        </span>
       </button>
 
       {mounted && (

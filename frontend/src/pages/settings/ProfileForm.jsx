@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import api from "../../lib/api";
+import api, { API_ORIGIN } from "../../lib/api";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
-import { Check } from "lucide-react";
+import AvatarUploadModal from "./AvatarUploadModal";
+import { Check, Camera } from "lucide-react";
 
 function getInitials(name, email) {
   if (name && name.trim()) {
@@ -24,6 +25,7 @@ export default function ProfileForm() {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
   const initializedRef = useRef(false);
 
   useEffect(() => {
@@ -36,6 +38,7 @@ export default function ProfileForm() {
   }, [profile]);
 
   const initials = getInitials(fullName || profile?.full_name, user?.email);
+  const avatarSrc = profile?.avatar_url ? `${API_ORIGIN}${profile.avatar_url}` : null;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -71,12 +74,48 @@ export default function ProfileForm() {
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
       <div className="flex items-center gap-4 mb-6">
-        <div
-          className="flex items-center justify-center w-14 h-14 rounded-full text-lg font-semibold shrink-0
-            bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+        <button
+          type="button"
+          onClick={() => setAvatarModalOpen(true)}
+          className="group relative flex items-center justify-center w-14 h-14 shrink-0 rounded-md cursor-pointer
+            border-2 border-[var(--color-border)]
+            transition-colors duration-300 ease-out
+            hover:border-[var(--color-primary)]
+            focus-visible:outline-none focus-visible:border-[var(--color-primary)]"
         >
-          {initials}
-        </div>
+          <span
+            className="relative flex items-center justify-center w-full h-full rounded-sm overflow-hidden
+              bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-lg font-semibold"
+          >
+        {avatarSrc ? (
+          <>
+            <img
+              src={avatarSrc}
+              alt="Profile"
+              className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-110"
+            />
+            <span
+              className="pointer-events-none absolute inset-0 mix-blend-color
+                bg-[var(--color-primary)] opacity-15"
+            />
+          </>
+        ) : (
+          <span>{initials}</span>
+        )}
+            <span
+              className="absolute inset-0 flex items-center justify-center bg-black/50
+                opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
+            >
+              <span
+                className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-primary)]
+                  scale-75 transition-transform duration-300 ease-out delay-75 group-hover:scale-100"
+              >
+                <Camera size={14} className="text-white" />
+              </span>
+            </span>
+          </span>
+        </button>
+
         <div>
           <h2 className="text-base font-semibold text-[var(--color-text)]">Profile</h2>
           <p className="text-sm text-[var(--color-text-muted)]">{user?.email}</p>
@@ -125,6 +164,13 @@ export default function ProfileForm() {
           )}
         </div>
       </form>
+
+      <AvatarUploadModal
+        open={avatarModalOpen}
+        onClose={() => setAvatarModalOpen(false)}
+        onUploaded={(updatedProfile) => setProfile(updatedProfile)}
+        profile={profile}
+      />
     </div>
   );
 }
