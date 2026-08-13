@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { CalendarClock } from "lucide-react";
 import SessionCard from "./SessionCard";
 
 const VISIBLE_ROWS = 5;
+const FADE_SIZE = 28;
 
 export default function TodaySchedule({ sessions, currentKey }) {
   const scrollRef = useRef(null);
@@ -33,14 +35,40 @@ export default function TodaySchedule({ sessions, currentKey }) {
 
   const needsScroll = sessions.length > VISIBLE_ROWS;
 
+  const maskImage = needsScroll
+    ? `linear-gradient(to bottom, ${
+        showTopFade ? `transparent 0, black ${FADE_SIZE}px` : "black 0"
+      }, ${
+        showBottomFade
+          ? `black calc(100% - ${FADE_SIZE}px), transparent 100%`
+          : "black 100%"
+      })`
+    : undefined;
+
   return (
-    <div className="relative rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden p-2">
+    <div
+      className="relative overflow-hidden rounded-2xl border border-white/10 p-4 backdrop-blur-xl"
+      style={{
+        backgroundImage:
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, color-mix(in srgb, var(--color-accent) 5%, transparent) 65%, transparent 100%)",
+      }}
+    >
+      <div className="mb-3 flex items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+        <CalendarClock size={12} />
+        Today's schedule
+      </div>
+
       <div
         ref={scrollRef}
         onScroll={updateScrollFades}
-        style={needsScroll && maxHeight ? { maxHeight } : undefined}
-        className={`divide-y divide-[var(--color-border)] ${
-          needsScroll ? "overflow-y-auto scrollbar-cadence" : ""
+        style={{
+          ...(needsScroll && maxHeight ? { maxHeight } : {}),
+          ...(maskImage
+            ? { maskImage, WebkitMaskImage: maskImage }
+            : {}),
+        }}
+        className={`flex flex-col gap-0.5 transition-[mask-image] duration-150 ${
+          needsScroll ? "overflow-y-auto scrollbar-cadence pr-1" : ""
         }`}
       >
         {sessions.map((s, i) => (
@@ -49,23 +77,6 @@ export default function TodaySchedule({ sessions, currentKey }) {
           </div>
         ))}
       </div>
-
-      {needsScroll && (
-        <>
-          <div
-            aria-hidden="true"
-            className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
-              showTopFade ? "opacity-100" : "opacity-0"
-            }`}
-          />
-          <div
-            aria-hidden="true"
-            className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-8 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
-              showBottomFade ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        </>
-      )}
     </div>
   );
 }

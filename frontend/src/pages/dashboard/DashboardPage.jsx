@@ -3,9 +3,11 @@ import { useDashboardData } from "./useDashboardData";
 import TodaySchedule from "./TodaySchedule";
 import EmptyState from "./EmptyState";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
+import StudentCard from "./StudentCard";
+import TodayOverviewCard from "./TodayOverviewCard";
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const {
     loading,
     error,
@@ -16,23 +18,59 @@ export default function DashboardPage() {
     todaySessions,
     currentKey,
     nextSession,
+    weekStats,
     todayLabel,
   } = useDashboardData();
 
-  const firstName =
-    user?.name?.split(" ")[0] ?? user?.full_name?.split(" ")[0] ?? "there";
-
   if (loading && timetables.length === 0) return null;
 
+  const groupTag = workspace?.my_group ?? workspace?.myGroup ?? null;
+
   return (
-    <>
-      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-semibold text-[var(--color-text)]">
-            Welcome, {firstName}
-          </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">{todayLabel}</p>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="flex flex-col gap-6 min-w-0">
+        <div className="max-w-md w-full">
+          <StudentCard user={user} profile={profile} groupTag={groupTag} />
         </div>
+
+        {error && (
+          <div className="max-w-md rounded-lg border border-[var(--color-danger)] bg-[var(--color-surface)] p-4 text-sm text-[var(--color-danger)]">
+            {error}
+          </div>
+        )}
+
+        {!error && !workspace && (
+          <div className="max-w-md">
+            <EmptyState
+              title="No timetable yet"
+              body="Create a workspace to see today's schedule here."
+            />
+          </div>
+        )}
+
+        {!error && workspace && todaySessions.length === 0 && (
+          <div className="max-w-md">
+            <EmptyState
+              title="No classes today"
+              body="Nothing scheduled — enjoy the break."
+            />
+          </div>
+        )}
+
+        {!error && todaySessions.length > 0 && (
+          <div className="max-w-md">
+            <TodaySchedule sessions={todaySessions} currentKey={currentKey} />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <TodayOverviewCard
+          todayLabel={todayLabel}
+          nextSession={nextSession}
+          weekTotal={weekStats.total}
+          busiestDay={weekStats.busiestDay}
+        />
 
         <WorkspaceSwitcher
           timetables={timetables}
@@ -40,37 +78,6 @@ export default function DashboardPage() {
           onSelect={selectWorkspace}
         />
       </div>
-
-      {error && (
-        <div className="rounded-lg border border-[var(--color-danger)] bg-[var(--color-surface)] p-4 text-sm text-[var(--color-danger)]">
-          {error}
-        </div>
-      )}
-
-      {!error && !workspace && (
-        <EmptyState
-          title="No timetable yet"
-          body="Create a workspace to see today's schedule here."
-        />
-      )}
-
-      {!error && workspace && todaySessions.length === 0 && (
-        <EmptyState
-          title="No classes today"
-          body="Nothing scheduled — enjoy the break."
-        />
-      )}
-
-      {!error && todaySessions.length > 0 && (
-        <div className="max-w-xl">
-          {nextSession && (
-            <p className="text-sm text-[var(--color-primary)] mb-2">
-              Next up: {nextSession.subjectName} at {nextSession.start.slice(0, 5)}
-            </p>
-          )}
-          <TodaySchedule sessions={todaySessions} currentKey={currentKey} />
-        </div>
-      )}
-    </>
+    </div>
   );
 }
