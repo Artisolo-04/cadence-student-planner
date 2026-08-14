@@ -82,3 +82,20 @@ ALTER TABLE profiles
   ADD COLUMN IF NOT EXISTS avatar_zoom NUMERIC(6,2),
   ADD COLUMN IF NOT EXISTS avatar_offset_x NUMERIC(8,2),
   ADD COLUMN IF NOT EXISTS avatar_offset_y NUMERIC(8,2);
+
+CREATE TABLE IF NOT EXISTS homework (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  subject_id INTEGER REFERENCES subjects(id) ON DELETE SET NULL,
+  title VARCHAR(255) NOT NULL,
+  notes TEXT,
+  due_date DATE NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'todo' CHECK (status IN ('todo','in_progress','done')),
+  priority VARCHAR(10) NOT NULL DEFAULT 'normal' CHECK (priority IN ('low','normal','high')),
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_homework_user_id ON homework(user_id);
+CREATE INDEX IF NOT EXISTS idx_homework_subject_id ON homework(subject_id);
+CREATE INDEX IF NOT EXISTS idx_homework_due_date ON homework(due_date);
