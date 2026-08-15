@@ -6,7 +6,7 @@ import { isElementVisible, smoothScrollTo } from "./scrollUtils";
 
 const GLOW_WINDOW = 900;
 
-export default function BoardColumn({ column, items, onEdit, onStatusChange }) {
+export default function BoardColumn({ column, items, onEdit, onDelete, onStatusChange }) {
   const { scrollRef, showTopFade, showBottomFade, updateScrollFades } = useScrollFade(items);
   const prevIdsRef = useRef(new Set(items.map((i) => i.id)));
   const [pendingId, setPendingId] = useState(null);
@@ -91,6 +91,7 @@ export default function BoardColumn({ column, items, onEdit, onStatusChange }) {
                     <BoardCard
                       item={item}
                       onEdit={onEdit}
+                      onDelete={onDelete}
                       onStatusChange={onStatusChange}
                       revealed={item.id !== pendingId}
                       justArrived={item.id === arrivedId}

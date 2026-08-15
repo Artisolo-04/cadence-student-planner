@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { AlertTriangle, Flag, Pencil } from "lucide-react";
+import { AlertTriangle, Flag, Pencil, Trash2 } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import Dropdown from "../../../components/ui/Dropdown";
 import { PRIORITY_STYLES, STATUS_OPTIONS, formatDueDate, isOverdue } from "../homeworkUtils";
@@ -29,7 +29,7 @@ const GLOW_KEYFRAMES = {
   ],
 };
 
-export default function BoardCard({ item, onEdit, onStatusChange, revealed = true, justArrived = false }) {
+export default function BoardCard({ item, onEdit, onDelete, onStatusChange, revealed = true, justArrived = false }) {
   const [isLeaving, setIsLeaving] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const overdue = isOverdue(item.due_date, item.status);
@@ -128,6 +128,22 @@ export default function BoardCard({ item, onEdit, onStatusChange, revealed = tru
         >
           <Pencil size={11} />
         </Button>
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              onDelete(item);
+            }}
+            style={{ height: "26px", width: "26px" }}
+            className="shrink-0 rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-md hover:border-[var(--color-danger)]/40 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
+            aria-label={`Delete ${item.title}`}
+            title="Delete"
+          >
+            <Trash2 size={11} />
+          </Button>
+        )}
+      </div>
       </div>
 
       <h3 className="relative z-10 text-sm font-semibold text-[var(--color-text)]">{item.title}</h3>

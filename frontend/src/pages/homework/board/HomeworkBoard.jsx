@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import BoardColumn from "./BoardColumn";
 import { COLUMNS } from "./boardConstants";
 
-export default function HomeworkBoard({ homework, onEdit, onStatusChange }) {
+export default function HomeworkBoard({ homework, onEdit, onDelete, onStatusChange }) {
   const columns = COLUMNS.map((col) => ({
     ...col,
     items: homework
@@ -14,7 +14,7 @@ export default function HomeworkBoard({ homework, onEdit, onStatusChange }) {
   return (
     <motion.div layoutScroll className="flex h-full min-h-0 gap-3 overflow-x-auto scrollbar-cadence pb-1">
       {columns.map((col) => (
-        <BoardColumn key={col.key} column={col} items={col.items} onEdit={onEdit} onStatusChange={onStatusChange} />
+        <BoardColumn key={col.key} column={col} items={col.items} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
       ))}
     </motion.div>
   );

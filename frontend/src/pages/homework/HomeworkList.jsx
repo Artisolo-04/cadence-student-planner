@@ -234,7 +234,16 @@ export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onT
 
       {view === "board" && (
         <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-          <HomeworkBoard homework={homework} onEdit={onEdit} onStatusChange={onStatusChange} onReorder={onReorder} />
+          <HomeworkBoard
+            homework={homework}
+            onEdit={onEdit}
+            onDelete={(item) => {
+              setError("");
+              setSelectedItem(item);
+            }}
+            onStatusChange={onStatusChange}
+            onReorder={onReorder}
+          />
         </div>
       )}
 
