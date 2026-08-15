@@ -14,6 +14,8 @@ export default function Dropdown({
   options = [],
   placeholder = "Select...",
   className = "",
+  size = "md",
+  height,
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -26,6 +28,7 @@ export default function Dropdown({
   });
   const triggerRef = useRef(null);
   const listRef = useRef(null);
+  const isSm = size === "sm";
 
   useEffect(() => {
     let raf1, raf2;
@@ -64,8 +67,8 @@ export default function Dropdown({
 
       setCoords({
         top: openUp ? rect.top - effectiveHeight - 8 : rect.bottom + 8,
-        left: rect.left,
-        width: rect.width,
+        left: isSm ? rect.right - Math.max(rect.width, 140) : rect.left,
+        width: isSm ? Math.max(rect.width, 140) : rect.width,
         openUp,
       });
     }
@@ -73,7 +76,7 @@ export default function Dropdown({
     updatePosition();
     window.addEventListener("resize", updatePosition);
     return () => window.removeEventListener("resize", updatePosition);
-  }, [open, options.length]);
+  }, [open, options.length, isSm]);
 
   useEffect(() => {
     if (!open) return;
@@ -111,8 +114,22 @@ export default function Dropdown({
     setOpen(false);
   }
 
+  const triggerClasses = isSm
+    ? "w-auto inline-flex items-center gap-8 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium text-[var(--color-text-muted)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+    : "w-full flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
+
+  const triggerStyle = isSm
+    ? {
+        height: height || "26px",
+        display: "flex",
+        lineHeight: "1",
+        boxSizing: "border-box",
+        padding: "0 8px",
+      }
+    : undefined;
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className={isSm ? "flex" : "flex flex-col gap-2"}>
       {label && (
         <label
           htmlFor={id}
@@ -127,16 +144,14 @@ export default function Dropdown({
           id={id}
           ref={triggerRef}
           onClick={() => setOpen((o) => !o)}
-          className={`w-full flex items-center justify-between rounded-lg border border-[var(--color-border)]
-            bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]
-            focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
-            ${className}`}
+          style={triggerStyle}
+          className={`${triggerClasses} ${className}`}
         >
           <span className={selected ? "" : "text-[var(--color-text-muted)]"}>
             {selected ? selected.label : placeholder}
           </span>
           <ChevronDown
-            size={18}
+            size={isSm ? 11 : 18}
             className={`text-[var(--color-text-muted)] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
         </button>
