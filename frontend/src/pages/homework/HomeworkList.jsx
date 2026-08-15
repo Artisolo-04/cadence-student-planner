@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { AlertTriangle, Flag, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, Flag, LayoutGrid, List as ListIcon, Pencil, Plus, Trash2 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import Checkbox from "../../components/ui/Checkbox";
+import HomeworkBoard from "./board/HomeworkBoard";
 
 const PRIORITY_STYLES = {
   high: { label: "High", color: "var(--color-danger)" },
@@ -40,10 +41,30 @@ function isOverdue(dueDate, status) {
   return due < today;
 }
 
-export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onToggleDone }) {
+export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onToggleDone, onStatusChange, onReorder }) {
+  const [view, setView] = useState("list");
   const [selectedItem, setSelectedItem] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const scrollRef = useRef(null);
+  const [showTopFade, setShowTopFade] = useState(false);
+  const [showBottomFade, setShowBottomFade] = useState(false);
+
+  function updateScrollFades() {
+    const element = scrollRef.current;
+    if (!element) return;
+    setShowTopFade(element.scrollTop > 4);
+    setShowBottomFade(element.scrollTop + element.clientHeight < element.scrollHeight - 4);
+  }
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(updateScrollFades);
+    window.addEventListener("resize", updateScrollFades);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateScrollFades);
+    };
+  }, [homework]);
 
   const pending = homework.filter((h) => h.status !== "done");
   const completed = homework.filter((h) => h.status === "done");
@@ -197,13 +218,27 @@ export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onT
             Track what's due and mark it off as you go.
           </p>
         </div>
-        <Button type="button" onClick={onAddNew} className="shrink-0">
-          <Plus size={16} />
-          New homework
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-1">
+            <button type="button" onClick={() => setView("list")} className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${view === "list" ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
+              <ListIcon size={14} />
+              List
+            </button>
+            <button type="button" onClick={() => setView("board")} className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${view === "board" ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]" : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"}`}>
+              <LayoutGrid size={14} />
+              Board
+            </button>
+          </div>
+          <Button type="button" onClick={onAddNew} className="shrink-0">
+            <Plus size={16} />
+            New homework
+          </Button>
+        </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence pr-1">
+      {view === "list" && (
+      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+        <div ref={scrollRef} onScroll={updateScrollFades} className="h-full overflow-y-auto rounded-xl p-3 pr-4 scrollbar-cadence sm:p-5 sm:pr-6">
         <div className="flex flex-col gap-6 pb-2">
           <section className="flex flex-col gap-3">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -225,7 +260,18 @@ export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onT
             </section>
           )}
         </div>
-      </div>
+        </div>
+
+        <div aria-hidden="true" className={`pointer-events-none absolute inset-x-2 top-2 z-10 h-12 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${showTopFade ? "opacity-100" : "opacity-0"}`} />
+        <div aria-hidden="true" className={`pointer-events-none absolute inset-x-2 bottom-2 z-10 h-16 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${showBottomFade ? "opacity-100" : "opacity-0"}`} />
+      </section>
+      )}
+
+      {view === "board" && (
+        <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+          <HomeworkBoard homework={homework} onEdit={onEdit} onReorder={onReorder} />
+        </div>
+      )}
 
       <Modal
         open={Boolean(selectedItem)}

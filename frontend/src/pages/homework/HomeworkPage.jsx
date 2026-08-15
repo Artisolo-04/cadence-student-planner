@@ -55,10 +55,26 @@ export default function HomeworkPage() {
     await loadAll();
   }
 
+  async function handleStatusChange(id, status) {
+    await api.patch(`/homework/${id}/status`, { status });
+    await loadAll();
+  }
+
+  async function handleReorder(id, status, position) {
+    setHomework((current) =>
+      current.map((h) => (h.id === id ? { ...h, status, position } : h))
+    );
+    try {
+      await api.patch(`/homework/${id}/position`, { status, position });
+    } catch (err) {
+      console.error("Reorder failed, reloading:", err);
+      await loadAll();
+    }
+  }
+
   async function handleToggleDone(item) {
     const nextStatus = item.status === "done" ? "todo" : "done";
-    await api.patch(`/homework/${item.id}/status`, { status: nextStatus });
-    await loadAll();
+    await handleStatusChange(item.id, nextStatus);
   }
 
   if (view === "loading") {
@@ -74,6 +90,8 @@ export default function HomeworkPage() {
           onEdit={startEdit}
           onDelete={handleDelete}
           onToggleDone={handleToggleDone}
+          onStatusChange={handleStatusChange}
+          onReorder={handleReorder}
         />
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
