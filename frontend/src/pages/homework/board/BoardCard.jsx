@@ -1,25 +1,91 @@
+import { useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 import { AlertTriangle, Flag, Pencil } from "lucide-react";
 import Button from "../../../components/ui/Button";
 import Dropdown from "../../../components/ui/Dropdown";
 import { PRIORITY_STYLES, STATUS_OPTIONS, formatDueDate, isOverdue } from "../homeworkUtils";
 
-export default function BoardCard({ item, onEdit, onStatusChange }) {
+const EXIT_DURATION = 0.55;
+const ENTER_DELAY = 0.12;
+const HIDDEN_STATE = { opacity: 0, scale: 0.82, filter: "blur(10px)" };
+const VISIBLE_STATE = { opacity: 1, scale: 1, filter: "blur(0px)" };
+const EASE = [0.22, 1, 0.36, 1];
+const GLOW_DURATION = 1.1;
+
+const GLOW_OFF = {
+  borderColor: "color-mix(in srgb, var(--color-primary) 0%, transparent)",
+  boxShadow: "inset 0 0 0px 0px color-mix(in srgb, var(--color-primary) 0%, transparent)",
+};
+const GLOW_KEYFRAMES = {
+  borderColor: [
+    "color-mix(in srgb, var(--color-primary) 0%, transparent)",
+    "color-mix(in srgb, var(--color-primary) 95%, transparent)",
+    "color-mix(in srgb, var(--color-primary) 0%, transparent)",
+  ],
+  boxShadow: [
+    "inset 0 0 0px 0px color-mix(in srgb, var(--color-primary) 0%, transparent)",
+    "inset 0 0 22px 3px color-mix(in srgb, var(--color-primary) 55%, transparent)",
+    "inset 0 0 0px 0px color-mix(in srgb, var(--color-primary) 0%, transparent)",
+  ],
+};
+
+export default function BoardCard({ item, onEdit, onStatusChange, revealed = true, justArrived = false }) {
+  const [isLeaving, setIsLeaving] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
   const overdue = isOverdue(item.due_date, item.status);
   const priority = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES.normal;
   const hasTags = Boolean(item.subject_name) || item.priority !== "normal";
 
+  function handleStatusChange(e) {
+    const newStatus = e.target.value;
+    if (newStatus === item.status || isLeaving) return;
+    setIsLeaving(true);
+    setTimeout(
+      () => {
+        onStatusChange(item.id, newStatus);
+      },
+      shouldReduceMotion ? 0 : EXIT_DURATION * 1000,
+    );
+  }
+
+  const showVisible = !isLeaving && revealed;
+
+  const transition = shouldReduceMotion
+    ? { duration: 0 }
+    : isLeaving
+    ? { duration: EXIT_DURATION, ease: EASE }
+    : revealed
+    ? { type: "spring", stiffness: 300, damping: 20, mass: 0.8, delay: ENTER_DELAY }
+    : { duration: 0 };
+
   return (
-    <article
+    <motion.article
+      layout="position"
+      initial={HIDDEN_STATE}
+      animate={showVisible ? VISIBLE_STATE : HIDDEN_STATE}
+      transition={transition}
       style={{
         backgroundImage:
           "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, color-mix(in srgb, var(--color-accent) 6%, transparent) 55%, transparent 100%)",
+        pointerEvents: isLeaving ? "none" : "auto",
+        willChange: "transform, filter, opacity",
       }}
-      className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
+      className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
     >
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-[var(--color-primary)] opacity-10 blur-3xl transition-opacity duration-300 group-hover:opacity-20"
       />
+
+      {!shouldReduceMotion && (
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-30 rounded-2xl border-2"
+          initial={false}
+          animate={justArrived ? GLOW_KEYFRAMES : GLOW_OFF}
+          transition={{ duration: GLOW_DURATION, ease: "easeOut", times: [0, 0.35, 1] }}
+        />
+      )}
 
       <div className="relative z-10 flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-wrap items-center gap-1.5">
@@ -83,10 +149,10 @@ export default function BoardCard({ item, onEdit, onStatusChange }) {
         <Dropdown
           id={`board-status-${item.id}`}
           value={item.status}
-          onChange={(e) => onStatusChange(item.id, e.target.value)}
+          onChange={handleStatusChange}
           options={STATUS_OPTIONS}
         />
       </div>
-    </article>
+    </motion.article>
   );
 }

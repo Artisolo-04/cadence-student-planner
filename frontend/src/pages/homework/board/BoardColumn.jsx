@@ -1,11 +1,62 @@
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BoardCard from "./BoardCard";
 import useScrollFade from "./useScrollFade";
+import { isElementVisible, smoothScrollTo } from "./scrollUtils";
+
+const GLOW_WINDOW = 900;
 
 export default function BoardColumn({ column, items, onEdit, onStatusChange }) {
   const { scrollRef, showTopFade, showBottomFade, updateScrollFades } = useScrollFade(items);
+  const prevIdsRef = useRef(new Set(items.map((i) => i.id)));
+  const [pendingId, setPendingId] = useState(null);
+  const [arrivedId, setArrivedId] = useState(null);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    const currentIds = new Set(items.map((i) => i.id));
+    const newId = items.find((i) => !prevIdsRef.current.has(i.id))?.id;
+    prevIdsRef.current = currentIds;
+
+    if (newId == null) return;
+
+    const container = scrollRef.current;
+    if (!container) return;
+
+    if (shouldReduceMotion) {
+      setPendingId(null);
+      return;
+    }
+
+    setPendingId(newId);
+    let cancelled = false;
+
+    const raf = requestAnimationFrame(async () => {
+      const cardEl = container.querySelector(`[data-card-id="${newId}"]`);
+      if (cardEl) {
+        if (!isElementVisible(container, cardEl)) {
+          const target =
+            cardEl.offsetTop - container.clientHeight / 2 + cardEl.clientHeight / 2;
+          await smoothScrollTo(container, Math.max(0, target), 450);
+        }
+      }
+      if (!cancelled) {
+        setPendingId(null);
+        setArrivedId(newId);
+        setTimeout(() => {
+          setArrivedId((current) => (current === newId ? null : current));
+        }, GLOW_WINDOW);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+  }, [items, shouldReduceMotion]);
 
   return (
-    <div className="flex h-full min-w-[280px] flex-1 flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+    <div className="flex h-full min-w-[280px] flex-1 flex-col gap-3 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3" style={{ contain: "paint" }}>
       <div className="flex shrink-0 items-center justify-between px-1">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
           {column.label}
@@ -16,21 +67,40 @@ export default function BoardColumn({ column, items, onEdit, onStatusChange }) {
       </div>
 
       <div className="relative min-h-0 flex-1">
-        <div
+        <motion.div
+          layoutScroll
           ref={scrollRef}
           onScroll={updateScrollFades}
           className="h-full overflow-y-auto rounded-xl scrollbar-cadence pr-1"
         >
-          <div className="flex flex-col gap-3 pb-2">
-            {items.length === 0 ? (
-              <p className="px-1 py-6 text-center text-xs text-[var(--color-text-muted)]">Nothing here.</p>
-            ) : (
-              items.map((item) => (
-                <BoardCard key={item.id} item={item} onEdit={onEdit} onStatusChange={onStatusChange} />
-              ))
-            )}
-          </div>
-        </div>
+          <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-3 pb-2">
+            <AnimatePresence mode="popLayout">
+              {items.length === 0 ? (
+                <motion.p
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="px-1 py-6 text-center text-xs text-[var(--color-text-muted)]"
+                >
+                  Nothing here.
+                </motion.p>
+              ) : (
+                items.map((item) => (
+                  <div key={item.id} data-card-id={item.id}>
+                    <BoardCard
+                      item={item}
+                      onEdit={onEdit}
+                      onStatusChange={onStatusChange}
+                      revealed={item.id !== pendingId}
+                      justArrived={item.id === arrivedId}
+                    />
+                  </div>
+                ))
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
 
         <div
           aria-hidden="true"
