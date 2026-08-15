@@ -88,10 +88,10 @@ export default function BoardCard({ item, onEdit, onStatusChange, revealed = tru
       )}
 
       <div className="relative z-10 flex items-start justify-between gap-2">
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
           {hasTags && item.subject_name && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-lg border px-2 py-0.5 text-[11px] font-semibold backdrop-blur-md"
+              className="inline-flex h-[26px] max-w-[150px] items-center gap-1.5 rounded-lg border px-2 text-[11px] font-medium"
               style={{
                 borderColor: `color-mix(in srgb, ${item.subject_color || "var(--color-primary)"} 45%, transparent)`,
                 backgroundColor: `color-mix(in srgb, ${item.subject_color || "var(--color-primary)"} 20%, transparent)`,
@@ -103,12 +103,12 @@ export default function BoardCard({ item, onEdit, onStatusChange, revealed = tru
                 style={{ backgroundColor: item.subject_color || "var(--color-primary)" }}
                 aria-hidden="true"
               />
-              {item.subject_name}
+              <span className="truncate">{item.subject_name}</span>
             </span>
           )}
           {item.priority !== "normal" && (
             <span
-              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[11px] font-medium backdrop-blur-md"
+              className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium"
               style={{ color: priority.color }}
             >
               <Flag size={11} />
@@ -116,15 +116,17 @@ export default function BoardCard({ item, onEdit, onStatusChange, revealed = tru
             </span>
           )}
         </div>
-        <Button
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Button
           variant="ghost"
           size="icon"
           onClick={() => onEdit(item)}
-          className="h-7 w-7 shrink-0 rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-md hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
+          style={{ height: "26px", width: "26px" }}
+          className="shrink-0 rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-md hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
           aria-label={`Edit ${item.title}`}
           title="Edit"
         >
-          <Pencil size={13} />
+          <Pencil size={11} />
         </Button>
       </div>
 
@@ -134,24 +136,29 @@ export default function BoardCard({ item, onEdit, onStatusChange, revealed = tru
         <p className="relative z-10 text-xs text-[var(--color-text-muted)] line-clamp-2">{item.notes}</p>
       )}
 
-      <span
-        className={`relative z-10 inline-flex w-fit items-center whitespace-nowrap rounded-lg border px-2 py-1 text-[11px] font-medium ${
-          overdue
-            ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
-            : "border-white/10 bg-white/[0.03] text-[var(--color-text-muted)]"
-        }`}
-      >
-        {overdue && <AlertTriangle size={11} className="mr-1" />}
-        {formatDueDate(item.due_date)}
-      </span>
-
-      <div className="relative z-20" onClick={(e) => e.stopPropagation()}>
-        <Dropdown
-          id={`board-status-${item.id}`}
-          value={item.status}
-          onChange={handleStatusChange}
-          options={STATUS_OPTIONS}
-        />
+      <div className="relative z-10 flex items-center justify-between gap-2">
+        <span
+          className={`inline-flex h-[26px] w-fit items-center whitespace-nowrap rounded-lg border px-2 text-[11px] font-medium ${
+            overdue
+              ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
+              : "border-white/10 bg-white/[0.03] text-[var(--color-text-muted)]"
+          }`}
+        >
+          {overdue && <AlertTriangle size={11} className="mr-1" />}
+          {formatDueDate(item.due_date)}
+        </span>
+        <div
+          className="relative z-20 flex h-[26px] items-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Dropdown
+            id={`board-status-${item.id}`}
+            value={item.status}
+            onChange={handleStatusChange}
+            options={STATUS_OPTIONS}
+            size="sm"
+          />
+        </div>
       </div>
     </motion.article>
   );
