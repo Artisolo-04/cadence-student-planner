@@ -4,42 +4,7 @@ import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import Checkbox from "../../components/ui/Checkbox";
 import HomeworkBoard from "./board/HomeworkBoard";
-
-const PRIORITY_STYLES = {
-  high: { label: "High", color: "var(--color-danger)" },
-  normal: { label: "Normal", color: "var(--color-text-muted)" },
-  low: { label: "Low", color: "var(--color-primary)" },
-};
-
-const STATUS_STYLES = {
-  todo: {
-    label: "To do",
-    className: "border-[var(--color-border)] text-[var(--color-text-muted)]",
-  },
-  in_progress: {
-    label: "In progress",
-    className: "border-[var(--color-primary)]/40 text-[var(--color-primary)] bg-[var(--color-primary)]/10",
-  },
-  done: {
-    label: "Done",
-    className: "border-emerald-500/40 text-emerald-400 bg-emerald-500/10",
-  },
-};
-
-function formatDueDate(dueDate) {
-  const isoDate = String(dueDate).slice(0, 10);
-  const date = new Date(`${isoDate}T00:00:00`);
-  return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-}
-
-function isOverdue(dueDate, status) {
-  if (status === "done") return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const isoDate = String(dueDate).slice(0, 10);
-  const due = new Date(`${isoDate}T00:00:00`);
-  return due < today;
-}
+import { PRIORITY_STYLES, STATUS_STYLES, formatDueDate, isOverdue } from "./homeworkUtils";
 
 export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onToggleDone, onStatusChange, onReorder }) {
   const [view, setView] = useState("list");
@@ -269,7 +234,7 @@ export default function HomeworkList({ homework, onAddNew, onEdit, onDelete, onT
 
       {view === "board" && (
         <div className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
-          <HomeworkBoard homework={homework} onEdit={onEdit} onReorder={onReorder} />
+          <HomeworkBoard homework={homework} onEdit={onEdit} onStatusChange={onStatusChange} onReorder={onReorder} />
         </div>
       )}
 
