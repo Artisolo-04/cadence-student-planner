@@ -34,7 +34,7 @@ export default function StudentCard({ user, profile, groupTag }) {
 
   return (
     <div
-      className="relative flex w-full max-w-md overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl"
+      className="relative flex w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl"
       style={{
         aspectRatio: "1.586 / 1",
         backgroundImage:

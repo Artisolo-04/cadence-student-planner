@@ -1,10 +1,12 @@
 import { useAuth } from "../../hooks/useAuth";
 import { useDashboardData } from "./useDashboardData";
+import { useDueSoonHomework } from "./useDueSoonHomework";
 import TodaySchedule from "./TodaySchedule";
 import EmptyState from "./EmptyState";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import StudentCard from "./StudentCard";
 import TodayOverviewCard from "./TodayOverviewCard";
+import DueSoonCard from "./DueSoonCard";
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
@@ -22,12 +24,14 @@ export default function DashboardPage() {
     todayLabel,
   } = useDashboardData();
 
+  const { homework: dueSoonHomework, loading: dueSoonLoading } = useDueSoonHomework(4);
+
   if (loading && timetables.length === 0) return null;
 
   const groupTag = workspace?.my_group ?? workspace?.myGroup ?? null;
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[440px_1fr_320px]">
       <div className="flex flex-col gap-6 min-w-0">
         <div className="max-w-md w-full">
           <StudentCard user={user} profile={profile} groupTag={groupTag} />
@@ -62,6 +66,10 @@ export default function DashboardPage() {
             <TodaySchedule sessions={todaySessions} currentKey={currentKey} />
           </div>
         )}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <DueSoonCard homework={dueSoonHomework} loading={dueSoonLoading} />
       </div>
 
       <div className="flex flex-col gap-4">
