@@ -34,7 +34,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
   const shouldReduceMotion = useReducedMotion();
   const overdue = isOverdue(item.due_date, item.status);
   const priority = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES.normal;
-  const hasTags = Boolean(item.subject_name) || item.priority !== "normal";
+  const accentColor = item.subject_color || "var(--color-primary)";
 
   function handleStatusChange(e) {
     const newStatus = e.target.value;
@@ -89,32 +89,38 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
 
       <div className="relative z-10 flex items-start justify-between gap-2">
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-          {hasTags && item.subject_name && (
+          {item.subject_name ? (
             <span
               className="inline-flex h-[26px] max-w-[150px] items-center gap-1.5 rounded-lg border px-2 text-[11px] font-medium"
               style={{
-                borderColor: `color-mix(in srgb, ${item.subject_color || "var(--color-primary)"} 45%, transparent)`,
-                backgroundColor: `color-mix(in srgb, ${item.subject_color || "var(--color-primary)"} 20%, transparent)`,
-                color: item.subject_color || "var(--color-primary)",
+                borderColor: `color-mix(in srgb, ${accentColor} 45%, transparent)`,
+                backgroundColor: `color-mix(in srgb, ${accentColor} 20%, transparent)`,
+                color: accentColor,
               }}
             >
               <span
                 className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ backgroundColor: item.subject_color || "var(--color-primary)" }}
+                style={{ backgroundColor: accentColor }}
                 aria-hidden="true"
               />
               <span className="truncate">{item.subject_name}</span>
             </span>
-          )}
-          {item.priority !== "normal" && (
-            <span
-              className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium"
-              style={{ color: priority.color }}
-            >
-              <Flag size={11} />
-              {priority.label}
+          ) : (
+            <span className="inline-flex h-[26px] w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-2 text-[11px] font-medium text-[var(--color-text-muted)]/70">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full border border-dashed border-current opacity-60"
+                aria-hidden="true"
+              />
+              No subject
             </span>
           )}
+          <span
+            className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium"
+            style={{ color: priority.color }}
+          >
+            <Flag size={11} />
+            {priority.label}
+          </span>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <Button
