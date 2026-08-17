@@ -86,6 +86,7 @@ export default function HomeworkPage() {
       {view === "list" ? (
         <HomeworkList
           homework={homework}
+          subjects={subjects}
           onAddNew={startCreate}
           onEdit={startEdit}
           onDelete={handleDelete}

@@ -25,6 +25,28 @@ export const STATUS_OPTIONS = [
   { value: "done", label: "Done" },
 ];
 
+export const DUE_FILTERS = [
+  { value: "all", label: "Any due date" },
+  { value: "overdue", label: "Overdue" },
+  { value: "today", label: "Due today" },
+  { value: "week", label: "Due this week" },
+  { value: "none", label: "No due date" },
+];
+
+export const SORT_OPTIONS = [
+  { value: "due_date-asc", label: "Due date (soonest)" },
+  { value: "due_date-desc", label: "Due date (latest)" },
+  { value: "priority-desc", label: "Priority (high first)" },
+  { value: "subject-asc", label: "Subject (A-Z)" },
+  { value: "created-desc", label: "Recently added" },
+];
+
+const PRIORITY_RANK = { high: 3, normal: 2, low: 1 };
+
+export function comparePriority(a, b) {
+  return (PRIORITY_RANK[a.priority] || 0) - (PRIORITY_RANK[b.priority] || 0);
+}
+
 export function formatDueDate(dueDate) {
   const isoDate = String(dueDate).slice(0, 10);
   const date = new Date(`${isoDate}T00:00:00`);
