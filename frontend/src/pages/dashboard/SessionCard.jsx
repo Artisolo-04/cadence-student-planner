@@ -3,12 +3,17 @@ import { BookOpen } from "lucide-react";
 export default function SessionCard({ session, isCurrent }) {
   return (
     <div
-      className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+      className={`relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 transition-colors ${
         isCurrent ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"
       }`}
       style={
         isCurrent
-          ? { boxShadow: `inset 2px 0 0 0 ${session.color}` }
+          ? {
+              boxShadow: [
+                `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
+                `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
+              ].join(", "),
+            }
           : undefined
       }
     >
@@ -28,20 +33,9 @@ export default function SessionCard({ session, isCurrent }) {
         <BookOpen size={13} style={{ color: session.color }} />
       </span>
 
-      <div className="min-w-0 flex-1">
+      <div className={`min-w-0 flex-1 ${isCurrent ? "pr-12" : ""}`}>
         <div className="truncate text-sm font-medium text-[var(--color-text)]">
           {session.subjectName}
-          {isCurrent && (
-            <span
-              className="ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
-              style={{
-                backgroundColor: `color-mix(in srgb, ${session.color} 25%, transparent)`,
-                color: session.color,
-              }}
-            >
-              now
-            </span>
-          )}
         </div>
         <div className="truncate text-xs text-[var(--color-text-muted)]">
           {session.teacher}
@@ -49,6 +43,19 @@ export default function SessionCard({ session, isCurrent }) {
           {session.groupTag !== "all" ? ` · ${session.groupTag.toUpperCase()}` : ""}
         </div>
       </div>
+
+      {isCurrent && (
+        <span
+          className="absolute right-3 top-1/2 inline-flex shrink-0 -translate-y-1/2 items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+          style={{
+            borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,
+            color: session.color,
+          }}
+        >
+          now
+        </span>
+      )}
     </div>
   );
 }
