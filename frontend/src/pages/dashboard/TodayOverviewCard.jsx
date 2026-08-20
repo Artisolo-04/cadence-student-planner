@@ -1,19 +1,5 @@
 import { Clock, Flame, Sparkles } from "lucide-react";
 
-function toMinutes(hhmm) {
-  if (!hhmm) return null;
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + (m || 0);
-}
-
-function formatCountdown(minutesLeft) {
-  if (minutesLeft <= 0) return "starting now";
-  if (minutesLeft < 60) return `in ${minutesLeft} min`;
-  const h = Math.floor(minutesLeft / 60);
-  const m = minutesLeft % 60;
-  return m === 0 ? `in ${h}h` : `in ${h}h ${m}min`;
-}
-
 function formatDate() {
   return new Date().toLocaleDateString(undefined, {
     day: "numeric",
@@ -22,9 +8,6 @@ function formatDate() {
 }
 
 export default function TodayOverviewCard({ todayLabel, nextSession, weekTotal, busiestDay }) {
-  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
-  const minutesLeft = nextSession ? toMinutes(nextSession.start) - nowMin : null;
-
   return (
     <div
       className="relative overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
@@ -61,12 +44,12 @@ export default function TodayOverviewCard({ todayLabel, nextSession, weekTotal, 
                   {nextSession.subjectName}
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)]">
-                  {formatCountdown(minutesLeft)} · {nextSession.start.slice(0, 5)}
+                  {nextSession.start.slice(0, 5)} start
                 </p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-[var(--color-text-muted)]">No more classes today.</p>
+            <p className="text-xs text-[var(--color-text-muted)]">No more classes today.</p>
           )}
 
           {weekTotal > 0 && (
