@@ -34,9 +34,8 @@ export default function StudentCard({ user, profile, groupTag }) {
 
   return (
     <div
-      className="relative flex w-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl"
+      className="relative flex w-full h-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl"
       style={{
-        aspectRatio: "1.586 / 1",
         backgroundImage:
           "linear-gradient(140deg, color-mix(in srgb, var(--color-primary) 26%, transparent) 0%, color-mix(in srgb, var(--color-accent) 12%, transparent) 60%, transparent 100%)",
       }}
