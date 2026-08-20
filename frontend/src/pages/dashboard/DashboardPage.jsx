@@ -6,7 +6,10 @@ import EmptyState from "./EmptyState";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import StudentCard from "./StudentCard";
 import TodayOverviewCard from "./TodayOverviewCard";
+import FocusTimeline from "./FocusTimeline";
 import DueSoonCard from "./DueSoonCard";
+import DayProgressCard from "./DayProgressCard";
+import SessionTimerCard from "./SessionTimerCard";
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
@@ -31,9 +34,9 @@ export default function DashboardPage() {
   const groupTag = workspace?.my_group ?? workspace?.myGroup ?? null;
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[440px_1fr_320px]">
-      <div className="flex flex-col gap-6 min-w-0">
-        <div className="max-w-md w-full">
+    <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[440px_1fr_320px]">
+      <div className="flex flex-col gap-4 min-w-0 lg:h-full lg:overflow-y-auto scrollbar-cadence">
+        <div className="max-w-md w-full flex-1 min-h-0">
           <StudentCard user={user} profile={profile} groupTag={groupTag} />
         </div>
 
@@ -66,25 +69,37 @@ export default function DashboardPage() {
             <TodaySchedule sessions={todaySessions} currentKey={currentKey} />
           </div>
         )}
+
+        <div className="max-w-md">
+          <WorkspaceSwitcher
+            timetables={timetables}
+            activeId={activeId}
+            onSelect={selectWorkspace}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4 lg:h-full lg:overflow-y-auto scrollbar-cadence">
+        <DayProgressCard sessions={todaySessions} currentKey={currentKey} />
+        <div className="flex min-w-0 flex-col items-stretch gap-4 lg:flex-row">
+          <div className="w-full min-w-0 lg:w-1/2">
+            <TodayOverviewCard
+              todayLabel={todayLabel}
+              nextSession={nextSession}
+              weekTotal={weekStats.total}
+              busiestDay={weekStats.busiestDay}
+            />
+          </div>
+          <div className="w-full min-w-0 lg:w-1/2">
+            <SessionTimerCard sessions={todaySessions} currentKey={currentKey} />
+          </div>
+        </div>
+
         <DueSoonCard homework={dueSoonHomework} loading={dueSoonLoading} />
       </div>
 
-      <div className="flex flex-col gap-4">
-        <TodayOverviewCard
-          todayLabel={todayLabel}
-          nextSession={nextSession}
-          weekTotal={weekStats.total}
-          busiestDay={weekStats.busiestDay}
-        />
-
-        <WorkspaceSwitcher
-          timetables={timetables}
-          activeId={activeId}
-          onSelect={selectWorkspace}
-        />
+      <div className="flex w-full min-w-0 flex-col lg:h-full lg:min-h-0">
+        <FocusTimeline sessions={todaySessions} currentKey={currentKey} />
       </div>
     </div>
   );
