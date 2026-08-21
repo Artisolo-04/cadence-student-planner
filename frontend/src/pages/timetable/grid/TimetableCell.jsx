@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { Fragment, memo } from "react";
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { getCellDisplay } from "./timetableGridUtils";
 import SubjectLabel from "./SubjectLabel";
@@ -22,6 +22,11 @@ function getDisplayForView(entriesForCell, groupVisibility, myGroup) {
     entry: groupTag === "g1" ? display.g1Entry : display.g2Entry,
     groupTag,
   };
+}
+
+function pulseFor(landing, cellKey, groupTag) {
+  if (!landing) return null;
+  return landing.key === `${cellKey}-${groupTag}` ? landing.color : null;
 }
 
 function DropZone({
@@ -53,7 +58,6 @@ function DropZone({
   );
 }
 
-
 function DragIntentTargets({ cellKey }) {
   const g1 = useDroppable({ id: `cell::${cellKey}::g1` });
   const all = useDroppable({ id: `cell::${cellKey}::all` });
@@ -84,6 +88,191 @@ function DragIntentTargets({ cellKey }) {
   );
 }
 
+function TimetableCellFull({
+  display,
+  isToday,
+  isLive,
+  isLastCol,
+  isLastRow,
+  onOpen,
+  viewOptions,
+  slotId,
+  dayOfWeek,
+  isEditMode,
+  landing,
+  g1Column,
+  gridRow,
+}) {
+  const { showTeacher = false, showRoom = false } = viewOptions || {};
+  const isEmpty =
+    display.mode === "empty" ||
+    (display.mode === "filtered" && !display.entry);
+
+  const cellKey = `${slotId}-${dayOfWeek}`;
+  const { active: activeDrag } = useDndContext();
+  const isDragging = Boolean(activeDrag);
+
+  return (
+    <div
+      data-cell-key={cellKey}
+      style={{ gridColumn: `${g1Column} / span 2`, gridRow }}
+      className={`group relative overflow-hidden border-[var(--color-border)] ${
+        isLastCol ? "" : "border-r"
+      } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-[background-color,border-color,box-shadow] duration-200 ease-out ${
+        isToday && isEmpty ? "bg-[var(--color-accent)]/[0.05]" : ""
+      }`}
+    >
+      {isLive && (
+        <span className="pointer-events-none absolute inset-1 z-10 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)]" />
+      )}
+
+      <DropZone
+        id={`cell::${cellKey}::${display.groupTag || "all"}`}
+        disabled={!isEditMode || isDragging}
+        isFilled={!isEmpty}
+        className={`flex h-full min-h-[56px] items-center justify-center ${
+          isEditMode ? "cursor-pointer" : ""
+        } ${isEditMode && isEmpty ? "hover:bg-[var(--color-surface-alt)]" : ""}`}
+        onClick={isEditMode ? () => onOpen(display.groupTag || "all") : undefined}
+      >
+        {display.mode === "full" || display.mode === "filtered" ? (
+          display.entry ? (
+            <SubjectLabel
+              entry={display.entry}
+              groupTag={display.mode === "filtered" ? display.groupTag : null}
+              showTeacher={showTeacher}
+              showRoom={showRoom}
+              pulseColor={pulseFor(landing, cellKey, display.groupTag || "all")}
+              slotId={slotId}
+              dayOfWeek={dayOfWeek}
+              dragGroupTag={display.mode === "filtered" ? display.groupTag : "all"}
+              isEditMode={isEditMode}
+            />
+          ) : (
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]/40">
+              {display.groupTag?.toUpperCase()}
+            </span>
+          )
+        ) : (
+          <span className="h-1 w-1 rounded-full bg-[var(--color-text-muted)]/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+        )}
+      </DropZone>
+
+      {isEditMode && isDragging && (
+        <DragIntentTargets cellKey={cellKey} />
+      )}
+    </div>
+  );
+}
+
+function TimetableCellSplitLane({
+  display,
+  isToday,
+  isLive,
+  isLastCol,
+  isLastRow,
+  onOpen,
+  viewOptions,
+  slotId,
+  dayOfWeek,
+  isEditMode,
+  landing,
+  g1Column,
+  g2Column,
+  gridRow,
+}) {
+  const { showTeacher = false, showRoom = false } = viewOptions || {};
+  const cellKey = `${slotId}-${dayOfWeek}`;
+  const { active: activeDrag } = useDndContext();
+  const isDragging = Boolean(activeDrag);
+
+  const laneBaseClass = `overflow-hidden border-[var(--color-border)] ${
+    isLastRow ? "" : "border-b"
+  } p-0 text-center align-middle transition-[background-color,border-color,box-shadow] duration-200 ease-out`;
+
+  return (
+    <Fragment>
+      <div
+        data-cell-key={`${cellKey}-g1`}
+        style={{ gridColumn: g1Column, gridRow }}
+        className={`${laneBaseClass} border-r`}
+      >
+        <DropZone
+          id={`cell::${cellKey}::g1`}
+          disabled={!isEditMode || isDragging}
+          isFilled={Boolean(display.g1Entry)}
+          className={`group/half flex h-full min-h-[56px] items-center justify-center ${
+            isEditMode ? "cursor-pointer" : ""
+          }`}
+          onClick={isEditMode ? () => onOpen("g1") : undefined}
+        >
+          {display.g1Entry ? (
+            <SubjectLabel
+              entry={display.g1Entry}
+              showTeacher={showTeacher}
+              showRoom={showRoom}
+              pulseColor={pulseFor(landing, cellKey, "g1")}
+              slotId={slotId}
+              dayOfWeek={dayOfWeek}
+              dragGroupTag="g1"
+              isEditMode={isEditMode}
+            />
+          ) : (
+            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]/40 opacity-0 transition-opacity duration-200 group-hover/half:opacity-100">
+              G1
+            </span>
+          )}
+        </DropZone>
+      </div>
+
+      <div
+        data-cell-key={`${cellKey}-g2`}
+        style={{ gridColumn: g2Column, gridRow }}
+        className={`${laneBaseClass} ${isLastCol ? "" : "border-r"}`}
+      >
+        <DropZone
+          id={`cell::${cellKey}::g2`}
+          disabled={!isEditMode || isDragging}
+          isFilled={Boolean(display.g2Entry)}
+          className={`group/half flex h-full min-h-[56px] items-center justify-center ${
+            isEditMode ? "cursor-pointer" : ""
+          }`}
+          onClick={isEditMode ? () => onOpen("g2") : undefined}
+        >
+          {display.g2Entry ? (
+            <SubjectLabel
+              entry={display.g2Entry}
+              showTeacher={showTeacher}
+              showRoom={showRoom}
+              pulseColor={pulseFor(landing, cellKey, "g2")}
+              slotId={slotId}
+              dayOfWeek={dayOfWeek}
+              dragGroupTag="g2"
+              isEditMode={isEditMode}
+            />
+          ) : (
+            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]/40 opacity-0 transition-opacity duration-200 group-hover/half:opacity-100">
+              G2
+            </span>
+          )}
+        </DropZone>
+      </div>
+
+      <div
+        style={{ gridColumn: `${g1Column} / span 2`, gridRow }}
+        className="relative pointer-events-none"
+      >
+        {isLive && (
+          <span className="pointer-events-none absolute inset-1 z-10 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)]" />
+        )}
+        {isEditMode && isDragging && (
+          <DragIntentTargets cellKey={cellKey} />
+        )}
+      </div>
+    </Fragment>
+  );
+}
+
 function TimetableCell({
   entriesForCell,
   isToday,
@@ -97,137 +286,55 @@ function TimetableCell({
   dayOfWeek,
   isEditMode,
   landing,
+  g1Column,
+  g2Column,
+  gridRow,
 }) {
-  const {
-    groupVisibility = "both",
-    showTeacher = false,
-    showRoom = false,
-  } = viewOptions || {};
+  const { groupVisibility = "both" } = viewOptions || {};
 
   const display = getDisplayForView(
     entriesForCell,
     isEditMode ? "both" : groupVisibility,
     myGroup
   );
-  const isEmpty =
-    display.mode === "empty" ||
-    (display.mode === "filtered" && !display.entry);
 
-  const cellKey = `${slotId}-${dayOfWeek}`;
-  const { active: activeDrag } = useDndContext();
-  const isDragging = Boolean(activeDrag);
-
-  function pulseFor(groupTag) {
-    if (!landing) return null;
-    return landing.key === `${cellKey}-${groupTag}` ? landing.color : null;
+  if (display.mode === "split") {
+    return (
+      <TimetableCellSplitLane
+        display={display}
+        isToday={isToday}
+        isLive={isLive}
+        isLastCol={isLastCol}
+        isLastRow={isLastRow}
+        onOpen={onOpen}
+        viewOptions={viewOptions}
+        slotId={slotId}
+        dayOfWeek={dayOfWeek}
+        isEditMode={isEditMode}
+        landing={landing}
+        g1Column={g1Column}
+        g2Column={g2Column}
+        gridRow={gridRow}
+      />
+    );
   }
 
-
   return (
-    <td
-      data-cell-key={cellKey}
-      className={`group relative overflow-hidden border-[var(--color-border)] ${
-        isLastCol ? "" : "border-r"
-      } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-[background-color,border-color,box-shadow] duration-200 ease-out ${
-        isToday && isEmpty ? "bg-[var(--color-accent)]/[0.05]" : ""
-      }`}
-    >
-      {isLive && (
-        <span className="pointer-events-none absolute inset-1 z-10 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)]" />
-      )}
-
-      {display.mode === "split" ? (
-        <div className="flex h-full min-h-[56px] divide-x divide-[var(--color-border)]">
-          <DropZone
-            id={`cell::${cellKey}::g1`}
-            disabled={!isEditMode || isDragging}
-            isFilled={Boolean(display.g1Entry)}
-            className={`group/half flex-1 ${isEditMode ? "cursor-pointer" : ""}`}
-            onClick={isEditMode ? () => onOpen("g1") : undefined}
-          >
-            {display.g1Entry ? (
-              <SubjectLabel
-                entry={display.g1Entry}
-                showTeacher={showTeacher}
-                showRoom={showRoom}
-                pulseColor={pulseFor("g1")}
-                slotId={slotId}
-                dayOfWeek={dayOfWeek}
-                dragGroupTag="g1"
-                isEditMode={isEditMode}
-              />
-            ) : (
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]/40 opacity-0 transition-opacity duration-200 group-hover/half:opacity-100">
-                G1
-              </span>
-            )}
-          </DropZone>
-
-          <DropZone
-            id={`cell::${cellKey}::g2`}
-            disabled={!isEditMode || isDragging}
-            isFilled={Boolean(display.g2Entry)}
-            className={`group/half flex-1 ${isEditMode ? "cursor-pointer" : ""}`}
-            onClick={isEditMode ? () => onOpen("g2") : undefined}
-          >
-            {display.g2Entry ? (
-              <SubjectLabel
-                entry={display.g2Entry}
-                showTeacher={showTeacher}
-                showRoom={showRoom}
-                pulseColor={pulseFor("g2")}
-                slotId={slotId}
-                dayOfWeek={dayOfWeek}
-                dragGroupTag="g2"
-                isEditMode={isEditMode}
-              />
-            ) : (
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]/40 opacity-0 transition-opacity duration-200 group-hover/half:opacity-100">
-                G2
-              </span>
-            )}
-          </DropZone>
-        </div>
-      ) : (
-        <DropZone
-          id={`cell::${cellKey}::${display.groupTag || "all"}`}
-          disabled={!isEditMode || isDragging}
-          isFilled={!isEmpty}
-          className={`flex h-full min-h-[56px] items-center justify-center ${
-            isEditMode ? "cursor-pointer" : ""
-          } ${isEditMode && isEmpty ? "hover:bg-[var(--color-surface-alt)]" : ""}`}
-          onClick={isEditMode ? () => onOpen(display.groupTag || "all") : undefined}
-        >
-          {display.mode === "full" || display.mode === "filtered" ? (
-            display.entry ? (
-              <SubjectLabel
-                entry={display.entry}
-                groupTag={display.mode === "filtered" ? display.groupTag : null}
-                showTeacher={showTeacher}
-                showRoom={showRoom}
-                pulseColor={pulseFor(display.groupTag || "all")}
-                slotId={slotId}
-                dayOfWeek={dayOfWeek}
-                dragGroupTag={display.mode === "filtered" ? display.groupTag : "all"}
-                isEditMode={isEditMode}
-              />
-            ) : (
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]/40">
-                {display.groupTag?.toUpperCase()}
-              </span>
-            )
-          ) : (
-            <span className="h-1 w-1 rounded-full bg-[var(--color-text-muted)]/30 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-          )}
-
-        </DropZone>
-      )}
-
-
-      {isEditMode && isDragging && (
-        <DragIntentTargets cellKey={cellKey} />
-      )}
-    </td>
+    <TimetableCellFull
+      display={display}
+      isToday={isToday}
+      isLive={isLive}
+      isLastCol={isLastCol}
+      isLastRow={isLastRow}
+      onOpen={onOpen}
+      viewOptions={viewOptions}
+      slotId={slotId}
+      dayOfWeek={dayOfWeek}
+      isEditMode={isEditMode}
+      landing={landing}
+      g1Column={g1Column}
+      gridRow={gridRow}
+    />
   );
 }
 

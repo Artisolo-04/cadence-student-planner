@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import { sortDaysByWeekOrder } from "../../../lib/days";
 import SubjectPickerModal from "./SubjectPickerModal";
@@ -116,96 +116,103 @@ export default function TimetableGrid({
       <div className={`flex h-full min-h-0 w-full transition-all duration-500 ${isEditMode ? "gap-3" : "gap-0"}`}>
         <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
           <div className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence" style={{ scrollbarGutter: "auto" }}>
-          <table className="h-full w-full table-fixed border-collapse text-sm">
-            <colgroup>
-              <col style={{ width: "150px" }} />
-              {orderedDays.map((day) => (
-                <col key={day.id} />
-              ))}
-            </colgroup>
-            <thead>
-              <tr>
-                <th className="border-b border-r border-[var(--color-border)] bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                  Time
-                </th>
-                {orderedDays.map((day, i) => {
-                  const isToday = day.day_of_week === nowDow;
-                  const isLastCol = i === orderedDays.length - 1;
-                  return (
-                    <th
-                      key={day.id}
-                      className={`relative border-b border-[var(--color-border)] ${
-                        isLastCol ? "" : "border-r"
-                      } bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                        isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
-                      }`}
-                    >
-                      {WEEKDAY_FULL[day.day_of_week]}
-                      {isToday && (
-                        <span className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-[var(--color-accent)]" />
+          <div
+            className="grid h-full w-full text-sm"
+            style={{
+              gridTemplateColumns: `150px repeat(${orderedDays.length * 2}, minmax(0, 1fr))`,
+              gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,
+            }}
+          >
+            <div
+              className="border-b border-r border-[var(--color-border)] bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
+              style={{ gridColumn: 1, gridRow: 1 }}
+            >
+              Time
+            </div>
+            {orderedDays.map((day, i) => {
+              const isToday = day.day_of_week === nowDow;
+              const isLastCol = i === orderedDays.length - 1;
+              const g1Column = 2 + i * 2;
+              return (
+                <div
+                  key={day.id}
+                  style={{ gridColumn: `${g1Column} / span 2`, gridRow: 1 }}
+                  className={`relative border-b border-[var(--color-border)] ${
+                    isLastCol ? "" : "border-r"
+                  } bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                    isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
+                  }`}
+                >
+                  {WEEKDAY_FULL[day.day_of_week]}
+                  {isToday && (
+                    <span className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-[var(--color-accent)]" />
+                  )}
+                </div>
+              );
+            })}
+
+            {orderedSlots.map((slot, rowIdx) => {
+              const isLastRow = rowIdx === orderedSlots.length - 1;
+              const gridRow = 2 + rowIdx;
+              return (
+                <Fragment key={slot.id}>
+                  <div
+                    style={{ gridColumn: 1, gridRow }}
+                    className={`flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] ${
+                      isLastRow ? "" : "border-b"
+                    } px-3 bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
+                  >
+                    <div className="flex items-center justify-center gap-2 py-1">
+                      {slot.label && (
+                        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
+                          />
+                          <span className="relative z-10">{slot.label}</span>
+                        </span>
                       )}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {orderedSlots.map((slot, rowIdx) => {
-                const isLastRow = rowIdx === orderedSlots.length - 1;
-                return (
-                  <tr key={slot.id}>
-                    <td
-                      className={`overflow-hidden border-r border-[var(--color-border)] ${
-                        isLastRow ? "" : "border-b"
-                      } px-3 bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
-                    >
-                      <div className="flex items-center justify-center gap-2 py-1">
-                        {slot.label && (
-                          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
-                            <span
-                              aria-hidden="true"
-                              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
-                            />
-                            <span className="relative z-10">{slot.label}</span>
-                          </span>
-                        )}
-                        <div className="flex flex-col items-center gap-1 leading-none">
-                          <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
-                            {slot.start_time.slice(0, 5)}
-                          </span>
-                          <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
-                            {slot.end_time.slice(0, 5)}
-                          </span>
-                        </div>
+                      <div className="flex flex-col items-center gap-1 leading-none">
+                        <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
+                          {slot.start_time.slice(0, 5)}
+                        </span>
+                        <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
+                          {slot.end_time.slice(0, 5)}
+                        </span>
                       </div>
-                    </td>
-                    {orderedDays.map((day, i) => {
-                      const isToday = day.day_of_week === nowDow;
-                      const isLive = isToday && isCurrentSlot(slot);
-                      const isLastCol = i === orderedDays.length - 1;
-                      return (
-                        <TimetableCell
-                          key={day.id}
-                          entriesForCell={entriesByCell[entryKey(slot.id, day.day_of_week)]}
-                          isToday={isToday}
-                          isLive={isLive}
-                          isLastCol={isLastCol}
-                          isLastRow={isLastRow}
-                          onOpen={(groupTag) => openCell(slot, day, groupTag)}
-                          myGroup={myGroup}
-                          viewOptions={viewOptions}
-                          slotId={slot.id}
-                          dayOfWeek={day.day_of_week}
-                          isEditMode={isEditMode}
-                          landing={landing}
-                        />
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                  {orderedDays.map((day, i) => {
+                    const isToday = day.day_of_week === nowDow;
+                    const isLive = isToday && isCurrentSlot(slot);
+                    const isLastCol = i === orderedDays.length - 1;
+                    const g1Column = 2 + i * 2;
+                    const g2Column = 3 + i * 2;
+                    return (
+                      <TimetableCell
+                        key={day.id}
+                        entriesForCell={entriesByCell[entryKey(slot.id, day.day_of_week)]}
+                        isToday={isToday}
+                        isLive={isLive}
+                        isLastCol={isLastCol}
+                        isLastRow={isLastRow}
+                        onOpen={(groupTag) => openCell(slot, day, groupTag)}
+                        myGroup={myGroup}
+                        viewOptions={viewOptions}
+                        slotId={slot.id}
+                        dayOfWeek={day.day_of_week}
+                        isEditMode={isEditMode}
+                        landing={landing}
+                        g1Column={g1Column}
+                        g2Column={g2Column}
+                        gridRow={gridRow}
+                      />
+                    );
+                  })}
+                </Fragment>
+              );
+            })}
+          </div>
           </div>
 
           <SubjectPickerModal
