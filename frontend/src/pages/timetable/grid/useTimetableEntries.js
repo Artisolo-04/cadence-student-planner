@@ -38,7 +38,7 @@ function buildCommitChanges(payload, entriesByCell) {
 
   for (const del of payload.deletions) {
     const key = `${del.slotId}-${del.dayOfWeek}-${del.groupTag}`;
-    if (changesMap.has(key)) continue; // already captured above
+    if (changesMap.has(key)) continue;
     recordChange(del.slotId, del.dayOfWeek, del.groupTag, null);
   }
 
@@ -123,6 +123,28 @@ export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChang
       }
     }
     await refreshWorkspace();
+  }
+
+  async function commitResize({ sourceSlotId, dayOfWeek, groupTag, targetSlotIds }) {
+    if (!targetSlotIds.length) return;
+    const sourceEntries = entriesByCell[entryKey(sourceSlotId, dayOfWeek)] || [];
+    const sourceEntry = sourceEntries.find((e) => e.group_tag === groupTag);
+    if (!sourceEntry) return;
+
+    const changes = targetSlotIds.map((slotId) => ({
+      slotId,
+      dayOfWeek,
+      groupTag,
+      before: beforeStateFor(entriesByCell, slotId, dayOfWeek, groupTag),
+      after: { subjectId: sourceEntry.subject_id, room: sourceEntry.room || null },
+    }));
+
+    try {
+      await applyChanges(changes, "redo");
+      undoRedo.push({ label: "Resize subject", changes });
+    } catch (err) {
+      console.error("Resize subject error:", err);
+    }
   }
 
   async function commitSave(target, payload) {
@@ -283,6 +305,7 @@ export function useTimetableEntries({ timetable, entriesByCell, onWorkspaceChang
     handleSelect,
     handleClear,
     saveDraggedSubject,
+    commitResize,
     commitSave,
     setPendingSave,
     undo,
