@@ -243,3 +243,64 @@ export function planEntrySave({
   finalGroupTag = targetGroupTag;
   return buildResult("fallback-assign");
 }
+
+export function computeDayVisualBlocks(orderedSlots, dayOfWeek, entriesByCell) {
+  const rowPlan = orderedSlots.map(() => ({
+    allSpan: 1,
+    allSkip: false,
+    g1Span: 1,
+    g1Skip: false,
+    g2Span: 1,
+    g2Skip: false,
+  }));
+
+  function sameEntry(a, b) {
+    if (!a || !b) return false;
+    return a.subject_id === b.subject_id && (a.room || null) === (b.room || null);
+  }
+
+  let openAll = null;
+  let openG1 = null;
+  let openG2 = null;
+
+  for (let idx = 0; idx <= orderedSlots.length; idx += 1) {
+    const slot = orderedSlots[idx];
+    const display = slot ? getCellDisplay(entriesByCell[entryKey(slot.id, dayOfWeek)]) : null;
+
+    const currentAll = display && display.mode === "full" ? display.entry : null;
+    const currentG1 = display && display.mode === "split" ? display.g1Entry : null;
+    const currentG2 = display && display.mode === "split" ? display.g2Entry : null;
+
+    if (openAll && currentAll && sameEntry(openAll.entry, currentAll)) {
+
+    } else {
+      if (openAll) {
+        rowPlan[openAll.startIdx].allSpan = idx - openAll.startIdx;
+        for (let k = openAll.startIdx + 1; k < idx; k += 1) rowPlan[k].allSkip = true;
+      }
+      openAll = currentAll ? { startIdx: idx, entry: currentAll } : null;
+    }
+
+    if (openG1 && currentG1 && sameEntry(openG1.entry, currentG1)) {
+
+    } else {
+      if (openG1) {
+        rowPlan[openG1.startIdx].g1Span = idx - openG1.startIdx;
+        for (let k = openG1.startIdx + 1; k < idx; k += 1) rowPlan[k].g1Skip = true;
+      }
+      openG1 = currentG1 ? { startIdx: idx, entry: currentG1 } : null;
+    }
+
+    if (openG2 && currentG2 && sameEntry(openG2.entry, currentG2)) {
+
+    } else {
+      if (openG2) {
+        rowPlan[openG2.startIdx].g2Span = idx - openG2.startIdx;
+        for (let k = openG2.startIdx + 1; k < idx; k += 1) rowPlan[k].g2Skip = true;
+      }
+      openG2 = currentG2 ? { startIdx: idx, entry: currentG2 } : null;
+    }
+  }
+
+  return rowPlan;
+}

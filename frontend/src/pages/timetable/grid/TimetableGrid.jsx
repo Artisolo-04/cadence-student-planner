@@ -6,10 +6,11 @@ import TimetableCell from "./TimetableCell";
 import SubjectsDrawer from "./SubjectsDrawer";
 import { SubjectChipContent } from "./SubjectChip";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog";
-import { toMinutes, entryKey } from "./timetableGridUtils";
+import { toMinutes, entryKey, computeDayVisualBlocks } from "./timetableGridUtils";
 import { createMagneticModifier } from "./dragAnimations";
 import { useTimetableDragDrop } from "./useTimetableDragDrop";
 import { useTimetableEntries } from "./useTimetableEntries";
+import { useTimetableResize } from "./useTimetableResize";
 
 const WEEKDAY_FULL = [
   "SUNDAY",
@@ -61,6 +62,14 @@ export default function TimetableGrid({
     return map;
   }, [entries]);
 
+  const blocksByDay = useMemo(() => {
+    const map = {};
+    for (const day of orderedDays) {
+      map[day.day_of_week] = computeDayVisualBlocks(orderedSlots, day.day_of_week, entriesByCell);
+    }
+    return map;
+  }, [orderedDays, orderedSlots, entriesByCell]);
+
   const {
     subjects,
     activeCell,
@@ -72,6 +81,7 @@ export default function TimetableGrid({
     handleSelect,
     handleClear,
     saveDraggedSubject,
+    commitResize,
     commitSave,
     setPendingSave,
     undo,
@@ -103,6 +113,18 @@ export default function TimetableGrid({
     onDrop: ({ subjectId, slotId, dayOfWeek, groupTag, sourceCell }) =>
       saveDraggedSubject({ subjectId, slotId, dayOfWeek }, groupTag, sourceCell),
   });
+
+  async function handleCommitResize({ slotId, dayOfWeek, groupTag, rowIdx, slotDelta }) {
+    const targetSlotIds = [];
+    for (let j = rowIdx + 1; j <= rowIdx + slotDelta; j += 1) {
+      targetSlotIds.push(orderedSlots[j].id);
+    }
+    await commitResize({ sourceSlotId: slotId, dayOfWeek, groupTag, targetSlotIds });
+  }
+
+  const { startResize, activeResize } = useTimetableResize({ orderedSlots, entriesByCell, onCommitResize: handleCommitResize });
+
+  const lastRowIdx = orderedSlots.length - 1;
 
   return (
     <DndContext
@@ -152,7 +174,7 @@ export default function TimetableGrid({
             })}
 
             {orderedSlots.map((slot, rowIdx) => {
-              const isLastRow = rowIdx === orderedSlots.length - 1;
+              const isLastRow = rowIdx === lastRowIdx;
               const gridRow = 2 + rowIdx;
               return (
                 <Fragment key={slot.id}>
@@ -188,6 +210,17 @@ export default function TimetableGrid({
                     const isLastCol = i === orderedDays.length - 1;
                     const g1Column = 2 + i * 2;
                     const g2Column = 3 + i * 2;
+
+                    const rowPlan = blocksByDay[day.day_of_week][rowIdx];
+
+                    if (rowPlan.allSkip) {
+                      return null;
+                    }
+
+                    const isLastRowAll = rowIdx + rowPlan.allSpan - 1 === lastRowIdx;
+                    const isLastRowG1 = rowIdx + rowPlan.g1Span - 1 === lastRowIdx;
+                    const isLastRowG2 = rowIdx + rowPlan.g2Span - 1 === lastRowIdx;
+
                     return (
                       <TimetableCell
                         key={day.id}
@@ -206,12 +239,46 @@ export default function TimetableGrid({
                         g1Column={g1Column}
                         g2Column={g2Column}
                         gridRow={gridRow}
+                        rowIdx={rowIdx}
+                        onResizeStart={startResize}
+                        allSpan={rowPlan.allSpan}
+                        g1Span={rowPlan.g1Span}
+                        g2Span={rowPlan.g2Span}
+                        g1Skip={rowPlan.g1Skip}
+                        g2Skip={rowPlan.g2Skip}
+                        isLastRowAll={isLastRowAll}
+                        isLastRowG1={isLastRowG1}
+                        isLastRowG2={isLastRowG2}
                       />
                     );
                   })}
                 </Fragment>
               );
             })}
+
+              {activeResize && activeResize.previewSlotDelta > 0 && (() => {
+                const dayIdx = orderedDays.findIndex((d) => d.day_of_week === activeResize.dayOfWeek);
+                if (dayIdx === -1) return null;
+                const g1Col = 2 + dayIdx * 2;
+                const g2Col = 3 + dayIdx * 2;
+                const overlayColumn =
+                  activeResize.groupTag === "g1"
+                    ? `${g1Col}`
+                    : activeResize.groupTag === "g2"
+                      ? `${g2Col}`
+                      : `${g1Col} / span 2`;
+                const startRow = 2 + activeResize.rowIdx + 1;
+                return (
+                  <div
+                    key="resize-preview-overlay"
+                    style={{
+                      gridColumn: overlayColumn,
+                      gridRow: `${startRow} / span ${activeResize.previewSlotDelta}`,
+                    }}
+                    className="pointer-events-none z-50 bg-orange-400/10 ring-2 ring-inset ring-orange-400 shadow-[inset_0_0_0_1px_rgba(251,146,60,0.25)]"
+                  />
+                );
+              })()}
           </div>
           </div>
 
