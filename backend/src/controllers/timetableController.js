@@ -14,9 +14,11 @@ const {
 } = require("../models/Timetable");
 const { findSubjectById } = require("../models/Subject");
 const {
-  upsertEntry,
+  createEntry,
+  updateEntry,
   findEntriesByTimetableId,
   deleteEntry,
+  OverlapConflictError,
 } = require("../models/TimetableEntry");
 
 async function createWorkspace(req, res) {
@@ -216,9 +218,9 @@ async function removeWorkspace(req, res) {
   }
 }
 
-async function setEntry(req, res) {
+async function createEntryHandler(req, res) {
   try {
-    const { slotId, dayOfWeek, subjectId, groupTag = "all", room } = req.body;
+    const { slotId, endSlotId, dayOfWeek, subjectId, groupTag = "all", room } = req.body;
     if (slotId == null || dayOfWeek == null || subjectId == null) {
       return res.status(400).json({ error: "slotId, dayOfWeek, and subjectId are required" });
     }
@@ -239,25 +241,35 @@ async function setEntry(req, res) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    const entry = await upsertEntry(req.params.id, {
+    const entry = await createEntry(req.params.id, {
       slotId,
+      endSlotId: endSlotId ?? slotId,
       dayOfWeek,
       subjectId,
       groupTag,
       room: room?.trim() ? room.trim() : null,
     });
-    res.json({ entry });
+    res.status(201).json({ entry });
   } catch (err) {
-    console.error("Set entry error:", err);
+    if (err instanceof OverlapConflictError) {
+      return res.status(409).json({ error: err.message, conflicts: err.conflicts });
+    }
+    console.error("Create entry error:", err);
     res.status(500).json({ error: "Something went wrong assigning the subject" });
   }
 }
 
-async function clearEntry(req, res) {
+async function updateEntryHandler(req, res) {
   try {
-    const { slotId, dayOfWeek, groupTag = "all" } = req.body;
-    if (slotId == null || dayOfWeek == null) {
-      return res.status(400).json({ error: "slotId and dayOfWeek are required" });
+    const { slotId, endSlotId, dayOfWeek, subjectId, groupTag = "all", room } = req.body;
+    if (slotId == null || dayOfWeek == null || subjectId == null) {
+      return res.status(400).json({ error: "slotId, dayOfWeek, and subjectId are required" });
+    }
+    if (dayOfWeek < 0 || dayOfWeek > 6) {
+      return res.status(400).json({ error: "dayOfWeek must be between 0 and 6" });
+    }
+    if (!["all", "g1", "g2"].includes(groupTag)) {
+      return res.status(400).json({ error: "groupTag must be 'all', 'g1', or 'g2'" });
     }
 
     const timetable = await findTimetableById(req.params.id);
@@ -265,7 +277,40 @@ async function clearEntry(req, res) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const deleted = await deleteEntry(req.params.id, { slotId, dayOfWeek, groupTag });
+    const subject = await findSubjectById(subjectId);
+    if (!subject || subject.user_id !== req.userId) {
+      return res.status(404).json({ error: "Subject not found" });
+    }
+
+    const entry = await updateEntry(req.params.id, req.params.entryId, {
+      slotId,
+      endSlotId: endSlotId ?? slotId,
+      dayOfWeek,
+      subjectId,
+      groupTag,
+      room: room?.trim() ? room.trim() : null,
+    });
+    res.json({ entry });
+  } catch (err) {
+    if (err instanceof OverlapConflictError) {
+      return res.status(409).json({ error: err.message, conflicts: err.conflicts });
+    }
+    if (err.message === "Entry not found") {
+      return res.status(404).json({ error: "Entry not found" });
+    }
+    console.error("Update entry error:", err);
+    res.status(500).json({ error: "Something went wrong updating the entry" });
+  }
+}
+
+async function clearEntry(req, res) {
+  try {
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    const deleted = await deleteEntry(req.params.id, req.params.entryId);
     if (!deleted) {
       return res.status(404).json({ error: "Entry not found" });
     }
@@ -287,6 +332,7 @@ module.exports = {
   editSlot,
   removeSlot,
   removeWorkspace,
-  setEntry,
+  createEntryHandler,
+  updateEntryHandler,
   clearEntry,
 };
