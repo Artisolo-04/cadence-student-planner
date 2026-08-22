@@ -103,7 +103,9 @@ function TimetableCellFull({
   g1Column,
   gridRow,
   rowIdx,
+  allEndRowIdx,
   onResizeStart,
+  activeResize,
   rowSpan = 1,
 }) {
   const { showTeacher = false, showRoom = false } = viewOptions || {};
@@ -115,13 +117,23 @@ function TimetableCellFull({
   const { active: activeDrag } = useDndContext();
   const isDragging = Boolean(activeDrag);
 
+  const groupTagForCell = display.groupTag || "all";
+  const isResizingThis =
+    Boolean(activeResize) &&
+    activeResize.slotId === slotId &&
+    activeResize.dayOfWeek === dayOfWeek &&
+    activeResize.groupTag === groupTagForCell;
+  const effectiveRowSpan = isResizingThis
+    ? rowSpan + activeResize.previewSlotDelta
+    : rowSpan;
+
   const [isHovered, setIsHovered] = useState(false);
   const showResizeHandle = isEditMode && isHovered && !isEmpty && !isDragging;
 
   return (
     <div
       data-cell-key={cellKey}
-      style={{ gridColumn: `${g1Column} / span 2`, gridRow: `${gridRow} / span ${rowSpan}` }}
+      style={{ gridColumn: `${g1Column} / span 2`, gridRow: `${gridRow} / span ${effectiveRowSpan}` }}
       className={`group relative overflow-hidden border-[var(--color-border)] ${
         isLastCol ? "" : "border-r"
       } ${isLastRow ? "" : "border-b"} p-0 text-center align-middle transition-[background-color,border-color,box-shadow] duration-200 ease-out ${
@@ -132,6 +144,17 @@ function TimetableCellFull({
     >
       {isLive && (
         <span className="pointer-events-none absolute inset-1 z-10 rounded-lg ring-1 ring-[var(--color-accent)]/50 shadow-[0_0_0_3px_rgba(var(--color-accent-rgb),0.08)]" />
+      )}
+
+      {isResizingThis && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-40 rounded-lg border-2 border-dashed transition-[height] duration-200 ease-out"
+          style={{
+            borderColor: display.entry?.color || "var(--color-accent)",
+            height: `${activeResize.rowHeight * effectiveRowSpan}px`,
+          }}
+        />
       )}
 
       <DropZone
@@ -178,7 +201,7 @@ function TimetableCellFull({
               slotId,
               dayOfWeek,
               groupTag: display.groupTag || "all",
-              rowIdx,
+              rowIdx: allEndRowIdx,
             })
           }
           className="absolute inset-x-0 bottom-0 z-40 h-1.5 cursor-row-resize bg-[var(--color-accent)]/60 opacity-70 transition-opacity duration-150 hover:opacity-100"
@@ -204,7 +227,10 @@ function TimetableCellSplitLane({
   g2Column,
   gridRow,
   rowIdx,
+  g1EndRowIdx,
+  g2EndRowIdx,
   onResizeStart,
+  activeResize,
   g1Span = 1,
   g2Span = 1,
   g1Skip = false,
@@ -216,6 +242,19 @@ function TimetableCellSplitLane({
   const cellKey = `${slotId}-${dayOfWeek}`;
   const { active: activeDrag } = useDndContext();
   const isDragging = Boolean(activeDrag);
+
+  const isResizingG1 =
+    Boolean(activeResize) &&
+    activeResize.slotId === slotId &&
+    activeResize.dayOfWeek === dayOfWeek &&
+    activeResize.groupTag === "g1";
+  const isResizingG2 =
+    Boolean(activeResize) &&
+    activeResize.slotId === slotId &&
+    activeResize.dayOfWeek === dayOfWeek &&
+    activeResize.groupTag === "g2";
+  const effectiveG1Span = isResizingG1 ? g1Span + activeResize.previewSlotDelta : g1Span;
+  const effectiveG2Span = isResizingG2 ? g2Span + activeResize.previewSlotDelta : g2Span;
 
   const [hoveredLane, setHoveredLane] = useState(null);
 
@@ -235,7 +274,7 @@ function TimetableCellSplitLane({
       {!g1Skip && (
         <div
           data-cell-key={`${cellKey}-g1`}
-          style={{ gridColumn: g1Column, gridRow: `${gridRow} / span ${g1Span}` }}
+          style={{ gridColumn: g1Column, gridRow: `${gridRow} / span ${effectiveG1Span}` }}
           className={`relative ${laneBaseClass(g1LastRow)} border-r`}
           onMouseEnter={() => setHoveredLane("g1")}
           onMouseLeave={() => setHoveredLane((lane) => (lane === "g1" ? null : lane))}
@@ -267,11 +306,22 @@ function TimetableCellSplitLane({
             )}
           </DropZone>
 
+          {isResizingG1 && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 z-40 rounded-lg border-2 border-dashed transition-[height] duration-200 ease-out"
+              style={{
+                borderColor: display.g1Entry?.color || "var(--color-accent)",
+                height: `${activeResize.rowHeight * effectiveG1Span}px`,
+              }}
+            />
+          )}
+
           {showG1Handle && (
             <div
               data-resize-handle="g1"
               onMouseDown={(event) =>
-                onResizeStart(event, { slotId, dayOfWeek, groupTag: "g1", rowIdx })
+                onResizeStart(event, { slotId, dayOfWeek, groupTag: "g1", rowIdx: g1EndRowIdx })
               }
               className="absolute inset-x-0 bottom-0 z-40 h-1.5 cursor-row-resize bg-[var(--color-accent)]/60 opacity-70 transition-opacity duration-150 hover:opacity-100"
             />
@@ -282,7 +332,7 @@ function TimetableCellSplitLane({
       {!g2Skip && (
         <div
           data-cell-key={`${cellKey}-g2`}
-          style={{ gridColumn: g2Column, gridRow: `${gridRow} / span ${g2Span}` }}
+          style={{ gridColumn: g2Column, gridRow: `${gridRow} / span ${effectiveG2Span}` }}
           className={`relative ${laneBaseClass(g2LastRow)} ${isLastCol ? "" : "border-r"}`}
           onMouseEnter={() => setHoveredLane("g2")}
           onMouseLeave={() => setHoveredLane((lane) => (lane === "g2" ? null : lane))}
@@ -314,11 +364,22 @@ function TimetableCellSplitLane({
             )}
           </DropZone>
 
+          {isResizingG2 && (
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 z-40 rounded-lg border-2 border-dashed transition-[height] duration-200 ease-out"
+              style={{
+                borderColor: display.g2Entry?.color || "var(--color-accent)",
+                height: `${activeResize.rowHeight * effectiveG2Span}px`,
+              }}
+            />
+          )}
+
           {showG2Handle && (
             <div
               data-resize-handle="g2"
               onMouseDown={(event) =>
-                onResizeStart(event, { slotId, dayOfWeek, groupTag: "g2", rowIdx })
+                onResizeStart(event, { slotId, dayOfWeek, groupTag: "g2", rowIdx: g2EndRowIdx })
               }
               className="absolute inset-x-0 bottom-0 z-40 h-1.5 cursor-row-resize bg-[var(--color-accent)]/60 opacity-70 transition-opacity duration-150 hover:opacity-100"
             />
@@ -358,7 +419,11 @@ function TimetableCell({
   g2Column,
   gridRow,
   rowIdx,
+  allEndRowIdx,
+  g1EndRowIdx,
+  g2EndRowIdx,
   onResizeStart,
+  activeResize,
   allSpan = 1,
   g1Span = 1,
   g2Span = 1,
@@ -394,7 +459,10 @@ function TimetableCell({
         g2Column={g2Column}
         gridRow={gridRow}
         rowIdx={rowIdx}
+        g1EndRowIdx={g1EndRowIdx}
+        g2EndRowIdx={g2EndRowIdx}
         onResizeStart={onResizeStart}
+        activeResize={activeResize}
         g1Span={g1Span}
         g2Span={g2Span}
         g1Skip={g1Skip}
@@ -421,7 +489,9 @@ function TimetableCell({
       g1Column={g1Column}
       gridRow={gridRow}
       rowIdx={rowIdx}
+      allEndRowIdx={allEndRowIdx}
       onResizeStart={onResizeStart}
+      activeResize={activeResize}
       rowSpan={allSpan}
     />
   );

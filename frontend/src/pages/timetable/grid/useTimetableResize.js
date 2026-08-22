@@ -81,7 +81,7 @@ export function useTimetableResize({ orderedSlots, entriesByCell, onCommitResize
       dragStateRef.current = state;
 
       console.log("[resize] start", { slotId, dayOfWeek, groupTag, rowIdx, rowHeight, maxSlotDelta });
-      setActiveResize({ slotId, dayOfWeek, groupTag, rowIdx, previewSlotDelta: 0 });
+      setActiveResize({ slotId, dayOfWeek, groupTag, rowIdx, previewSlotDelta: 0, rowHeight });
 
       const onMove = (moveEvent) => {
         const current = dragStateRef.current;
@@ -100,6 +100,7 @@ export function useTimetableResize({ orderedSlots, entriesByCell, onCommitResize
             groupTag: current.groupTag,
             rowIdx: current.rowIdx,
             previewSlotDelta: slotDelta,
+            rowHeight: current.rowHeight,
           });
         }
       };

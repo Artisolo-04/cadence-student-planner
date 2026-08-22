@@ -138,148 +138,149 @@ export default function TimetableGrid({
       <div className={`flex h-full min-h-0 w-full transition-all duration-500 ${isEditMode ? "gap-3" : "gap-0"}`}>
         <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
           <div className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence" style={{ scrollbarGutter: "auto" }}>
-          <div
-            className="grid h-full w-full text-sm"
-            style={{
-              gridTemplateColumns: `150px repeat(${orderedDays.length * 2}, minmax(0, 1fr))`,
-              gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,
-            }}
-          >
             <div
-              className="border-b border-r border-[var(--color-border)] bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
-              style={{ gridColumn: 1, gridRow: 1 }}
+              className="grid h-full w-full text-sm"
+              style={{
+                gridTemplateColumns: `150px repeat(${orderedDays.length * 2}, minmax(0, 1fr))`,
+                gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,
+              }}
             >
-              Time
-            </div>
-            {orderedDays.map((day, i) => {
-              const isToday = day.day_of_week === nowDow;
-              const isLastCol = i === orderedDays.length - 1;
-              const g1Column = 2 + i * 2;
-              return (
-                <div
-                  key={day.id}
-                  style={{ gridColumn: `${g1Column} / span 2`, gridRow: 1 }}
-                  className={`relative border-b border-[var(--color-border)] ${
-                    isLastCol ? "" : "border-r"
-                  } bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                    isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
-                  }`}
-                >
-                  {WEEKDAY_FULL[day.day_of_week]}
-                  {isToday && (
-                    <span className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-[var(--color-accent)]" />
-                  )}
-                </div>
-              );
-            })}
-
-            {orderedSlots.map((slot, rowIdx) => {
-              const isLastRow = rowIdx === lastRowIdx;
-              const gridRow = 2 + rowIdx;
-              return (
-                <Fragment key={slot.id}>
-                  <div
-                    style={{ gridColumn: 1, gridRow }}
-                    className={`flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] ${
-                      isLastRow ? "" : "border-b"
-                    } px-3 bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
-                  >
-                    <div className="flex items-center justify-center gap-2 py-1">
-                      {slot.label && (
-                        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
-                          <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
-                          />
-                          <span className="relative z-10">{slot.label}</span>
-                        </span>
-                      )}
-                      <div className="flex flex-col items-center gap-1 leading-none">
-                        <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
-                          {slot.start_time.slice(0, 5)}
-                        </span>
-                        <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
-                          {slot.end_time.slice(0, 5)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  {orderedDays.map((day, i) => {
-                    const isToday = day.day_of_week === nowDow;
-                    const isLive = isToday && isCurrentSlot(slot);
-                    const isLastCol = i === orderedDays.length - 1;
-                    const g1Column = 2 + i * 2;
-                    const g2Column = 3 + i * 2;
-
-                    const rowPlan = blocksByDay[day.day_of_week][rowIdx];
-
-                    if (rowPlan.allSkip) {
-                      return null;
-                    }
-
-                    const isLastRowAll = rowIdx + rowPlan.allSpan - 1 === lastRowIdx;
-                    const isLastRowG1 = rowIdx + rowPlan.g1Span - 1 === lastRowIdx;
-                    const isLastRowG2 = rowIdx + rowPlan.g2Span - 1 === lastRowIdx;
-
-                    return (
-                      <TimetableCell
-                        key={day.id}
-                        entriesForCell={entriesByCell[entryKey(slot.id, day.day_of_week)]}
-                        isToday={isToday}
-                        isLive={isLive}
-                        isLastCol={isLastCol}
-                        isLastRow={isLastRow}
-                        onOpen={(groupTag) => openCell(slot, day, groupTag)}
-                        myGroup={myGroup}
-                        viewOptions={viewOptions}
-                        slotId={slot.id}
-                        dayOfWeek={day.day_of_week}
-                        isEditMode={isEditMode}
-                        landing={landing}
-                        g1Column={g1Column}
-                        g2Column={g2Column}
-                        gridRow={gridRow}
-                        rowIdx={rowIdx}
-                        onResizeStart={startResize}
-                        allSpan={rowPlan.allSpan}
-                        g1Span={rowPlan.g1Span}
-                        g2Span={rowPlan.g2Span}
-                        g1Skip={rowPlan.g1Skip}
-                        g2Skip={rowPlan.g2Skip}
-                        isLastRowAll={isLastRowAll}
-                        isLastRowG1={isLastRowG1}
-                        isLastRowG2={isLastRowG2}
-                      />
-                    );
-                  })}
-                </Fragment>
-              );
-            })}
-
-              {activeResize && activeResize.previewSlotDelta > 0 && (() => {
-                const dayIdx = orderedDays.findIndex((d) => d.day_of_week === activeResize.dayOfWeek);
-                if (dayIdx === -1) return null;
-                const g1Col = 2 + dayIdx * 2;
-                const g2Col = 3 + dayIdx * 2;
-                const overlayColumn =
-                  activeResize.groupTag === "g1"
-                    ? `${g1Col}`
-                    : activeResize.groupTag === "g2"
-                      ? `${g2Col}`
-                      : `${g1Col} / span 2`;
-                const startRow = 2 + activeResize.rowIdx + 1;
+              <div
+                className="border-b border-r border-[var(--color-border)] bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
+                style={{ gridColumn: 1, gridRow: 1 }}
+              >
+                Time
+              </div>
+              {orderedDays.map((day, i) => {
+                const isToday = day.day_of_week === nowDow;
+                const isLastCol = i === orderedDays.length - 1;
+                const g1Column = 2 + i * 2;
                 return (
                   <div
-                    key="resize-preview-overlay"
-                    style={{
-                      gridColumn: overlayColumn,
-                      gridRow: `${startRow} / span ${activeResize.previewSlotDelta}`,
-                    }}
-                    className="pointer-events-none z-50 bg-orange-400/10 ring-2 ring-inset ring-orange-400 shadow-[inset_0_0_0_1px_rgba(251,146,60,0.25)]"
-                  />
+                    key={day.id}
+                    style={{ gridColumn: `${g1Column} / span 2`, gridRow: 1 }}
+                    className={`relative border-b border-[var(--color-border)] ${
+                      isLastCol ? "" : "border-r"
+                    } bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                      isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {WEEKDAY_FULL[day.day_of_week]}
+                    {isToday && (
+                      <span className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-[var(--color-accent)]" />
+                    )}
+                  </div>
                 );
-              })()}
-          </div>
+              })}
+
+              {orderedSlots.map((slot, rowIdx) => {
+                const isLastRow = rowIdx === lastRowIdx;
+                const gridRow = 2 + rowIdx;
+                return (
+                  <Fragment key={slot.id}>
+                    <div
+                      style={{ gridColumn: 1, gridRow }}
+                      className={`flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] ${
+                        isLastRow ? "" : "border-b"
+                      } px-3 bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
+                    >
+                      <div className="flex items-center justify-center gap-2 py-1">
+                        {slot.label && (
+                          <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
+                            <span
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
+                            />
+                            <span className="relative z-10">{slot.label}</span>
+                          </span>
+                        )}
+                        <div className="flex flex-col items-center gap-1 leading-none">
+                          <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
+                            {slot.start_time.slice(0, 5)}
+                          </span>
+                          <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
+                            {slot.end_time.slice(0, 5)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {orderedDays.map((day, i) => {
+                      const isToday = day.day_of_week === nowDow;
+                      const isLive = isToday && isCurrentSlot(slot);
+                      const isLastCol = i === orderedDays.length - 1;
+                      const g1Column = 2 + i * 2;
+                      const g2Column = 3 + i * 2;
+
+                      let rowPlan = blocksByDay[day.day_of_week][rowIdx];
+
+                      if (
+                        activeResize &&
+                        activeResize.dayOfWeek === day.day_of_week &&
+                        activeResize.previewSlotDelta > 0 &&
+                        rowIdx > activeResize.rowIdx &&
+                        rowIdx <= activeResize.rowIdx + activeResize.previewSlotDelta
+                      ) {
+                        rowPlan =
+                          activeResize.groupTag === "all"
+                            ? { ...rowPlan, allSkip: true }
+                            : activeResize.groupTag === "g1"
+                              ? { ...rowPlan, g1Skip: true }
+                              : activeResize.groupTag === "g2"
+                                ? { ...rowPlan, g2Skip: true }
+                                : rowPlan;
+                      }
+
+                      if (rowPlan.allSkip) {
+                        return null;
+                      }
+
+                      const allEndRowIdx = rowIdx + rowPlan.allSpan - 1;
+                      const g1EndRowIdx = rowIdx + rowPlan.g1Span - 1;
+                      const g2EndRowIdx = rowIdx + rowPlan.g2Span - 1;
+
+                      const isLastRowAll = allEndRowIdx === lastRowIdx;
+                      const isLastRowG1 = g1EndRowIdx === lastRowIdx;
+                      const isLastRowG2 = g2EndRowIdx === lastRowIdx;
+
+                      return (
+                        <TimetableCell
+                          key={day.id}
+                          entriesForCell={entriesByCell[entryKey(slot.id, day.day_of_week)]}
+                          isToday={isToday}
+                          isLive={isLive}
+                          isLastCol={isLastCol}
+                          isLastRow={isLastRow}
+                          onOpen={(groupTag) => openCell(slot, day, groupTag)}
+                          myGroup={myGroup}
+                          viewOptions={viewOptions}
+                          slotId={slot.id}
+                          dayOfWeek={day.day_of_week}
+                          isEditMode={isEditMode}
+                          landing={landing}
+                          g1Column={g1Column}
+                          g2Column={g2Column}
+                          gridRow={gridRow}
+                          rowIdx={rowIdx}
+                          allEndRowIdx={allEndRowIdx}
+                          g1EndRowIdx={g1EndRowIdx}
+                          g2EndRowIdx={g2EndRowIdx}
+                          onResizeStart={startResize}
+                          allSpan={rowPlan.allSpan}
+                          g1Span={rowPlan.g1Span}
+                          g2Span={rowPlan.g2Span}
+                          g1Skip={rowPlan.g1Skip}
+                          g2Skip={rowPlan.g2Skip}
+                          isLastRowAll={isLastRowAll}
+                          isLastRowG1={isLastRowG1}
+                          isLastRowG2={isLastRowG2}
+                          activeResize={activeResize}
+                        />
+                      );
+                    })}
+                  </Fragment>
+                );
+              })}
+            </div>
           </div>
 
           <SubjectPickerModal
