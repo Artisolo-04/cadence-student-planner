@@ -1,5 +1,7 @@
 import { useEffect, useState, memo } from "react";
+import { createPortal } from "react-dom";
 import { useDraggable } from "@dnd-kit/core";
+import { useResizeHandle } from "../dragdrop/useResizeHandle";
 
 function LandingPulse({ color }) {
   const [settled, setSettled] = useState(false);
@@ -22,6 +24,18 @@ function LandingPulse({ color }) {
   );
 }
 
+function ResizeGhost({ cellEl, previewSpan, rowHeight }) {
+  if (!cellEl) return null;
+  const rect = cellEl.getBoundingClientRect();
+  return createPortal(
+    <div
+      className="pointer-events-none fixed z-40 rounded-lg ring-2 ring-[var(--color-accent)] bg-[var(--color-accent)]/10 backdrop-blur-[1px]"
+      style={{ left: rect.left, top: rect.top, width: rect.width, height: rowHeight * previewSpan }}
+    />,
+    document.body
+  );
+}
+
 function SubjectLabel({
   entry,
   groupTag,
@@ -33,6 +47,8 @@ function SubjectLabel({
   dayOfWeek,
   dragGroupTag,
   isEditMode,
+  orderedSlots,
+  resizeEntry,
 }) {
   const [popped, setPopped] = useState(false);
 
@@ -60,6 +76,12 @@ function SubjectLabel({
     },
   });
 
+  const { previewSpan, isResizing, isRejected, cellEl, rowHeight, handlers } = useResizeHandle({
+    entry,
+    orderedSlots,
+    resizeEntry,
+  });
+
   return (
     <span
       ref={setNodeRef}
@@ -79,7 +101,9 @@ function SubjectLabel({
       }}
       className={`group/label absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,inset_0_0_0_1px_rgba(255,255,255,0.08),0_0_16px_-4px_color-mix(in_srgb,var(--subject-color)_65%,transparent)] backdrop-blur-md backdrop-saturate-150 transition-opacity duration-150 hover:opacity-90 ${
         dimmed ? "opacity-60" : ""
-      } ${isEditMode ? "touch-none cursor-grab active:cursor-grabbing" : ""}`}
+      } ${isEditMode ? "touch-none cursor-grab active:cursor-grabbing" : ""} ${
+        isRejected ? "animate-cadence-shake" : ""
+      }`}
     >
       <span
         aria-hidden="true"
@@ -119,6 +143,18 @@ function SubjectLabel({
           {teacherText}
         </span>
       )}
+
+      {isEditMode && resizeEntry && (
+        <span
+          onPointerDown={handlers.onPointerDown}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute inset-x-0 bottom-0 z-20 h-2 cursor-ns-resize opacity-0 transition-opacity duration-150 group-hover/label:opacity-70 hover:!opacity-100"
+        >
+          <span className="pointer-events-none absolute inset-x-2 bottom-0.5 h-1 rounded-full bg-white/70" />
+        </span>
+      )}
+
+      {isResizing && <ResizeGhost cellEl={cellEl} previewSpan={previewSpan} rowHeight={rowHeight} />}
     </span>
   );
 }

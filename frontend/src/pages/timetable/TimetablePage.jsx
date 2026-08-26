@@ -4,7 +4,7 @@ import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
 import TimetableWizard from "./wizard/TimetableWizard";
-import TimetableGrid from "./grid/TimetableGrid";
+import TimetableGrid from "./grid/layout/TimetableGrid";
 import ViewOptionsPanel from "./ViewOptionsPanel";
 import useTimetableViewOptions from "../../hooks/useTimetableViewOptions";
 

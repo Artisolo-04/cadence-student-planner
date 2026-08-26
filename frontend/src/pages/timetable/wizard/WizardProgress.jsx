@@ -9,7 +9,6 @@ export default function WizardProgress({
   disabled = false,
 }) {
   const isInteractive = typeof onStepChange === "function";
-  const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
 
   return (
     <div>

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, X, Check } from "lucide-react";
-import Modal from "../../../components/ui/Modal";
-import Button from "../../../components/ui/Button";
-import Input from "../../../components/ui/Input";
+import Modal from "../../../../components/ui/Modal";
+import Button from "../../../../components/ui/Button";
+import Input from "../../../../components/ui/Input";
 import SubjectPickerRow from "./SubjectPickerRow";
 
 const GROUP_OPTIONS = [
@@ -30,7 +30,6 @@ export default function SubjectPickerModal({
   const [groupTag, setGroupTag] = useState("all");
   const [room, setRoom] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState(null);
-
 
   useEffect(() => {
     if (open) {

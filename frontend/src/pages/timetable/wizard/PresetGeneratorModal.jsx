@@ -12,7 +12,6 @@ const DURATION_OPTIONS = [
   { value: "120", label: "120 minutes" },
 ];
 
-// "08:30" + 45 -> "09:15"
 function addMinutes(time, minutes) {
   const [h, m] = time.split(":").map(Number);
   const total = h * 60 + m + minutes;

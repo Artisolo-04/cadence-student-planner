@@ -1,37 +1,23 @@
-import { findEntryForGroup, planEntrySave } from "./timetableGridUtils";
+import { findEntryForGroup, findAllEntriesForGroup, planEntrySave } from "../layout/timetableGridUtils";
 
-export const DRAG_AUTO_CONFIRM_ACTIONS = new Set([
-  "overwrite",
-  "move",
-  "expand",
-  "noop",
-  "merge",
-]);
-
-export function dialogConfigForAction(actionType, isMove = false) {
+export function actionNoticeConfig(actionType, isMove = false) {
   switch (actionType) {
     case "merge":
-      return { title: "Merge duplicate subjects?", confirmLabel: "Merge into All" };
+      return { title: "Merged duplicate subjects into All" };
     case "swap":
-      return { title: "Swap subjects between groups?", confirmLabel: "Swap subjects" };
+      return { title: "Swapped subjects between groups" };
     case "overwrite":
-      return isMove
-        ? { title: "Move subject here?", confirmLabel: "Move anyway" }
-        : { title: "Replace subject?", confirmLabel: "Replace" };
+      return { title: isMove ? "Moved subject, replacing what was there" : "Replaced subject" };
     case "convert":
-      return isMove
-        ? { title: "Move subject to a shared slot?", confirmLabel: "Move anyway" }
-        : { title: "Convert to shared slot?", confirmLabel: "Convert to All" };
+      return { title: isMove ? "Moved subject into a shared slot" : "Converted to a shared slot" };
     case "split":
-      return { title: "Split shared slot?", confirmLabel: "Split" };
-    case "noop":
-      return { title: "No changes", confirmLabel: "OK" };
+      return { title: "Split the shared slot" };
     default:
-      return { title: "This will change more than one thing", confirmLabel: "Continue" };
+      return { title: "Updated more than one slot" };
   }
 }
 
-export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell }) {
+export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell, spanCount = null }) {
   const isSameCell =
     sourceCell &&
     sourceCell.slotId === drop.slotId &&
@@ -61,6 +47,7 @@ export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell }) {
     subjectId: drop.subjectId,
     room,
     isMove: Boolean(sourceCell),
+    isSameCell,
   });
 
   if (plan.noop) {
@@ -70,11 +57,17 @@ export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell }) {
     return { kind: "noop" };
   }
 
-  const deletions = plan.deletions.map((tag) => ({
-    slotId: drop.slotId,
-    dayOfWeek: drop.dayOfWeek,
-    groupTag: tag,
-  }));
+  const deletions = plan.deletions.flatMap((tag) => {
+    const matches = findAllEntriesForGroup(cellEntries, tag);
+    if (matches.length === 0) {
+      return [{ slotId: drop.slotId, dayOfWeek: drop.dayOfWeek, groupTag: tag }];
+    }
+    return matches.map((entry) => ({
+      slotId: entry.start_slot_id,
+      dayOfWeek: entry.day_of_week,
+      groupTag: tag,
+    }));
+  });
 
   if (sourceCell && !isSameCell) {
     deletions.push({
@@ -87,20 +80,17 @@ export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell }) {
   const payload = {
     subjectId: drop.subjectId,
     groupTag: plan.finalGroupTag || groupTag,
+    originalGroupTag: groupTag,
     room,
     deletions,
     swap: plan.swap,
     actionType: plan.actionType,
     warnings: plan.warnings,
     target: { slotId: drop.slotId, dayOfWeek: drop.dayOfWeek },
+    sourceCell: sourceCell || null,
     isMove: Boolean(sourceCell),
+    dragSpanCount: spanCount,
   };
 
-  const skipConfirmForDrag = true;
-
-  return {
-    kind: "save",
-    needsConfirm: plan.needsConfirm && !skipConfirmForDrag,
-    payload,
-  };
+  return { kind: "save", payload };
 }

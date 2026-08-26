@@ -1,41 +1,4 @@
-export function toMinutes(t) {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
-
-export function entryKey(slotId, dayOfWeek) {
-  return `${slotId}-${dayOfWeek}`;
-}
-
-export function getCellDisplay(entriesForCell) {
-  const list = entriesForCell || [];
-  const allEntry = list.find((e) => e.group_tag === "all");
-  if (allEntry) {
-    return { mode: "full", entry: allEntry };
-  }
-  const g1Entry = list.find((e) => e.group_tag === "g1") || null;
-  const g2Entry = list.find((e) => e.group_tag === "g2") || null;
-  if (g1Entry || g2Entry) {
-    return { mode: "split", g1Entry, g2Entry };
-  }
-  return { mode: "empty" };
-}
-
-export function findEntryForGroup(entriesForCell, groupTag) {
-  if (!entriesForCell) return null;
-  return entriesForCell.find((e) => e.group_tag === groupTag) || null;
-}
-
-export function getDuplicateSiblingHint({ cellEntries, targetGroupTag, subjectId }) {
-  if (targetGroupTag !== "g1" && targetGroupTag !== "g2") return null;
-  if (subjectId == null) return null;
-  const siblingGroupTag = targetGroupTag === "g1" ? "g2" : "g1";
-  const siblingEntry = findEntryForGroup(cellEntries, siblingGroupTag);
-  if (siblingEntry && siblingEntry.subject_id === subjectId) {
-    return `"${siblingEntry.subject_name}" is already assigned to ${siblingGroupTag.toUpperCase()} for this slot. Both groups will have the same subject — use "All" instead if they're really together.`;
-  }
-  return null;
-}
+import { findEntryForGroup } from "../cell/cellDisplayUtils";
 
 function buildState(entriesForCell) {
   const all = findEntryForGroup(entriesForCell, "all");
@@ -55,6 +18,7 @@ export function planEntrySave({
   subjectId,
   room,
   isMove = false,
+  isSameCell = false,
 }) {
   const normalizedRoom = room?.trim() || null;
   const currentState = buildState(cellEntries);
@@ -124,6 +88,41 @@ export function planEntrySave({
     }
   }
 
+  if (
+    isSameCell &&
+    sourceGroupTag === "all" &&
+    (targetGroupTag === "g1" || targetGroupTag === "g2") &&
+    currentState.all &&
+    currentState.all.subject_id === subjectId
+  ) {
+    pushDeletion("all", null);
+    finalGroupTag = targetGroupTag;
+    actionType = "split";
+    return buildResult("convert-all-to-single-lane");
+  }
+
+  if (targetGroupTag !== "all" && currentState.all) {
+    if (currentState.all.subject_id === subjectId) {
+      return {
+        deletions: [],
+        swap: null,
+        warnings: [],
+        needsConfirm: false,
+        finalGroupTag: targetGroupTag,
+        noop: true,
+        actionType: "noop",
+        debug: { reason: "target-already-covered-by-all", currentState, simulatedState },
+      };
+    }
+    pushDeletion(
+      "all",
+      `"${currentState.all.name}" currently covers this slot for both groups. It will stay for the other group and be replaced here.`
+    );
+    actionType = "split";
+    finalGroupTag = targetGroupTag;
+    return buildResult("all-to-lane-split");
+  }
+
   if (targetGroupTag === "all") {
     const isSafeExpandFromG1 =
       currentState.g1?.subject_id === subjectId && !currentState.g2;
@@ -137,6 +136,9 @@ export function planEntrySave({
       return buildResult("expand-group-to-all");
     }
 
+    if (currentState.all && currentState.all.subject_id !== subjectId) {
+      pushDeletion("all", `"${currentState.all.name}" occupies part of this range and will be replaced/split.`);
+    }
     if (currentState.g1) pushDeletion("g1", `G1's separate subject ("${currentState.g1.name}") will be removed.`);
     if (currentState.g2) pushDeletion("g2", `G2's separate subject ("${currentState.g2.name}") will be removed.`);
     finalGroupTag = "all";
@@ -160,6 +162,7 @@ export function planEntrySave({
         isMove ? "the subject you're moving" : "the selected subject"
       }, and ${siblingGroupTag.toUpperCase()} will keep "${sourceCurrent.name}".`
     );
+    deletions.add("all");
     actionType = "split";
     finalGroupTag = targetGroupTag;
     return buildResult("split-shared-subject");
