@@ -103,7 +103,6 @@ const StepSlots = forwardRef(function StepSlots(
               label: slot.label?.trim() || null,
               startTime,
               endTime,
-              sortOrder: slot.sort_order,
             }
           );
 
@@ -146,7 +145,6 @@ const StepSlots = forwardRef(function StepSlots(
             label: `S${slots.length + index + 1}`,
             startTime,
             endTime,
-            sortOrder: slots.length + index + 1,
           })
         );
 
@@ -175,7 +173,6 @@ const StepSlots = forwardRef(function StepSlots(
         label: `S${slots.length + 1}`,
         startTime,
         endTime,
-        sortOrder: slots.length + 1,
       });
 
       setSlots((current) => [...current, slot]);
