@@ -132,7 +132,7 @@ async function updateDays(req, res) {
 
 async function createSlot(req, res) {
   try {
-    const { label, startTime, endTime, sortOrder } = req.body;
+    const { label, startTime, endTime } = req.body;
     if (!startTime || !endTime) {
       return res.status(400).json({ error: "Start time and end time are required" });
     }
@@ -145,7 +145,7 @@ async function createSlot(req, res) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const slot = await addSlot(req.params.id, { label, startTime, endTime, sortOrder });
+    const slot = await addSlot(req.params.id, { label, startTime, endTime });
     res.status(201).json({ slot });
   } catch (err) {
     console.error("Create slot error:", err);
@@ -155,7 +155,7 @@ async function createSlot(req, res) {
 
 async function editSlot(req, res) {
   try {
-    const { label, startTime, endTime, sortOrder } = req.body;
+    const { label, startTime, endTime } = req.body;
     if (!startTime || !endTime) {
       return res.status(400).json({ error: "Start time and end time are required" });
     }
@@ -172,7 +172,6 @@ async function editSlot(req, res) {
       label,
       startTime,
       endTime,
-      sortOrder,
     });
 
     if (!slot) {
@@ -198,7 +197,7 @@ async function removeSlot(req, res) {
       return res.status(404).json({ error: "Slot not found" });
     }
 
-    res.json({ id: deleted.id });
+    res.json({ id: deleted.id, cascadedEntries: deleted.cascadedEntries });
   } catch (err) {
     console.error("Remove slot error:", err);
     res.status(500).json({ error: "Something went wrong removing the slot" });

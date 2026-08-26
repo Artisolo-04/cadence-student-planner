@@ -34,5 +34,4 @@ router.post("/:id/entries", requireAuth, createEntryHandler);
 router.patch("/:id/entries/:entryId", requireAuth, updateEntryHandler);
 router.delete("/:id/entries/:entryId", requireAuth, clearEntry);
 
-
 module.exports = router;
