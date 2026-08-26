@@ -124,8 +124,8 @@ const StepSlots = forwardRef(function StepSlots(
     const breakMinutes = Number(presetBreak) || 0;
     const count = Number(presetCount);
 
-    if (!presetStart || !Number.isInteger(count) || count < 1 || count > 12) {
-      setError("Choose a start time and between 1 and 12 slots.");
+    if (!presetStart || !Number.isFinite(duration) || duration < 1 || !Number.isInteger(count) || count < 1 || count > 12) {
+      setError("Choose a start time, a positive duration, and between 1 and 12 slots.");
       return;
     }
 
