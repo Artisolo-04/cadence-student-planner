@@ -19,6 +19,7 @@
   --color-accent-fg: #1a1210;
 
   --color-danger: #c4453b;
+  --color-warning: #b45309;
   --color-ring: #0f5c5b;
 }
 
@@ -39,6 +40,7 @@
   --color-accent-fg: #1a1210;
 
   --color-danger: #e0685d;
+  --color-warning: #f2b84b;
   --color-ring: #2fa39a;
 }
 
@@ -55,6 +57,7 @@
   --color-accent: var(--color-accent);
   --color-accent-fg: var(--color-accent-fg);
   --color-danger: var(--color-danger);
+  --color-warning: var(--color-warning);
   --color-ring: var(--color-ring);
 }
 
@@ -90,7 +93,6 @@
   width: 0;
   height: 0;
 }
-
 
 .zoom-slider {
   height: 20px;
@@ -137,4 +139,40 @@
   background: var(--color-primary);
   box-shadow: 0 0 0 1px var(--color-primary), 0 2px 6px rgba(0, 0, 0, 0.4);
   cursor: pointer;
+}
+
+@keyframes cadence-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.animate-cadence-shake {
+  animation: cadence-shake 260ms ease-out;
+}
+
+@keyframes cadence-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.animate-cadence-shake {
+  animation: cadence-shake 260ms ease-out;
+}
+
+@keyframes cadence-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.animate-cadence-shake {
+  animation: cadence-shake 260ms ease-out;
 }
