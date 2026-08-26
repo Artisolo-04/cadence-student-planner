@@ -9,22 +9,25 @@ class OverlapConflictError extends Error {
   }
 }
 
-async function getSlotSortOrders(client, timetableId, slotId, endSlotId) {
+async function getSlotTimeRange(client, timetableId, slotId, endSlotId) {
   const result = await client.query(
-    `SELECT id, sort_order FROM timetable_slots
+    `SELECT id, start_time, end_time FROM timetable_slots
      WHERE timetable_id = $1 AND id = ANY($2::int[])`,
     [timetableId, [slotId, endSlotId]]
   );
-  const bySlot = Object.fromEntries(result.rows.map((r) => [r.id, r.sort_order]));
-  return { startOrder: bySlot[slotId], endOrder: bySlot[endSlotId] };
+  const byId = Object.fromEntries(result.rows.map((r) => [r.id, r]));
+  const startSlot = byId[slotId];
+  const endSlot = byId[endSlotId];
+  if (!startSlot || !endSlot) return null;
+  return { startTime: startSlot.start_time, endTime: endSlot.end_time };
 }
 
 async function findOverlaps(client, {
-  timetableId, dayOfWeek, groupTag, startOrder, endOrder, excludeEntryId = null,
+  timetableId, dayOfWeek, groupTag, startTime, endTime, excludeEntryId = null,
 }) {
   const result = await client.query(
     `SELECT e.id, e.subject_id, e.group_tag, s.name AS subject_name,
-            ss.sort_order AS existing_start, es.sort_order AS existing_end
+            ss.start_time AS existing_start, es.end_time AS existing_end
      FROM timetable_entries e
      JOIN timetable_slots ss ON ss.id = e.slot_id
      JOIN timetable_slots es ON es.id = e.end_slot_id
@@ -33,23 +36,34 @@ async function findOverlaps(client, {
        AND e.day_of_week = $2
        AND ($3::int IS NULL OR e.id != $3)
        AND (e.group_tag = 'all' OR $4 = 'all' OR e.group_tag = $4)
-       AND ss.sort_order <= $6
-       AND es.sort_order >= $5`,
-    [timetableId, dayOfWeek, excludeEntryId, groupTag, startOrder, endOrder]
+       AND ss.start_time < $6
+       AND es.end_time > $5`,
+    [timetableId, dayOfWeek, excludeEntryId, groupTag, startTime, endTime]
   );
   return result.rows;
 }
 
+async function lockTimetableDay(client, timetableId, dayOfWeek) {
+  await client.query(
+    `SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))`,
+    [`timetable:${timetableId}:day:${dayOfWeek}`]
+  );
+}
+
 async function validateAndCheckConflicts(client, timetableId, { slotId, endSlotId, dayOfWeek, groupTag, excludeEntryId }) {
-  const { startOrder, endOrder } = await getSlotSortOrders(client, timetableId, slotId, endSlotId);
-  if (startOrder === undefined || endOrder === undefined) {
+  const range = await getSlotTimeRange(client, timetableId, slotId, endSlotId);
+  if (!range) {
     throw new Error("Invalid slot range: slot not found in this timetable");
   }
-  if (endOrder < startOrder) {
-    throw new Error("end_slot_id must not come before start_slot_id");
+  const { startTime, endTime } = range;
+  if (endTime <= startTime) {
+    throw new Error("end_slot_id must not end before start_slot_id begins");
   }
+
+  await lockTimetableDay(client, timetableId, dayOfWeek);
+
   const conflicts = await findOverlaps(client, {
-    timetableId, dayOfWeek, groupTag, startOrder, endOrder, excludeEntryId,
+    timetableId, dayOfWeek, groupTag, startTime, endTime, excludeEntryId,
   });
   if (conflicts.length > 0) {
     throw new OverlapConflictError(conflicts);
@@ -68,7 +82,7 @@ async function createEntry(
     const result = await client.query(
       `INSERT INTO timetable_entries (timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
       [timetableId, slotId, endSlotId, dayOfWeek, subjectId, groupTag, room]
     );
 
@@ -97,7 +111,7 @@ async function updateEntry(
        SET slot_id = $3, end_slot_id = $4, day_of_week = $5,
            subject_id = $6, group_tag = $7, room = $8, updated_at = NOW()
        WHERE timetable_id = $1 AND id = $2
-       RETURNING id, timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
       [timetableId, entryId, slotId, endSlotId, dayOfWeek, subjectId, groupTag, room]
     );
 
