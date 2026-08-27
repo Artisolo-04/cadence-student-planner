@@ -5,12 +5,15 @@ import SubjectPickerModal from "../subjects/SubjectPickerModal";
 import SubjectsDrawer from "../subjects/SubjectsDrawer";
 import { SubjectChipContent } from "../subjects/SubjectChip";
 import ActionNoticeBanner from "../ActionNoticeBanner";
-import { toMinutes, entryKey, buildSpanLayout } from "./timetableGridUtils";
+import { toMinutes, entryKey } from "../cell/cellDisplayUtils";
+import { buildSpanLayout } from "./slotSpanUtils";
+import { buildOverlayMatrix } from "../overlay/overlayMatrixBuilder";
 import { createMagneticModifier } from "../dragdrop/dragAnimations";
 import { useTimetableDragDrop } from "../dragdrop/useTimetableDragDrop";
 import { useTimetableEntries } from "../entries/useTimetableEntries";
 import { useDragOverlayGeometry } from "../dragdrop/useDragOverlayGeometry";
 import { WEEKDAY_FULL } from "./weekdayConstants";
+import { slotIndexToGridRow } from "../overlay/overlayGeometry";
 import { GridHeaderRow } from "./GridHeaderRow";
 import { TimeSlotRow } from "./TimeSlotRow";
 
@@ -57,6 +60,11 @@ export default function TimetableGrid({
   const spanLayout = useMemo(
     () => buildSpanLayout(entries, orderedSlots),
     [entries, orderedSlots]
+  );
+
+  const overlayMatrix = useMemo(
+    () => buildOverlayMatrix({ orderedDays, orderedSlots, spanLayout }),
+    [orderedDays, orderedSlots, spanLayout]
   );
 
   const {
@@ -160,7 +168,7 @@ export default function TimetableGrid({
 
             {orderedSlots.map((slot, rowIdx) => {
               const isLastRow = rowIdx === orderedSlots.length - 1;
-              const gridRow = 2 + rowIdx;
+              const gridRow = slotIndexToGridRow(rowIdx);
               return (
                 <TimeSlotRow
                   key={slot.id}
@@ -170,7 +178,7 @@ export default function TimetableGrid({
                   gridRow={gridRow}
                   orderedDays={orderedDays}
                   orderedSlots={orderedSlots}
-                  spanLayout={spanLayout}
+                  overlayMatrix={overlayMatrix}
                   entriesByCell={entriesByCell}
                   nowDow={nowDow}
                   isCurrentSlot={isCurrentSlot}

@@ -1,4 +1,4 @@
-import { getCellDisplay } from "../layout/timetableGridUtils";
+import { getCellDisplay } from "./cellDisplayUtils";
 
 export function getDisplayForView(entriesForCell, groupVisibility, myGroup) {
   const display = getCellDisplay(entriesForCell);

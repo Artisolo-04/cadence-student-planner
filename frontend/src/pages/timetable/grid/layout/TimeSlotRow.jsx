@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import TimetableCell from "../cell/TimetableCell";
 import { CoveredRowDropTarget } from "../dragdrop/CoveredRowDropTarget";
-import { entryKey } from "./timetableGridUtils";
+import { entryKey } from "../cell/cellDisplayUtils";
 
 export function TimeSlotRow({
   slot,
@@ -10,7 +10,7 @@ export function TimeSlotRow({
   gridRow,
   orderedDays,
   orderedSlots,
-  spanLayout,
+  overlayMatrix,
   entriesByCell,
   nowDow,
   isCurrentSlot,
@@ -54,36 +54,20 @@ export function TimeSlotRow({
         const isToday = day.day_of_week === nowDow;
         const isLive = isToday && isCurrentSlot(slot);
         const isLastCol = i === orderedDays.length - 1;
-        const g1Column = 2 + i * 2;
-        const g2Column = 3 + i * 2;
+        const cellMeta = overlayMatrix[day.day_of_week][rowIdx];
 
-        const dayLayout = spanLayout[day.day_of_week];
-        const allInfo = dayLayout?.all[rowIdx] || null;
-        const g1Info = dayLayout?.g1[rowIdx] || null;
-        const g2Info = dayLayout?.g2[rowIdx] || null;
-
-        if (allInfo?.type === "covered" || (g1Info?.type === "covered" && g2Info?.type === "covered")) {
+        if (cellMeta.isCoveredRow) {
           return (
             <CoveredRowDropTarget
               key={day.id}
               slotId={slot.id}
               dayOfWeek={day.day_of_week}
               isEditMode={isEditMode}
-              g1Column={g1Column}
+              g1Column={cellMeta.g1Column}
               gridRow={gridRow}
             />
           );
         }
-
-        const allSpan = allInfo?.type === "start" ? allInfo.span : 1;
-        const g1Span = g1Info?.type === "start" ? g1Info.span : 1;
-        const g2Span = g2Info?.type === "start" ? g2Info.span : 1;
-        const g1Hidden = g1Info?.type === "covered";
-        const g2Hidden = g2Info?.type === "covered";
-
-        const allIsLastRow = rowIdx + allSpan - 1 === orderedSlots.length - 1;
-        const g1IsLastRow = rowIdx + g1Span - 1 === orderedSlots.length - 1;
-        const g2IsLastRow = rowIdx + g2Span - 1 === orderedSlots.length - 1;
 
         return (
           <TimetableCell
@@ -101,17 +85,17 @@ export function TimeSlotRow({
             resizeEntry={resizeEntry}
             orderedSlots={orderedSlots}
             landing={landing}
-            g1Column={g1Column}
-            g2Column={g2Column}
+            g1Column={cellMeta.g1Column}
+            g2Column={cellMeta.g2Column}
             gridRow={gridRow}
-            allSpan={allSpan}
-            allIsLastRow={allIsLastRow}
-            g1Span={g1Span}
-            g1IsLastRow={g1IsLastRow}
-            g1Hidden={g1Hidden}
-            g2Span={g2Span}
-            g2IsLastRow={g2IsLastRow}
-            g2Hidden={g2Hidden}
+            allSpan={cellMeta.allSpan}
+            allIsLastRow={cellMeta.allIsLastRow}
+            g1Span={cellMeta.g1Span}
+            g1IsLastRow={cellMeta.g1IsLastRow}
+            g1Hidden={cellMeta.g1Hidden}
+            g2Span={cellMeta.g2Span}
+            g2IsLastRow={cellMeta.g2IsLastRow}
+            g2Hidden={cellMeta.g2Hidden}
           />
         );
       })}

@@ -1,4 +1,5 @@
-import { findEntryForGroup, findAllEntriesForGroup, planEntrySave } from "../layout/timetableGridUtils";
+import { findEntryForGroup, findAllEntriesForGroup } from "../cell/cellDisplayUtils";
+import { planEntrySave } from "../entries/entryPlanning";
 
 export function actionNoticeConfig(actionType, isMove = false) {
   switch (actionType) {

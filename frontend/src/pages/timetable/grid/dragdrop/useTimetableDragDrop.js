@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { getSpanCount, computeMaxFreeSpan } from "../layout/timetableGridUtils";
+import { getSpanCount, computeMaxFreeSpan } from "../layout/slotSpanUtils";
+import { computeDragChipDimensions } from "../overlay/overlayGeometry";
 import {
   CANCEL_FADE_ANIMATION,
   DROP_SCALE_FADE_ANIMATION,
@@ -194,21 +195,12 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
       });
     }
   }
-
-  const grownHeight = baseChipSize
-    ? Math.max(0, (singleRowHeight ?? baseChipSize.height) * effectiveDragSpan - DRAG_CHIP_MARGIN_PX * 2)
-    : 0;
-
-  const dragChipSize = baseChipSize
-    ? {
-        width: Math.max(0, baseChipSize.width - DRAG_CHIP_MARGIN_PX * 2),
-        height: grownHeight,
-      }
-    : null;
-
-  const dragChipOffsetY = baseChipSize
-    ? -((grownHeight - Math.max(0, baseChipSize.height - DRAG_CHIP_MARGIN_PX * 2)) / 2)
-    : 0;
+  const { dragChipSize, dragChipOffsetY } = computeDragChipDimensions({
+    baseChipSize,
+    singleRowHeight,
+    effectiveDragSpan,
+    marginPx: DRAG_CHIP_MARGIN_PX,
+  });
 
   return {
     sensors,

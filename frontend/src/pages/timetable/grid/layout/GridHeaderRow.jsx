@@ -1,4 +1,5 @@
 import { WEEKDAY_FULL } from "./weekdayConstants";
+import { dayIndexToColumns } from "../overlay/overlayGeometry";
 
 export function GridHeaderRow({ orderedDays, nowDow }) {
   return (
@@ -12,7 +13,7 @@ export function GridHeaderRow({ orderedDays, nowDow }) {
       {orderedDays.map((day, i) => {
         const isToday = day.day_of_week === nowDow;
         const isLastCol = i === orderedDays.length - 1;
-        const g1Column = 2 + i * 2;
+        const { g1Column } = dayIndexToColumns(i);
         return (
           <div
             key={day.id}

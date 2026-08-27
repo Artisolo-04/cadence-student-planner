@@ -4,7 +4,7 @@ import {
   resolveSpanOverlap,
   resolveLaneOverlap,
 } from "./entryPersistence";
-import { findEntriesCoveringRange } from "../layout/timetableGridUtils";
+import { findEntriesCoveringRange } from "../layout/slotSpanUtils";
 
 export function createResizeEntry({
   timetable,

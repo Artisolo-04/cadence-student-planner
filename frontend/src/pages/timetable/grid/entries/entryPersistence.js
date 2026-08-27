@@ -1,5 +1,6 @@
 import api from "../../../../lib/api";
-import { entryKey, computeEndSlotId, findMergeCandidates } from "../layout/timetableGridUtils";
+import { entryKey } from "../cell/cellDisplayUtils";
+import { computeEndSlotId, findMergeCandidates } from "../layout/slotSpanUtils";
 
 export function findEntryAtPosition(entriesByCell, slotId, dayOfWeek, groupTag) {
   const cellEntries = entriesByCell[entryKey(slotId, dayOfWeek)] || [];

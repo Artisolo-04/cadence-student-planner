@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../../../../lib/api";
+import { entryKey } from "../cell/cellDisplayUtils";
+import { planEntrySave } from "./entryPlanning";
 import {
-  entryKey,
-  planEntrySave,
   getSpanCount,
   findEntriesCoveringRange,
   computeMaxFreeSpan,
   clipRangeAgainstSameSubjectAll,
-} from "../layout/timetableGridUtils";
+} from "../layout/slotSpanUtils";
 import { resolveDragMove } from "../dragdrop/dragMovePlanner";
 import { useUndoRedo } from "../useUndoRedo";
 import { findEntryAtPosition, beforeStateFor, clearEntryAt } from "./entryPersistence";

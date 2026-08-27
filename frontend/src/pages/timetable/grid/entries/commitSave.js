@@ -8,7 +8,7 @@ import {
   resolveLaneOverlap,
 } from "./entryPersistence";
 import { buildCommitChanges } from "./entryChangeBuilder";
-import { getSpanCount, computeEndSlotId, computeMaxFreeSpan } from "../layout/timetableGridUtils";
+import { getSpanCount, computeEndSlotId, computeMaxFreeSpan } from "../layout/slotSpanUtils";
 import { actionNoticeConfig } from "../dragdrop/dragMovePlanner";
 import { changeKey } from "./changeKey";
 

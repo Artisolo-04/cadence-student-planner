@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { resizeDeltaToSpan, computeEndSlotId, getSpanCount, getSlotIndex } from "../layout/timetableGridUtils";
+import { resizeDeltaToSpan, computeEndSlotId, getSpanCount, getSlotIndex } from "../layout/slotSpanUtils";
 
 export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
   const [previewSpan, setPreviewSpan] = useState(null);

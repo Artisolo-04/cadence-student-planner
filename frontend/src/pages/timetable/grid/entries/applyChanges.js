@@ -1,4 +1,4 @@
-import { entryKey } from "../layout/timetableGridUtils";
+import { entryKey } from "../cell/cellDisplayUtils";
 import { clearEntryAt, saveEntryAtPosition } from "./entryPersistence";
 
 export async function applyChanges(changes, direction, { timetableId, entriesByCell, orderedSlots, refreshWorkspace }) {
