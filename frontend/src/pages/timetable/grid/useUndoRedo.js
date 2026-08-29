@@ -7,22 +7,35 @@ export function useUndoRedo() {
   const busyRef = useRef(false);
   const [busy, setBusy] = useState(false);
 
+  const acquire = useCallback(() => {
+    if (busyRef.current) return false;
+    busyRef.current = true;
+    setBusy(true);
+    return true;
+  }, []);
+
+  const release = useCallback(() => {
+    busyRef.current = false;
+    setBusy(false);
+  }, []);
+
   const push = useCallback((command) => {
     setUndoStack((stack) => [...stack, command]);
     setRedoStack([]);
   }, []);
 
   const reset = useCallback(() => {
+    busyRef.current = false;
     setUndoStack([]);
     setRedoStack([]);
+    setBusy(false);
   }, []);
 
   const undo = useCallback(
     async (applyUndo) => {
       if (busyRef.current) return;
       if (undoStack.length === 0) return;
-      busyRef.current = true;
-      setBusy(true);
+      if (!acquire()) return;
       const command = undoStack[undoStack.length - 1];
       setUndoStack((stack) => stack.slice(0, -1));
       try {
@@ -32,19 +45,17 @@ export function useUndoRedo() {
         setUndoStack((stack) => [...stack, command]);
         throw err;
       } finally {
-        busyRef.current = false;
-        setBusy(false);
+        release();
       }
     },
-    [undoStack]
+    [undoStack, acquire, release]
   );
 
   const redo = useCallback(
     async (applyRedo) => {
       if (busyRef.current) return;
       if (redoStack.length === 0) return;
-      busyRef.current = true;
-      setBusy(true);
+      if (!acquire()) return;
       const command = redoStack[redoStack.length - 1];
       setRedoStack((stack) => stack.slice(0, -1));
       try {
@@ -54,16 +65,18 @@ export function useUndoRedo() {
         setRedoStack((stack) => [...stack, command]);
         throw err;
       } finally {
-        busyRef.current = false;
-        setBusy(false);
+        release();
       }
     },
-    [redoStack]
+    [redoStack, acquire, release]
   );
 
   return {
     canUndo: undoStack.length > 0 && !busy,
     canRedo: redoStack.length > 0 && !busy,
+    busy,
+    acquire,
+    release,
     push,
     undo,
     redo,
