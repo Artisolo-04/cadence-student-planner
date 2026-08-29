@@ -4,11 +4,21 @@ function buildState(entriesForCell) {
   const all = findEntryForGroup(entriesForCell, "all");
   const g1 = findEntryForGroup(entriesForCell, "g1");
   const g2 = findEntryForGroup(entriesForCell, "g2");
-  return {
-    all: all ? { subject_id: all.subject_id, name: all.subject_name, room: all.room } : null,
-    g1: g1 ? { subject_id: g1.subject_id, name: g1.subject_name, room: g1.room } : null,
-    g2: g2 ? { subject_id: g2.subject_id, name: g2.subject_name, room: g2.room } : null,
-  };
+  const toState = (e) =>
+    e
+      ? {
+          subject_id: e.subject_id,
+          name: e.subject_name,
+          room: e.room,
+          start_slot_id: e.start_slot_id,
+          end_slot_id: e.end_slot_id,
+        }
+      : null;
+  return { all: toState(all), g1: toState(g1), g2: toState(g2) };
+}
+
+function sameSpan(a, b) {
+  return Boolean(a) && Boolean(b) && a.start_slot_id === b.start_slot_id && a.end_slot_id === b.end_slot_id;
 }
 
 export function planEntrySave({
@@ -187,7 +197,8 @@ export function planEntrySave({
     sourceCurrent &&
     sourceCurrent.subject_id === subjectId &&
     targetCurrent &&
-    targetCurrent.subject_id !== subjectId
+    targetCurrent.subject_id !== subjectId &&
+    sameSpan(sourceCurrent, targetCurrent)
   ) {
     swap = {
       groupTag: sourceGroupTag,
@@ -218,6 +229,12 @@ export function planEntrySave({
     }
 
     finalGroupTag = "all";
+    if (targetCurrent && targetCurrent.subject_id !== subjectId) {
+      pushDeletion(
+        targetGroupTag,
+        `${targetGroupTag.toUpperCase()} currently has "${targetCurrent.name}". It will be replaced since both groups will share "${siblingCurrent.name}".`
+      );
+    }
     pushDeletion(
       siblingGroupTag,
       `Both groups would have the same subject ("${siblingCurrent.name}"). ${
