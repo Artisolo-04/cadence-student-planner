@@ -9,6 +9,7 @@ export function buildCommitChanges(payload, entriesByCell) {
       slotId,
       dayOfWeek,
       groupTag,
+      entryId: null,
       before: beforeStateFor(entriesByCell, slotId, dayOfWeek, groupTag),
       after,
     });
@@ -17,6 +18,7 @@ export function buildCommitChanges(payload, entriesByCell) {
   recordChange(payload.target.slotId, payload.target.dayOfWeek, payload.groupTag, {
     subjectId: payload.subjectId,
     room: payload.room || null,
+    slotId: payload.target.slotId,
     endSlotId: payload.targetEndSlotId ?? null,
   });
 
@@ -24,6 +26,7 @@ export function buildCommitChanges(payload, entriesByCell) {
     recordChange(payload.target.slotId, payload.target.dayOfWeek, payload.swap.groupTag, {
       subjectId: payload.swap.subjectId,
       room: payload.swap.room || null,
+      slotId: payload.target.slotId,
       endSlotId: payload.targetEndSlotId ?? null,
     });
   }
