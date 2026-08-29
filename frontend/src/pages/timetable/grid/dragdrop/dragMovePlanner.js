@@ -22,7 +22,8 @@ export function resolveDragMove({ cellEntries, drop, groupTag, sourceCell, spanC
   const isSameCell =
     sourceCell &&
     sourceCell.slotId === drop.slotId &&
-    sourceCell.dayOfWeek === drop.dayOfWeek;
+    sourceCell.dayOfWeek === drop.dayOfWeek &&
+    (sourceCell.groupTag === "all" || sourceCell.groupTag === groupTag);
 
   if (isSameCell && sourceCell.groupTag === groupTag) {
     return { kind: "noop" };
