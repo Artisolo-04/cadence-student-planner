@@ -21,6 +21,12 @@ const {
   applyBatch,
   OverlapConflictError,
 } = require("../models/TimetableEntry");
+const {
+  ensureBaselineSnapshot,
+  recordSnapshot,
+  restoreVersion,
+  getMaxVersion,
+} = require("../models/TimetableSnapshot");
 
 const VALID_GROUP_TAGS = ["all", "g1", "g2"];
 
@@ -55,13 +61,21 @@ async function getWorkspace(req, res) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const [days, slots, entries] = await Promise.all([
+    const [days, slots, entries, maxVersion] = await Promise.all([
       findDaysByTimetableId(timetable.id),
       findSlotsByTimetableId(timetable.id),
       findEntriesByTimetableId(timetable.id),
+      getMaxVersion(timetable.id),
     ]);
 
-    res.json({ timetable, days, slots, entries });
+    res.json({
+      timetable,
+      days,
+      slots,
+      entries,
+      currentVersion: timetable.current_version,
+      maxVersion,
+    });
   } catch (err) {
     console.error("Get workspace error:", err);
     res.status(500).json({ error: "Something went wrong fetching the workspace" });
@@ -388,8 +402,11 @@ async function batchUpdateEntries(req, res) {
       room: o.room?.trim ? (o.room.trim() ? o.room.trim() : null) : (o.room ?? null),
     }));
 
+    await ensureBaselineSnapshot(req.params.id);
     const result = await applyBatch(req.params.id, normalizedOps);
-    res.json(result);
+    const newVersion = await recordSnapshot(req.params.id);
+
+    res.json({ ...result, currentVersion: newVersion });
   } catch (err) {
     if (err instanceof OverlapConflictError) {
       return res.status(409).json({ error: err.message, conflicts: err.conflicts });
@@ -408,6 +425,67 @@ async function batchUpdateEntries(req, res) {
   }
 }
 
+async function undoEntries(req, res) {
+  try {
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    if (timetable.current_version <= 0) {
+      return res.status(409).json({ error: "Nothing to undo" });
+    }
+
+    const targetVersion = timetable.current_version - 1;
+    const restoredVersion = await restoreVersion(req.params.id, targetVersion);
+    if (restoredVersion === null) {
+      return res.status(409).json({ error: "No earlier state found" });
+    }
+
+    const entries = await findEntriesByTimetableId(req.params.id);
+    res.json({ entries, currentVersion: restoredVersion });
+  } catch (err) {
+    if (err.code === "23503") {
+      return res.status(409).json({
+        error: "Can't undo: a slot or subject from that earlier state no longer exists",
+      });
+    }
+    console.error("Undo entries error:", err);
+    res.status(500).json({ error: "Something went wrong undoing the last change" });
+  }
+}
+
+async function redoEntries(req, res) {
+  try {
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    const maxVersion = await getMaxVersion(req.params.id);
+    if (timetable.current_version >= maxVersion) {
+      return res.status(409).json({ error: "Nothing to redo" });
+    }
+
+    const targetVersion = timetable.current_version + 1;
+    const restoredVersion = await restoreVersion(req.params.id, targetVersion);
+    if (restoredVersion === null) {
+      return res.status(409).json({ error: "No later state found" });
+    }
+
+    const entries = await findEntriesByTimetableId(req.params.id);
+    res.json({ entries, currentVersion: restoredVersion });
+  } catch (err) {
+    if (err.code === "23503") {
+      return res.status(409).json({
+        error: "Can't redo: a slot or subject from that later state no longer exists",
+      });
+    }
+    console.error("Redo entries error:", err);
+    res.status(500).json({ error: "Something went wrong redoing the last change" });
+  }
+}
+
 module.exports = {
   createWorkspace,
   listWorkspaces,
@@ -423,4 +501,6 @@ module.exports = {
   updateEntryHandler,
   clearEntry,
   batchUpdateEntries,
+  undoEntries,
+  redoEntries,
 };

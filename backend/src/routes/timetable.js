@@ -16,6 +16,8 @@ const {
   updateEntryHandler,
   clearEntry,
   batchUpdateEntries,
+  undoEntries,
+  redoEntries,
 } = require("../controllers/timetableController");
 
 router.post("/", requireAuth, createWorkspace);
@@ -32,6 +34,8 @@ router.patch("/:id/slots/:slotId", requireAuth, editSlot);
 router.delete("/:id/slots/:slotId", requireAuth, removeSlot);
 
 router.post("/:id/entries/batch", requireAuth, batchUpdateEntries);
+router.post("/:id/entries/undo", requireAuth, undoEntries);
+router.post("/:id/entries/redo", requireAuth, redoEntries);
 router.post("/:id/entries", requireAuth, createEntryHandler);
 router.patch("/:id/entries/:entryId", requireAuth, updateEntryHandler);
 router.delete("/:id/entries/:entryId", requireAuth, clearEntry);

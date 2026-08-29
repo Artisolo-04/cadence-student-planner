@@ -2,7 +2,7 @@ const pool = require("../config/db");
 
 async function createTimetable(userId, name) {
   const result = await pool.query(
-    "INSERT INTO timetables (user_id, name) VALUES ($1, $2) RETURNING id, user_id, name, my_group, created_at, updated_at",
+    "INSERT INTO timetables (user_id, name) VALUES ($1, $2) RETURNING id, user_id, name, my_group, current_version, created_at, updated_at",
     [userId, name]
   );
   return result.rows[0];
@@ -10,7 +10,7 @@ async function createTimetable(userId, name) {
 
 async function findTimetableById(id) {
   const result = await pool.query(
-    "SELECT id, user_id, name, my_group, created_at, updated_at FROM timetables WHERE id = $1",
+    "SELECT id, user_id, name, my_group, current_version, created_at, updated_at FROM timetables WHERE id = $1",
     [id]
   );
   return result.rows[0];
@@ -18,7 +18,7 @@ async function findTimetableById(id) {
 
 async function findTimetablesByUserId(userId) {
   const result = await pool.query(
-    "SELECT id, user_id, name, my_group, created_at, updated_at FROM timetables WHERE user_id = $1 ORDER BY created_at DESC",
+    "SELECT id, user_id, name, my_group, current_version, created_at, updated_at FROM timetables WHERE user_id = $1 ORDER BY created_at DESC",
     [userId]
   );
   return result.rows;
@@ -26,7 +26,7 @@ async function findTimetablesByUserId(userId) {
 
 async function updateTimetableName(id, name) {
   const result = await pool.query(
-    "UPDATE timetables SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, user_id, name, my_group, created_at, updated_at",
+    "UPDATE timetables SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, user_id, name, my_group, current_version, created_at, updated_at",
     [name, id]
   );
   return result.rows[0];
@@ -37,7 +37,7 @@ async function updateTimetableMyGroup(id, userId, myGroup) {
     `UPDATE timetables
      SET my_group = $1, updated_at = NOW()
      WHERE id = $2 AND user_id = $3
-     RETURNING id, user_id, name, my_group, created_at, updated_at`,
+     RETURNING id, user_id, name, my_group, current_version, created_at, updated_at`,
     [myGroup, id, userId]
   );
   return result.rows[0];
