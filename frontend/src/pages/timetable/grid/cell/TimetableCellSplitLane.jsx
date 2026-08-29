@@ -44,7 +44,7 @@ export function TimetableCellSplitLane({
         <div
           data-cell-key={`${cellKey}-g1`}
           style={{ gridColumn: g1Column, gridRow: `${gridRow} / span ${g1Span}` }}
-          className={g1Hidden ? "relative" : `${laneBaseClass} border-r ${g1IsLastRow ? "" : "border-b"}`}
+          className={g1Hidden ? "relative pointer-events-none" : `${laneBaseClass} border-r ${g1IsLastRow ? "" : "border-b"}`}
         >
           <DropZone
             id={`cell::${cellKey}::g1::self`}
@@ -79,7 +79,7 @@ export function TimetableCellSplitLane({
         <div
           data-cell-key={`${cellKey}-g2`}
           style={{ gridColumn: g2Column, gridRow: `${gridRow} / span ${g2Span}` }}
-          className={g2Hidden ? "relative" : `${laneBaseClass} ${isLastCol ? "" : "border-r"} ${g2IsLastRow ? "" : "border-b"}`}
+          className={g2Hidden ? "relative pointer-events-none" : `${laneBaseClass} ${isLastCol ? "" : "border-r"} ${g2IsLastRow ? "" : "border-b"}`}
         >
           <DropZone
             id={`cell::${cellKey}::g2::self`}
