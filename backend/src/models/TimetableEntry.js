@@ -181,13 +181,6 @@ async function deleteEntry(timetableId, entryId) {
   return result.rows[0];
 }
 
-/**
- * Apply a batch of create/update/delete operations to timetable_entries
- * atomically. Overlap validation happens ONCE, against the final state,
- * after all raw mutations are applied — not per-operation — so
- * swaps/resizes/multi-entry cleanups never see false-positive conflicts
- * against their own transaction's intermediate state.
- */
 async function applyBatch(timetableId, operations) {
   const client = await pool.connect();
   try {
