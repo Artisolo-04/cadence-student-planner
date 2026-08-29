@@ -18,8 +18,11 @@ const {
   updateEntry,
   findEntriesByTimetableId,
   deleteEntry,
+  applyBatch,
   OverlapConflictError,
 } = require("../models/TimetableEntry");
+
+const VALID_GROUP_TAGS = ["all", "g1", "g2"];
 
 async function createWorkspace(req, res) {
   try {
@@ -320,6 +323,91 @@ async function clearEntry(req, res) {
   }
 }
 
+function validateOp(op, index) {
+  if (!op || typeof op !== "object") {
+    throw { status: 400, message: `Operation at index ${index} is invalid` };
+  }
+  if (!["create", "update", "delete"].includes(op.op)) {
+    throw { status: 400, message: `Operation at index ${index} has invalid 'op'` };
+  }
+  if (op.op === "delete") {
+    if (op.entryId == null) {
+      throw { status: 400, message: `Operation at index ${index}: entryId is required for delete` };
+    }
+    return;
+  }
+  if (op.op === "update" && op.entryId == null) {
+    throw { status: 400, message: `Operation at index ${index}: entryId is required for update` };
+  }
+  if (op.op === "create" && !op.tempId) {
+    throw { status: 400, message: `Operation at index ${index}: tempId is required for create` };
+  }
+  if (op.slotId == null || op.dayOfWeek == null || op.subjectId == null) {
+    throw { status: 400, message: `Operation at index ${index}: slotId, dayOfWeek, subjectId are required` };
+  }
+  if (op.dayOfWeek < 0 || op.dayOfWeek > 6) {
+    throw { status: 400, message: `Operation at index ${index}: dayOfWeek must be between 0 and 6` };
+  }
+  const groupTag = op.groupTag ?? "all";
+  if (!VALID_GROUP_TAGS.includes(groupTag)) {
+    throw { status: 400, message: `Operation at index ${index}: invalid groupTag` };
+  }
+}
+
+async function batchUpdateEntries(req, res) {
+  try {
+    const { operations } = req.body;
+    if (!Array.isArray(operations) || operations.length === 0) {
+      return res.status(400).json({ error: "operations must be a non-empty array" });
+    }
+    if (operations.length > 200) {
+      return res.status(400).json({ error: "Batch too large (max 200 operations)" });
+    }
+
+    operations.forEach(validateOp);
+
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    const subjectIds = [
+      ...new Set(operations.filter((o) => o.op !== "delete").map((o) => o.subjectId)),
+    ];
+    for (const subjectId of subjectIds) {
+      const subject = await findSubjectById(subjectId);
+      if (!subject || subject.user_id !== req.userId) {
+        return res.status(404).json({ error: `Subject not found: ${subjectId}` });
+      }
+    }
+
+    const normalizedOps = operations.map((o) => ({
+      ...o,
+      endSlotId: o.endSlotId ?? o.slotId,
+      groupTag: o.groupTag ?? "all",
+      room: o.room?.trim ? (o.room.trim() ? o.room.trim() : null) : (o.room ?? null),
+    }));
+
+    const result = await applyBatch(req.params.id, normalizedOps);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof OverlapConflictError) {
+      return res.status(409).json({ error: err.message, conflicts: err.conflicts });
+    }
+    if (err.status === 400) {
+      return res.status(400).json({ error: err.message });
+    }
+    if (typeof err.message === "string" && err.message.startsWith("Entry not found")) {
+      return res.status(404).json({ error: err.message });
+    }
+    if (typeof err.message === "string" && err.message.startsWith("Invalid slot range")) {
+      return res.status(400).json({ error: err.message });
+    }
+    console.error("Batch update entries error:", err);
+    res.status(500).json({ error: "Something went wrong applying the batch update" });
+  }
+}
+
 module.exports = {
   createWorkspace,
   listWorkspaces,
@@ -334,4 +422,5 @@ module.exports = {
   createEntryHandler,
   updateEntryHandler,
   clearEntry,
+  batchUpdateEntries,
 };
