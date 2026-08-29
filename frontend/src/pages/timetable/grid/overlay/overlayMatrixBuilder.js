@@ -1,14 +1,5 @@
 import { dayIndexToColumns } from "./overlayGeometry";
 
-// Builds a deterministic [dayOfWeek][rowIdx] -> cell metadata matrix.
-// This is the single place that turns spanLayout (from buildSpanLayout)
-// into everything a grid cell needs to render: which grid columns it
-// occupies, whether it's a "covered" row (part of a spanning entry above
-// it and should render a drop-target instead of a real cell), and the
-// per-lane span/hidden/last-row flags for split g1/g2 rendering.
-//
-// TimeSlotRow (and any other consumer) should only ever read from this
-// matrix — it must never recompute this metadata itself.
 export function buildOverlayMatrix({ orderedDays, orderedSlots, spanLayout }) {
   const matrix = {};
 
