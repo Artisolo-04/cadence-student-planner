@@ -5,10 +5,12 @@ export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
   const [previewSpan, setPreviewSpan] = useState(null);
   const [isResizing, setIsResizing] = useState(false);
   const [isRejected, setIsRejected] = useState(false);
+  const [isPersisting, setIsPersisting] = useState(false);
   const [rowHeight, setRowHeight] = useState(56);
   const [cellEl, setCellEl] = useState(null);
   const dragState = useRef(null);
   const previewSpanRef = useRef(null);
+  const isPersistingRef = useRef(false);
 
   const onPointerMove = useCallback((e) => {
     if (!dragState.current) return;
@@ -37,15 +39,24 @@ export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
     if (finalSpan === state.originalSpan) return;
 
     const newEndSlotId = computeEndSlotId(orderedSlots, entry.start_slot_id, finalSpan);
-    const result = await resizeEntry(entry, newEndSlotId);
-    if (!result.ok) {
-      setIsRejected(true);
-      window.setTimeout(() => setIsRejected(false), 260);
+
+    isPersistingRef.current = true;
+    setIsPersisting(true);
+    try {
+      const result = await resizeEntry(entry, newEndSlotId);
+      if (!result.ok) {
+        setIsRejected(true);
+        window.setTimeout(() => setIsRejected(false), 260);
+      }
+    } finally {
+      isPersistingRef.current = false;
+      setIsPersisting(false);
     }
   }, [entry, orderedSlots, resizeEntry, onPointerMove]);
 
   const onPointerDown = useCallback(
     (e) => {
+      if (isPersistingRef.current) return;
       e.stopPropagation();
       e.preventDefault();
       const handleEl = e.currentTarget;
@@ -73,6 +84,7 @@ export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
     previewSpan,
     isResizing,
     isRejected,
+    isPersisting,
     cellEl,
     rowHeight,
     handlers: { onPointerDown },
