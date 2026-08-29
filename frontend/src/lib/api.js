@@ -4,6 +4,7 @@ export const API_ORIGIN = import.meta.env.VITE_API_URL || `http://${window.locat
 
 const api = axios.create({
   baseURL: `${API_ORIGIN}/api`,
+  timeout: 15000,
 });
 
 api.interceptors.request.use((config) => {
