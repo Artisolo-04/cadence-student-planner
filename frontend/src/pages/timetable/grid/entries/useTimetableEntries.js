@@ -136,6 +136,8 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
 
   async function handleClear() {
     if (!activeCell) return;
+
+    if (!undoRedo.acquire()) return;
     setSaveError(null);
     try {
       const groupTag = activeCell.groupTag || "all";
@@ -154,6 +156,8 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
       closePicker();
     } catch (err) {
       reportSaveError(err, "Something went wrong clearing this cell.");
+    } finally {
+      undoRedo.release();
     }
   }
 
@@ -206,7 +210,9 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
     let cellEntries = findEntriesCoveringRange(entries, orderedSlots, effectiveDrop.slotId, spanCount, effectiveDrop.dayOfWeek);
     if (sourceEntry) {
       const droppingOntoOwnPosition =
-        sourceEntry.start_slot_id === effectiveDrop.slotId && sourceEntry.day_of_week === effectiveDrop.dayOfWeek;
+        sourceEntry.start_slot_id === effectiveDrop.slotId &&
+        sourceEntry.day_of_week === effectiveDrop.dayOfWeek &&
+        (sourceCell.groupTag === "all" || sourceCell.groupTag === groupTag);
       if (!droppingOntoOwnPosition) {
         cellEntries = cellEntries.filter((e) => e.id !== sourceEntry.id);
       }
@@ -216,6 +222,8 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
     if (result.kind === "noop") return;
 
     if (result.kind === "clear-source") {
+
+      if (!undoRedo.acquire()) return;
       const changes = [
         {
           slotId: result.sourceCell.slotId,
@@ -233,7 +241,10 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
       clearEntryAt(timetable.id, entriesByCell, result.sourceCell.slotId, result.sourceCell.dayOfWeek, result.sourceCell.groupTag)
         .then(refreshWorkspace)
         .then(() => undoRedo.push({ label: "Move subject", changes }))
-        .catch((err) => console.error("Move subject error:", err));
+        .catch((err) => {
+          reportSaveError(err, "Something went wrong moving this subject.");
+        })
+        .finally(() => undoRedo.release());
       return;
     }
 
@@ -245,7 +256,7 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
       await undoRedo.undo((command) =>
         applyChanges(command.changes, "undo", {
           timetableId: timetable.id,
-          entriesByCell,
+          entries,
           orderedSlots,
           refreshWorkspace,
         })
@@ -262,7 +273,7 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
       await undoRedo.redo((command) =>
         applyChanges(command.changes, "redo", {
           timetableId: timetable.id,
-          entriesByCell,
+          entries,
           orderedSlots,
           refreshWorkspace,
         })
