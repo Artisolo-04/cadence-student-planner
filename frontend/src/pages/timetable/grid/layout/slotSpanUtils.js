@@ -112,9 +112,12 @@ export function computeMaxFreeSpan({ entries, orderedSlots, startIdx, dayOfWeek,
   if (startIdx < 0 || startIdx >= orderedSlots.length) return 1;
   const cap = Math.max(1, maxSpan || 1);
 
+  function conflicts(entry) {
+    return entry.group_tag === "all" || groupTag === "all" || entry.group_tag === groupTag;
+  }
+
   function isBlocking(coveringList) {
-    if (groupTag === "all") return coveringList.length > 0;
-    return coveringList.some((e) => e.group_tag === "all" || e.group_tag === groupTag);
+    return coveringList.some(conflicts);
   }
 
   const startSlot = orderedSlots[startIdx];
