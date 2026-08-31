@@ -20,10 +20,12 @@ const {
   undoEntries,
   redoEntries,
 } = require("../controllers/timetableController");
+const { getAnalytics } = require("../controllers/timetable/analyticsController");
 
 router.post("/", requireAuth, createWorkspace);
 router.get("/", requireAuth, listWorkspaces);
 router.get("/:id", requireAuth, getWorkspace);
+router.get("/:id/analytics", requireAuth, getAnalytics);
 router.patch("/:id", requireAuth, renameWorkspace);
 router.patch("/:id/my-group", requireAuth, updateMyGroup);
 router.delete("/:id", requireAuth, removeWorkspace);
