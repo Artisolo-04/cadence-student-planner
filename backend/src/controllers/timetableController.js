@@ -257,7 +257,9 @@ async function createEntryHandler(req, res) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    const entry = await createEntry(req.params.id, {
+    await ensureBaselineSnapshot(req.params.id);
+
+    const { mainEntry, deletedIds, createdFragments } = await createEntry(req.params.id, {
       slotId,
       endSlotId: endSlotId ?? slotId,
       dayOfWeek,
@@ -265,10 +267,24 @@ async function createEntryHandler(req, res) {
       groupTag,
       room: room?.trim() ? room.trim() : null,
     });
-    res.status(201).json({ entry });
+
+    const currentVersion = await recordSnapshot(req.params.id);
+
+    res.status(201).json({
+      entry: mainEntry,
+      deletedIds,
+      createdFragments,
+      currentVersion,
+    });
   } catch (err) {
     if (err instanceof OverlapConflictError) {
       return res.status(409).json({ error: err.message, conflicts: err.conflicts });
+    }
+    if (err.message === "Invalid slot range: slot not found in this timetable") {
+      return res.status(400).json({ error: err.message });
+    }
+    if (err.message === "end_slot_id must not end before start_slot_id begins") {
+      return res.status(400).json({ error: err.message });
     }
     console.error("Create entry error:", err);
     res.status(500).json({ error: "Something went wrong assigning the subject" });
@@ -298,21 +314,41 @@ async function updateEntryHandler(req, res) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    const entry = await updateEntry(req.params.id, req.params.entryId, {
-      slotId,
-      endSlotId: endSlotId ?? slotId,
-      dayOfWeek,
-      subjectId,
-      groupTag,
-      room: room?.trim() ? room.trim() : null,
+    await ensureBaselineSnapshot(req.params.id);
+
+    const { mainEntry, deletedIds, createdFragments } = await updateEntry(
+      req.params.id,
+      req.params.entryId,
+      {
+        slotId,
+        endSlotId: endSlotId ?? slotId,
+        dayOfWeek,
+        subjectId,
+        groupTag,
+        room: room?.trim() ? room.trim() : null,
+      }
+    );
+
+    const currentVersion = await recordSnapshot(req.params.id);
+
+    res.json({
+      entry: mainEntry,
+      deletedIds,
+      createdFragments,
+      currentVersion,
     });
-    res.json({ entry });
   } catch (err) {
     if (err instanceof OverlapConflictError) {
       return res.status(409).json({ error: err.message, conflicts: err.conflicts });
     }
     if (err.message === "Entry not found") {
       return res.status(404).json({ error: "Entry not found" });
+    }
+    if (err.message === "Invalid slot range: slot not found in this timetable") {
+      return res.status(400).json({ error: err.message });
+    }
+    if (err.message === "end_slot_id must not end before start_slot_id begins") {
+      return res.status(400).json({ error: err.message });
     }
     console.error("Update entry error:", err);
     res.status(500).json({ error: "Something went wrong updating the entry" });
@@ -326,11 +362,16 @@ async function clearEntry(req, res) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
+    await ensureBaselineSnapshot(req.params.id);
+
     const deleted = await deleteEntry(req.params.id, req.params.entryId);
     if (!deleted) {
       return res.status(404).json({ error: "Entry not found" });
     }
-    res.json({ id: deleted.id });
+
+    const currentVersion = await recordSnapshot(req.params.id);
+
+    res.json({ id: deleted.id, currentVersion });
   } catch (err) {
     console.error("Clear entry error:", err);
     res.status(500).json({ error: "Something went wrong clearing the cell" });
@@ -425,6 +466,23 @@ async function batchUpdateEntries(req, res) {
   }
 }
 
+async function checkpointEntries(req, res) {
+  try {
+    const timetable = await findTimetableById(req.params.id);
+    if (!timetable || timetable.user_id !== req.userId) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+
+    await ensureBaselineSnapshot(req.params.id);
+    const newVersion = await recordSnapshot(req.params.id);
+
+    res.json({ currentVersion: newVersion });
+  } catch (err) {
+    console.error("Checkpoint entries error:", err);
+    res.status(500).json({ error: "Something went wrong saving a history checkpoint" });
+  }
+}
+
 async function undoEntries(req, res) {
   try {
     const timetable = await findTimetableById(req.params.id);
@@ -501,6 +559,7 @@ module.exports = {
   updateEntryHandler,
   clearEntry,
   batchUpdateEntries,
+  checkpointEntries,
   undoEntries,
   redoEntries,
 };

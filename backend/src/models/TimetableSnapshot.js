@@ -10,7 +10,7 @@ async function ensureBaselineSnapshot(timetableId) {
     if (existing.rows.length > 0) return;
 
     const entries = await client.query(
-      `SELECT subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
+      `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
        FROM timetable_entries WHERE timetable_id = $1`,
       [timetableId]
     );
@@ -47,7 +47,7 @@ async function recordSnapshot(timetableId) {
     );
 
     const entries = await client.query(
-      `SELECT subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
+      `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
        FROM timetable_entries WHERE timetable_id = $1`,
       [timetableId]
     );
@@ -95,29 +95,74 @@ async function restoreVersion(timetableId, targetVersion) {
       await client.query("ROLLBACK");
       return null;
     }
+    const targetEntries = snapResult.rows[0].entries_json;
 
-    const entries = snapResult.rows[0].entries_json;
-
-    await client.query(
-      `DELETE FROM timetable_entries WHERE timetable_id = $1`,
+    const currentResult = await client.query(
+      `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
+       FROM timetable_entries WHERE timetable_id = $1 FOR UPDATE`,
       [timetableId]
     );
 
-    if (entries.length > 0) {
+    const currentById = new Map(currentResult.rows.map((r) => [r.id, r]));
+    const targetById = new Map(targetEntries.map((e) => [e.id, e]));
+
+    await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
+
+    const toDelete = [...currentById.keys()].filter((id) => !targetById.has(id));
+    if (toDelete.length > 0) {
+      await client.query(
+        `DELETE FROM timetable_entries WHERE timetable_id = $1 AND id = ANY($2::int[])`,
+        [timetableId, toDelete]
+      );
+    }
+
+    for (const [id, target] of targetById) {
+      const curr = currentById.get(id);
+      if (!curr) continue;
+      const changed =
+        curr.subject_id !== target.subject_id ||
+        curr.slot_id !== target.slot_id ||
+        curr.end_slot_id !== target.end_slot_id ||
+        curr.day_of_week !== target.day_of_week ||
+        curr.group_tag !== target.group_tag ||
+        curr.room !== target.room;
+      if (changed) {
+        await client.query(
+          `UPDATE timetable_entries
+           SET subject_id = $3, slot_id = $4, end_slot_id = $5,
+               day_of_week = $6, group_tag = $7, room = $8, updated_at = NOW()
+           WHERE timetable_id = $1 AND id = $2`,
+          [
+            timetableId, id, target.subject_id, target.slot_id,
+            target.end_slot_id, target.day_of_week, target.group_tag, target.room,
+          ]
+        );
+      }
+    }
+
+    const toInsert = [...targetById.values()].filter((t) => !currentById.has(t.id));
+    if (toInsert.length > 0) {
       const values = [];
       const params = [timetableId];
-      entries.forEach((e) => {
+      toInsert.forEach((e) => {
         const base = params.length;
         values.push(
-          `($1, $${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6})`
+          `($1, $${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7})`
         );
-        params.push(e.subject_id, e.slot_id, e.end_slot_id, e.day_of_week, e.group_tag, e.room);
+        params.push(e.id, e.subject_id, e.slot_id, e.end_slot_id, e.day_of_week, e.group_tag, e.room);
       });
       await client.query(
         `INSERT INTO timetable_entries
-           (timetable_id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room)
+           (timetable_id, id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room)
          VALUES ${values.join(", ")}`,
         params
+      );
+
+      await client.query(
+        `SELECT setval(
+           pg_get_serial_sequence('timetable_entries', 'id'),
+           GREATEST((SELECT COALESCE(MAX(id), 1) FROM timetable_entries), 1)
+         )`
       );
     }
 

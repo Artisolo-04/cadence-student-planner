@@ -9,71 +9,6 @@ class OverlapConflictError extends Error {
   }
 }
 
-async function getSlotTimeRange(client, timetableId, slotId, endSlotId) {
-  const result = await client.query(
-    `SELECT id, start_time, end_time FROM timetable_slots
-     WHERE timetable_id = $1 AND id = ANY($2::int[])`,
-    [timetableId, [slotId, endSlotId]]
-  );
-  const byId = Object.fromEntries(result.rows.map((r) => [r.id, r]));
-  const startSlot = byId[slotId];
-  const endSlot = byId[endSlotId];
-  if (!startSlot || !endSlot) return null;
-  return { startTime: startSlot.start_time, endTime: endSlot.end_time };
-}
-
-async function findOverlaps(client, {
-  timetableId, dayOfWeek, groupTag, startTime, endTime, excludeEntryId = null,
-}) {
-  const result = await client.query(
-    `SELECT e.id, e.subject_id, e.group_tag, s.name AS subject_name,
-            ss.start_time AS existing_start, es.end_time AS existing_end
-     FROM timetable_entries e
-     JOIN timetable_slots ss ON ss.id = e.slot_id
-     JOIN timetable_slots es ON es.id = e.end_slot_id
-     JOIN subjects s ON s.id = e.subject_id
-     WHERE e.timetable_id = $1
-       AND e.day_of_week = $2
-       AND ($3::int IS NULL OR e.id != $3)
-       AND (e.group_tag = 'all' OR $4 = 'all' OR e.group_tag = $4)
-       AND ss.start_time < $6
-       AND es.end_time > $5`,
-    [timetableId, dayOfWeek, excludeEntryId, groupTag, startTime, endTime]
-  );
-  return result.rows;
-}
-
-async function findFinalOverlaps(client, timetableId, days) {
-  if (days.length === 0) return [];
-  const result = await client.query(
-    `WITH ranges AS (
-       SELECT e.id, e.day_of_week, e.group_tag,
-              ss.start_time, es.end_time,
-              s.name AS subject_name
-       FROM timetable_entries e
-       JOIN timetable_slots ss ON ss.id = e.slot_id
-       JOIN timetable_slots es ON es.id = e.end_slot_id
-       JOIN subjects s ON s.id = e.subject_id
-       WHERE e.timetable_id = $1 AND e.day_of_week = ANY($2::int[])
-     )
-     SELECT
-       a.id AS entry_a_id, a.subject_name AS entry_a_subject,
-       a.start_time AS a_start, a.end_time AS a_end,
-       b.id AS entry_b_id, b.subject_name AS entry_b_subject,
-       b.start_time AS b_start, b.end_time AS b_end,
-       a.day_of_week
-     FROM ranges a
-     JOIN ranges b
-       ON a.day_of_week = b.day_of_week
-      AND a.id < b.id
-      AND (a.group_tag = 'all' OR b.group_tag = 'all' OR a.group_tag = b.group_tag)
-      AND a.start_time < b.end_time
-      AND b.start_time < a.end_time`,
-    [timetableId, days]
-  );
-  return result.rows;
-}
-
 async function lockTimetableDay(client, timetableId, dayOfWeek) {
   await client.query(
     `SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))`,
@@ -81,24 +16,323 @@ async function lockTimetableDay(client, timetableId, dayOfWeek) {
   );
 }
 
-async function validateAndCheckConflicts(client, timetableId, { slotId, endSlotId, dayOfWeek, groupTag, excludeEntryId }) {
-  const range = await getSlotTimeRange(client, timetableId, slotId, endSlotId);
-  if (!range) {
-    throw new Error("Invalid slot range: slot not found in this timetable");
+async function getSlotSortMap(client, timetableId) {
+  const result = await client.query(
+    `SELECT id, sort_order FROM timetable_slots WHERE timetable_id = $1`,
+    [timetableId]
+  );
+  const idToSort = new Map();
+  const sortToId = new Map();
+  for (const row of result.rows) {
+    idToSort.set(row.id, row.sort_order);
+    sortToId.set(row.sort_order, row.id);
   }
-  const { startTime, endTime } = range;
-  if (endTime <= startTime) {
-    throw new Error("end_slot_id must not end before start_slot_id begins");
+  return { idToSort, sortToId };
+}
+
+function subtractRanges(start, end, consumed) {
+  const remaining = [];
+  let cursor = start;
+  for (const r of consumed) {
+    if (r.start > cursor) remaining.push({ start: cursor, end: r.start - 1 });
+    cursor = Math.max(cursor, r.end + 1);
+  }
+  if (cursor <= end) remaining.push({ start: cursor, end });
+  return remaining;
+}
+
+function coalesceFragmentSpecs(specs) {
+  const groups = new Map();
+  for (const spec of specs) {
+    const key = `${spec.groupTag}\u0000${spec.subjectId}\u0000${spec.room ?? "\u0000NULL"}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(spec);
   }
 
-  await lockTimetableDay(client, timetableId, dayOfWeek);
-
-  const conflicts = await findOverlaps(client, {
-    timetableId, dayOfWeek, groupTag, startTime, endTime, excludeEntryId,
-  });
-  if (conflicts.length > 0) {
-    throw new OverlapConflictError(conflicts);
+  const merged = [];
+  for (const group of groups.values()) {
+    group.sort((a, b) => a.startSort - b.startSort);
+    let current = null;
+    for (const spec of group) {
+      if (current && spec.startSort <= current.endSort + 1) {
+        current.endSort = Math.max(current.endSort, spec.endSort);
+      } else {
+        if (current) merged.push(current);
+        current = { ...spec };
+      }
+    }
+    if (current) merged.push(current);
   }
+  return merged;
+}
+
+async function coalesceWithExistingNeighbors(client, timetableId, dayOfWeek, excludeEntryId, specs) {
+  const merged = coalesceFragmentSpecs(specs);
+  const deletedIds = [];
+
+  for (const spec of merged) {
+    
+    while (true) {
+      const neighborResult = await client.query(
+        `SELECT e.id, ss.sort_order AS start_sort, es.sort_order AS end_sort
+         FROM timetable_entries e
+         JOIN timetable_slots ss ON ss.id = e.slot_id
+         JOIN timetable_slots es ON es.id = e.end_slot_id
+         WHERE e.timetable_id = $1
+           AND e.day_of_week = $2
+           AND ($3::int IS NULL OR e.id != $3)
+           AND e.group_tag = $4
+           AND e.subject_id = $5
+           AND e.room IS NOT DISTINCT FROM $6
+           AND (es.sort_order = $7 OR ss.sort_order = $8)
+         FOR UPDATE OF e
+         LIMIT 1`,
+        [
+          timetableId, dayOfWeek, excludeEntryId,
+          spec.groupTag, spec.subjectId, spec.room ?? null,
+          spec.startSort - 1, spec.endSort + 1,
+        ]
+      );
+
+      if (neighborResult.rows.length === 0) break;
+
+      const neighbor = neighborResult.rows[0];
+      await client.query(`DELETE FROM timetable_entries WHERE id = $1`, [neighbor.id]);
+      deletedIds.push(neighbor.id);
+
+      spec.startSort = Math.min(spec.startSort, neighbor.start_sort);
+      spec.endSort = Math.max(spec.endSort, neighbor.end_sort);
+    }
+  }
+
+  return { specs: merged, deletedIds };
+}
+
+async function resolveAndWrite(client, timetableId, slotMap, op, iStart, iEnd) {
+  const excludeEntryId = op.kind === "update" ? op.entryId : null;
+
+  const deletedIds = [];
+  const fragmentSpecs = [];
+  const mergeFragmentSpecs = [];
+
+  if (op.groupTag === "g1" || op.groupTag === "g2") {
+    const siblingTag = op.groupTag === "g1" ? "g2" : "g1";
+
+    const siblingResult = await client.query(
+      `SELECT e.id, e.subject_id, e.room,
+              ss.sort_order AS start_sort, es.sort_order AS end_sort
+       FROM timetable_entries e
+       JOIN timetable_slots ss ON ss.id = e.slot_id
+       JOIN timetable_slots es ON es.id = e.end_slot_id
+       WHERE e.timetable_id = $1
+         AND e.day_of_week = $2
+         AND ($3::int IS NULL OR e.id != $3)
+         AND e.group_tag = $4
+         AND e.subject_id = $5
+         AND ss.sort_order <= $7
+         AND es.sort_order >= $6
+       FOR UPDATE OF e`,
+      [timetableId, op.dayOfWeek, excludeEntryId, siblingTag, op.subjectId, iStart, iEnd]
+    );
+
+    for (const c of siblingResult.rows) {
+      const overlapStart = Math.max(c.start_sort, iStart);
+      const overlapEnd = Math.min(c.end_sort, iEnd);
+      const sameRoom = (c.room ?? null) === (op.room ?? null);
+
+      const siblingFragments = [];
+      if (c.start_sort < overlapStart) {
+        siblingFragments.push({
+          subjectId: c.subject_id, groupTag: siblingTag, room: c.room,
+          startSort: c.start_sort, endSort: overlapStart - 1,
+        });
+      }
+      if (c.end_sort > overlapEnd) {
+        siblingFragments.push({
+          subjectId: c.subject_id, groupTag: siblingTag, room: c.room,
+          startSort: overlapEnd + 1, endSort: c.end_sort,
+        });
+      }
+
+      let producesMerge = false;
+      if (sameRoom) {
+        producesMerge = true;
+        mergeFragmentSpecs.push({
+          subjectId: op.subjectId, groupTag: "all", room: op.room ?? c.room,
+          startSort: overlapStart, endSort: overlapEnd,
+        });
+      } else {
+        siblingFragments.push({
+          subjectId: c.subject_id, groupTag: siblingTag, room: c.room,
+          startSort: overlapStart, endSort: overlapEnd,
+        });
+      }
+
+      if (!producesMerge) {
+        const coalesced = coalesceFragmentSpecs(siblingFragments);
+        const isNoOp =
+          coalesced.length === 1 &&
+          coalesced[0].startSort === c.start_sort &&
+          coalesced[0].endSort === c.end_sort &&
+          coalesced[0].groupTag === siblingTag &&
+          coalesced[0].subjectId === c.subject_id &&
+          (coalesced[0].room ?? null) === (c.room ?? null);
+
+        if (isNoOp) {
+          continue;
+        }
+      }
+
+      await client.query(`DELETE FROM timetable_entries WHERE id = $1`, [c.id]);
+      deletedIds.push(c.id);
+      fragmentSpecs.push(...siblingFragments);
+    }
+  }
+
+  const mergeCreatedEntries = [];
+  const { specs: mergedMergeSpecs, deletedIds: neighborDeletedIdsForMerge } =
+    await coalesceWithExistingNeighbors(client, timetableId, op.dayOfWeek, excludeEntryId, mergeFragmentSpecs);
+  deletedIds.push(...neighborDeletedIdsForMerge);
+  for (const f of mergedMergeSpecs) {
+    const fragStartSlotId = slotMap.sortToId.get(f.startSort);
+    const fragEndSlotId = slotMap.sortToId.get(f.endSort);
+    if (fragStartSlotId == null || fragEndSlotId == null) continue;
+    const r = await client.query(
+      `INSERT INTO timetable_entries (timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+      [timetableId, fragStartSlotId, fragEndSlotId, op.dayOfWeek, f.subjectId, f.groupTag, f.room]
+    );
+    mergeCreatedEntries.push({ startSort: f.startSort, endSort: f.endSort, entry: r.rows[0] });
+  }
+
+  const mergeCreatedIds = mergeCreatedEntries.map((m) => m.entry.id);
+
+  const conflictsResult = await client.query(
+    `SELECT e.id, e.subject_id, e.group_tag, e.room,
+            ss.sort_order AS start_sort, es.sort_order AS end_sort
+     FROM timetable_entries e
+     JOIN timetable_slots ss ON ss.id = e.slot_id
+     JOIN timetable_slots es ON es.id = e.end_slot_id
+     WHERE e.timetable_id = $1
+       AND e.day_of_week = $2
+       AND ($3::int IS NULL OR e.id != $3)
+       AND (e.group_tag = 'all' OR $4 = 'all' OR e.group_tag = $4)
+       AND ss.sort_order <= $6
+       AND es.sort_order >= $5
+       AND NOT (e.id = ANY($7::int[]))
+     FOR UPDATE OF e`,
+    [timetableId, op.dayOfWeek, excludeEntryId, op.groupTag, iStart, iEnd, mergeCreatedIds]
+  );
+
+  for (const c of conflictsResult.rows) {
+    const overlapStart = Math.max(c.start_sort, iStart);
+    const overlapEnd = Math.min(c.end_sort, iEnd);
+
+    if (c.start_sort < overlapStart) {
+      fragmentSpecs.push({
+        subjectId: c.subject_id, groupTag: c.group_tag, room: c.room,
+        startSort: c.start_sort, endSort: overlapStart - 1,
+      });
+    }
+    if (c.end_sort > overlapEnd) {
+      fragmentSpecs.push({
+        subjectId: c.subject_id, groupTag: c.group_tag, room: c.room,
+        startSort: overlapEnd + 1, endSort: c.end_sort,
+      });
+    }
+    if (c.group_tag === "all" && op.groupTag !== "all") {
+      const siblingTag = op.groupTag === "g1" ? "g2" : "g1";
+      fragmentSpecs.push({
+        subjectId: c.subject_id, groupTag: siblingTag, room: c.room,
+        startSort: overlapStart, endSort: overlapEnd,
+      });
+    }
+
+    await client.query(`DELETE FROM timetable_entries WHERE id = $1`, [c.id]);
+    deletedIds.push(c.id);
+  }
+
+  const createdFragments = [];
+  const { specs: mergedFragmentSpecs, deletedIds: neighborDeletedIds } =
+    await coalesceWithExistingNeighbors(client, timetableId, op.dayOfWeek, excludeEntryId, fragmentSpecs);
+  deletedIds.push(...neighborDeletedIds);
+  for (const f of mergedFragmentSpecs) {
+    const fragStartSlotId = slotMap.sortToId.get(f.startSort);
+    const fragEndSlotId = slotMap.sortToId.get(f.endSort);
+    if (fragStartSlotId == null || fragEndSlotId == null) continue;
+    const r = await client.query(
+      `INSERT INTO timetable_entries (timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+      [timetableId, fragStartSlotId, fragEndSlotId, op.dayOfWeek, f.subjectId, f.groupTag, f.room]
+    );
+    createdFragments.push(r.rows[0]);
+  }
+  createdFragments.push(...mergeCreatedEntries.map((m) => m.entry));
+
+  const remainingRanges = subtractRanges(
+    iStart, iEnd,
+    mergeCreatedEntries.map((m) => ({ start: m.startSort, end: m.endSort })).sort((a, b) => a.start - b.start)
+  );
+
+  let mainEntry = null;
+  const extraMainFragments = [];
+
+  if (remainingRanges.length === 0) {
+    if (op.kind === "update") {
+      const del = await client.query(
+        `DELETE FROM timetable_entries WHERE timetable_id = $1 AND id = $2 RETURNING id`,
+        [timetableId, op.entryId]
+      );
+      if (del.rows.length === 0) throw new Error("Entry not found");
+      deletedIds.push(op.entryId);
+    }
+    mainEntry = mergeCreatedEntries[0]?.entry ?? null;
+  } else {
+    for (let i = 0; i < remainingRanges.length; i++) {
+      const { start, end } = remainingRanges[i];
+      const startSlotId = slotMap.sortToId.get(start);
+      const endSlotId = slotMap.sortToId.get(end);
+      if (startSlotId == null || endSlotId == null) continue;
+
+      if (i === 0 && op.kind === "update") {
+        const result = await client.query(
+          `UPDATE timetable_entries
+           SET slot_id = $3, end_slot_id = $4, day_of_week = $5,
+               subject_id = $6, group_tag = $7, room = $8, updated_at = NOW()
+           WHERE timetable_id = $1 AND id = $2
+           RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+          [timetableId, op.entryId, startSlotId, endSlotId, op.dayOfWeek, op.subjectId, op.groupTag, op.room]
+        );
+        if (result.rows.length === 0) throw new Error("Entry not found");
+        mainEntry = result.rows[0];
+      } else {
+        const result = await client.query(
+          `INSERT INTO timetable_entries (timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+          [timetableId, startSlotId, endSlotId, op.dayOfWeek, op.subjectId, op.groupTag, op.room]
+        );
+        if (i === 0) {
+          mainEntry = result.rows[0];
+        } else {
+          extraMainFragments.push(result.rows[0]);
+        }
+      }
+    }
+  }
+
+  const allFragments = [...createdFragments, ...extraMainFragments];
+  const dedupedFragments = mainEntry
+    ? allFragments.filter((f) => f.id !== mainEntry.id)
+    : allFragments;
+
+  return {
+    mainEntry,
+    deletedIds,
+    createdFragments: dedupedFragments,
+  };
 }
 
 async function createEntry(
@@ -108,17 +342,27 @@ async function createEntry(
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await validateAndCheckConflicts(client, timetableId, { slotId, endSlotId, dayOfWeek, groupTag, excludeEntryId: null });
+    await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
+    await lockTimetableDay(client, timetableId, dayOfWeek);
 
-    const result = await client.query(
-      `INSERT INTO timetable_entries (timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
-      [timetableId, slotId, endSlotId, dayOfWeek, subjectId, groupTag, room]
+    const slotMap = await getSlotSortMap(client, timetableId);
+    const iStart = slotMap.idToSort.get(slotId);
+    const iEnd = slotMap.idToSort.get(endSlotId);
+    if (iStart == null || iEnd == null) {
+      throw new Error("Invalid slot range: slot not found in this timetable");
+    }
+    if (iEnd < iStart) {
+      throw new Error("end_slot_id must not end before start_slot_id begins");
+    }
+
+    const resolveResult = await resolveAndWrite(
+      client, timetableId, slotMap,
+      { kind: "create", slotId, endSlotId, dayOfWeek, subjectId, groupTag, room },
+      iStart, iEnd
     );
 
     await client.query("COMMIT");
-    return result.rows[0];
+    return resolveResult;
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -135,23 +379,27 @@ async function updateEntry(
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await validateAndCheckConflicts(client, timetableId, { slotId, endSlotId, dayOfWeek, groupTag, excludeEntryId: entryId });
+    await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
+    await lockTimetableDay(client, timetableId, dayOfWeek);
 
-    const result = await client.query(
-      `UPDATE timetable_entries
-       SET slot_id = $3, end_slot_id = $4, day_of_week = $5,
-           subject_id = $6, group_tag = $7, room = $8, updated_at = NOW()
-       WHERE timetable_id = $1 AND id = $2
-       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id, day_of_week, subject_id, group_tag, room, created_at, updated_at`,
-      [timetableId, entryId, slotId, endSlotId, dayOfWeek, subjectId, groupTag, room]
-    );
-
-    if (result.rows.length === 0) {
-      throw new Error("Entry not found");
+    const slotMap = await getSlotSortMap(client, timetableId);
+    const iStart = slotMap.idToSort.get(slotId);
+    const iEnd = slotMap.idToSort.get(endSlotId);
+    if (iStart == null || iEnd == null) {
+      throw new Error("Invalid slot range: slot not found in this timetable");
+    }
+    if (iEnd < iStart) {
+      throw new Error("end_slot_id must not end before start_slot_id begins");
     }
 
+    const resolveResult = await resolveAndWrite(
+      client, timetableId, slotMap,
+      { kind: "update", entryId, slotId, endSlotId, dayOfWeek, subjectId, groupTag, room },
+      iStart, iEnd
+    );
+
     await client.query("COMMIT");
-    return result.rows[0];
+    return resolveResult;
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -185,9 +433,7 @@ async function applyBatch(timetableId, operations) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await client.query(
-      "SET CONSTRAINTS timetable_entries_unique_span DEFERRED"
-    );
+    await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
 
     const touchedIds = [
       ...new Set(
@@ -220,6 +466,8 @@ async function applyBatch(timetableId, operations) {
       await lockTimetableDay(client, timetableId, day);
     }
 
+    const slotMap = await getSlotSortMap(client, timetableId);
+
     const created = [];
     const updated = [];
     const deletedIds = [];
@@ -236,51 +484,45 @@ async function applyBatch(timetableId, operations) {
         deletedIds.push(op.entryId);
       } else if (op.op === "update" || op.op === "create") {
         const endSlotId = op.endSlotId ?? op.slotId;
-        const range = await getSlotTimeRange(client, timetableId, op.slotId, endSlotId);
-        if (!range) {
+        const iStart = slotMap.idToSort.get(op.slotId);
+        const iEnd = slotMap.idToSort.get(endSlotId);
+        if (iStart == null || iEnd == null) {
           throw new Error(
             `Invalid slot range for ${op.op === "create" ? `tempId=${op.tempId}` : `entry ${op.entryId}`}`
           );
         }
-        if (range.endTime <= range.startTime) {
+        if (iEnd < iStart) {
           throw new Error(
             `end_slot_id must not end before start_slot_id (${op.op === "create" ? `tempId=${op.tempId}` : `entry ${op.entryId}`})`
           );
         }
 
+        const { mainEntry, deletedIds: fragDeleted, createdFragments } = await resolveAndWrite(
+          client, timetableId, slotMap,
+          {
+            kind: op.op,
+            entryId: op.entryId,
+            slotId: op.slotId,
+            endSlotId,
+            dayOfWeek: op.dayOfWeek,
+            subjectId: op.subjectId,
+            groupTag: op.groupTag ?? "all",
+            room: op.room ?? null,
+          },
+          iStart, iEnd
+        );
+
+        deletedIds.push(...fragDeleted);
+        createdFragments.forEach((f) => created.push({ tempId: null, entry: f }));
+
         if (op.op === "create") {
-          const result = await client.query(
-            `INSERT INTO timetable_entries
-               (timetable_id, slot_id, end_slot_id, day_of_week, subject_id, group_tag, room)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
-             RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id,
-                       day_of_week, subject_id, group_tag, room, created_at, updated_at`,
-            [timetableId, op.slotId, endSlotId, op.dayOfWeek, op.subjectId, op.groupTag ?? "all", op.room ?? null]
-          );
-          created.push({ tempId: op.tempId, entry: result.rows[0] });
-        } else {
-          const result = await client.query(
-            `UPDATE timetable_entries
-             SET slot_id = $3, end_slot_id = $4, day_of_week = $5,
-                 subject_id = $6, group_tag = $7, room = $8, updated_at = NOW()
-             WHERE timetable_id = $1 AND id = $2
-             RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id,
-                       day_of_week, subject_id, group_tag, room, created_at, updated_at`,
-            [timetableId, op.entryId, op.slotId, endSlotId, op.dayOfWeek, op.subjectId, op.groupTag ?? "all", op.room ?? null]
-          );
-          if (result.rows.length === 0) {
-            throw new Error(`Entry not found: ${op.entryId}`);
-          }
-          updated.push(result.rows[0]);
+          created.push({ tempId: op.tempId, entry: mainEntry });
+        } else if (mainEntry) {
+          updated.push(mainEntry);
         }
       } else {
         throw new Error(`Unknown operation type: ${op.op}`);
       }
-    }
-
-    const conflicts = await findFinalOverlaps(client, timetableId, [...affectedDays]);
-    if (conflicts.length > 0) {
-      throw new OverlapConflictError(conflicts);
     }
 
     await client.query("COMMIT");
