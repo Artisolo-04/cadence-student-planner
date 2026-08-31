@@ -525,8 +525,47 @@ async function applyBatch(timetableId, operations) {
       }
     }
 
+    const returnedEntryIds = [
+      ...created.map(({ entry }) => entry?.id),
+      ...updated.map((entry) => entry?.id),
+    ].filter((id) => id != null);
+
+    const hydratedById = new Map();
+    if (returnedEntryIds.length > 0) {
+      const hydratedResult = await client.query(
+        `SELECT e.id, e.slot_id AS start_slot_id, e.end_slot_id, e.day_of_week,
+                e.subject_id, e.group_tag, e.room,
+                s.name AS subject_name, s.color AS subject_color,
+                s.teacher AS subject_teacher
+         FROM timetable_entries e
+         JOIN subjects s ON s.id = e.subject_id
+         WHERE e.timetable_id = $1
+           AND e.id = ANY($2::int[])`,
+        [timetableId, [...new Set(returnedEntryIds)]]
+      );
+
+      for (const entry of hydratedResult.rows) {
+        hydratedById.set(entry.id, entry);
+      }
+    }
+
+    const hydratedCreated = created
+      .map((item) => {
+        const entry = hydratedById.get(item.entry?.id);
+        return entry ? { ...item, entry } : null;
+      })
+      .filter(Boolean);
+
+    const hydratedUpdated = updated
+      .map((entry) => hydratedById.get(entry.id))
+      .filter(Boolean);
+
     await client.query("COMMIT");
-    return { created, updated, deletedIds };
+    return {
+      created: hydratedCreated,
+      updated: hydratedUpdated,
+      deletedIds,
+    };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;

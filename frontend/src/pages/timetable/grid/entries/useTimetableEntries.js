@@ -1,303 +1,272 @@
-import { useEffect, useState } from "react";
-import api from "../../../../lib/api";
+import { useCallback, useMemo, useState } from "react";
 import { entryKey } from "../cell/cellDisplayUtils";
-import { planEntrySave } from "./entryPlanning";
-import {
-  getSpanCount,
-  findEntriesCoveringRange,
-  computeMaxFreeSpan,
-  clipRangeAgainstSameSubjectAll,
-} from "../layout/slotSpanUtils";
-import { resolveDragMove } from "../dragdrop/dragMovePlanner";
-import { useUndoRedo } from "../useUndoRedo";
-import { findEntryAtPosition, beforeStateFor, clearEntryAt } from "./entryPersistence";
+import { useTimetableHistory } from "../useTimetableHistory";
 import { useSubjects } from "./useSubjects";
-import { applyChanges } from "./applyChanges";
-import { createCommitSave } from "./commitSave";
+import { applyEntryBatch } from "./entryPersistence";
+import { reconcileBatchResult } from "./liveGridState";
 import { createResizeEntry } from "./resizeEntry";
 
-export function useTimetableEntries({ timetable, entriesByCell, entries, onWorkspaceChange, isEditMode, orderedSlots }) {
-  const subjects = useSubjects();
+function createTempId() {
+  return globalThis.crypto?.randomUUID?.() ??
+    `entry-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
+export function useTimetableEntries({
+  workspace,
+  onWorkspaceChange,
+  orderedSlots,
+  maxVersion,
+}) {
+  const { timetable, entries = [] } = workspace;
+  const subjects = useSubjects();
   const [activeCell, setActiveCell] = useState(null);
   const [saveError, setSaveError] = useState(null);
-  const [actionNotice, setActionNotice] = useState(null);
-  const undoRedo = useUndoRedo();
 
-  function reportSaveError(err, fallbackMessage) {
-    console.error(fallbackMessage, err);
-    if (err?.response?.status === 409) {
-      setSaveError({
-        message: err.response?.data?.error || "This overlaps with another entry.",
-        conflicts: err.response?.data?.conflicts || [],
-      });
-    } else {
-      setSaveError({
-        message: err?.response?.data?.error || fallbackMessage,
-        conflicts: [],
-      });
+  const entriesByCell = useMemo(() => {
+    const map = {};
+
+    for (const entry of entries) {
+      const startIndex = orderedSlots.findIndex(
+        (slot) => slot.id === entry.start_slot_id
+      );
+      const endIndex = orderedSlots.findIndex(
+        (slot) => slot.id === entry.end_slot_id
+      );
+
+      if (startIndex === -1 || endIndex === -1) continue;
+
+      for (
+        let index = Math.min(startIndex, endIndex);
+        index <= Math.max(startIndex, endIndex);
+        index += 1
+      ) {
+        const key = entryKey(orderedSlots[index].id, entry.day_of_week);
+        if (!map[key]) map[key] = [];
+        map[key].push(entry);
+      }
     }
+
+    return map;
+  }, [entries, orderedSlots]);
+
+  const replaceEntries = useCallback(
+    (nextEntries, currentVersion, resetMaxVersion = false) => {
+      const nextMaxVersion = resetMaxVersion
+        ? currentVersion
+        : workspace.maxVersion;
+
+      onWorkspaceChange?.({
+        ...workspace,
+        entries: nextEntries,
+        currentVersion,
+        maxVersion: nextMaxVersion,
+        timetable: {
+          ...workspace.timetable,
+          current_version: currentVersion,
+        },
+      });
+    },
+    [onWorkspaceChange, workspace]
+  );
+
+  const history = useTimetableHistory({
+    timetableId: timetable.id,
+    initialVersion: timetable.current_version,
+    initialMaxVersion: maxVersion,
+    replaceEntries,
+  });
+
+  function reportSaveError(error, fallbackMessage) {
+    console.error(fallbackMessage, error);
+    setSaveError({
+      message: error?.response?.data?.error || fallbackMessage,
+      conflicts: error?.response?.data?.conflicts || [],
+    });
   }
 
-  useEffect(() => {
-    if (!isEditMode) {
-      undoRedo.reset();
-      setActionNotice(null);
-    }
-  }, [isEditMode]);
+  const submitBatch = useCallback(
+    async (operations) => {
+      if (!operations.length) return null;
+      if (!history.acquire()) return null;
+
+      setSaveError(null);
+
+      try {
+        const result = await applyEntryBatch(timetable.id, operations);
+        const nextEntries = reconcileBatchResult(entries, result);
+
+        replaceEntries(nextEntries, result.currentVersion, true);
+        history.recordMutation(result.currentVersion);
+
+        return result;
+      } catch (error) {
+        reportSaveError(error, "Something went wrong saving this change.");
+        throw error;
+      } finally {
+        history.release();
+      }
+    },
+    [entries, history, replaceEntries, timetable.id]
+  );
+
+  const resizeEntry = useMemo(
+    () =>
+      createResizeEntry({
+        submitBatch,
+        setSaveError,
+        reportSaveError,
+      }),
+    [submitBatch]
+  );
 
   function openCell(slot, day, groupTag) {
-    setActiveCell({ slotId: slot.id, dayOfWeek: day.day_of_week, slot, day, groupTag });
+    setActiveCell({
+      slotId: slot.id,
+      dayOfWeek: day.day_of_week,
+      slot,
+      day,
+      groupTag,
+    });
   }
 
   function closePicker() {
     setActiveCell(null);
   }
 
-  async function refreshWorkspace() {
-    const { data } = await api.get(`/timetables/${timetable.id}`);
-    onWorkspaceChange?.(data);
+  function findActiveEntry() {
+    if (!activeCell) return null;
+
+    return (
+      entriesByCell[
+        entryKey(activeCell.slotId, activeCell.dayOfWeek)
+      ]?.find((entry) => entry.group_tag === activeCell.groupTag) ?? null
+    );
   }
 
-  async function recoverFromDesync() {
-    try {
-      await refreshWorkspace();
-    } catch (err) {
-      console.error("Resync after undo/redo failure also failed:", err);
-    }
-    undoRedo.reset();
-    setActionNotice({
-      title: "History reset after a sync issue",
-      warnings: [
-        "The last undo/redo step couldn't be completed cleanly, so history was cleared and the board was refreshed to match what's saved.",
-      ],
-    });
-  }
-
-  const commitSave = createCommitSave({
-    timetable,
-    entriesByCell,
-    entries,
-    orderedSlots,
-    undoRedo,
-    setSaveError,
-    reportSaveError,
-    refreshWorkspace,
-    setActionNotice,
-    closePicker,
-  });
-
-  const resizeEntry = createResizeEntry({
-    timetable,
-    entries,
-    orderedSlots,
-    undoRedo,
-    setSaveError,
-    reportSaveError,
-    refreshWorkspace,
-  });
-
-  function handleSelect({ subjectId, groupTag, room }) {
+  async function handleSelect({ subjectId, groupTag, room }) {
     if (!activeCell) return;
-    const cellEntries = entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)];
-    const plan = planEntrySave({
-      cellEntries,
-      sourceGroupTag: activeCell.groupTag,
-      targetGroupTag: groupTag,
-      subjectId,
-      room,
-    });
 
-    if (plan.noop) {
+    const existing = findActiveEntry();
+    const operation = existing
+      ? {
+          op: "update",
+          entryId: existing.id,
+          slotId: existing.start_slot_id,
+          endSlotId: existing.end_slot_id,
+          dayOfWeek: existing.day_of_week,
+          subjectId,
+          groupTag,
+          room,
+        }
+      : {
+          op: "create",
+          tempId: createTempId(),
+          slotId: activeCell.slotId,
+          endSlotId: activeCell.slotId,
+          dayOfWeek: activeCell.dayOfWeek,
+          subjectId,
+          groupTag,
+          room,
+        };
+
+    try {
+      await submitBatch([operation]);
       closePicker();
-      return;
+    } catch {
+      // submitBatch has already surfaced the server error.
     }
-
-    const finalGroupTag = plan.finalGroupTag || groupTag;
-    const target = { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek };
-    const payload = {
-      subjectId,
-      groupTag: finalGroupTag,
-      room,
-      deletions: plan.deletions.map((tag) => ({
-        slotId: target.slotId,
-        dayOfWeek: target.dayOfWeek,
-        groupTag: tag,
-      })),
-      swap: plan.swap,
-      actionType: plan.actionType,
-      warnings: plan.warnings,
-      target,
-      sourceCell: { slotId: activeCell.slotId, dayOfWeek: activeCell.dayOfWeek, groupTag: activeCell.groupTag },
-    };
-
-    commitSave(target, payload);
   }
 
   async function handleClear() {
-    if (!activeCell) return;
-
-    if (!undoRedo.acquire()) return;
-    setSaveError(null);
-    try {
-      const groupTag = activeCell.groupTag || "all";
-      const changes = [
-        {
-          slotId: activeCell.slotId,
-          dayOfWeek: activeCell.dayOfWeek,
-          groupTag,
-          before: beforeStateFor(entriesByCell, activeCell.slotId, activeCell.dayOfWeek, groupTag),
-          after: null,
-        },
-      ];
-      await clearEntryAt(timetable.id, entriesByCell, activeCell.slotId, activeCell.dayOfWeek, groupTag);
-      await refreshWorkspace();
-      undoRedo.push({ label: "Clear subject", changes });
+    const existing = findActiveEntry();
+    if (!existing) {
       closePicker();
-    } catch (err) {
-      reportSaveError(err, "Something went wrong clearing this cell.");
-    } finally {
-      undoRedo.release();
-    }
-  }
-
-  function saveDraggedSubject(drop, groupTag, sourceCell = null) {
-    let spanCount = 1;
-    let sourceEntry = null;
-    if (sourceCell) {
-      sourceEntry = findEntryAtPosition(
-        entriesByCell, sourceCell.slotId, sourceCell.dayOfWeek, sourceCell.groupTag
-      );
-      if (sourceEntry) {
-        spanCount = getSpanCount(sourceEntry, orderedSlots);
-      }
-    }
-
-    let effectiveDrop = drop;
-    if (groupTag !== "all") {
-      const startIdx = orderedSlots.findIndex((s) => s.id === drop.slotId);
-      const clip = clipRangeAgainstSameSubjectAll({
-        entries,
-        orderedSlots,
-        startIdx,
-        spanCount,
-        dayOfWeek: drop.dayOfWeek,
-        groupTag,
-        subjectId: drop.subjectId,
-        excludeEntryId: sourceEntry?.id ?? null,
-      });
-      if (!clip) return;
-      spanCount = clip.spanCount;
-      effectiveDrop = { ...drop, slotId: orderedSlots[clip.startIdx].id };
-    }
-
-    {
-      const clampStartIdx = orderedSlots.findIndex((s) => s.id === effectiveDrop.slotId);
-      if (clampStartIdx !== -1) {
-        const maxFree = computeMaxFreeSpan({
-          entries,
-          orderedSlots,
-          startIdx: clampStartIdx,
-          dayOfWeek: effectiveDrop.dayOfWeek,
-          groupTag,
-          excludeEntryId: sourceEntry?.id ?? null,
-          maxSpan: spanCount,
-        });
-        spanCount = Math.min(spanCount, maxFree);
-      }
-    }
-
-    let cellEntries = findEntriesCoveringRange(entries, orderedSlots, effectiveDrop.slotId, spanCount, effectiveDrop.dayOfWeek);
-    if (sourceEntry) {
-      const droppingOntoOwnPosition =
-        sourceEntry.start_slot_id === effectiveDrop.slotId &&
-        sourceEntry.day_of_week === effectiveDrop.dayOfWeek &&
-        (sourceCell.groupTag === "all" || sourceCell.groupTag === groupTag);
-      if (!droppingOntoOwnPosition) {
-        cellEntries = cellEntries.filter((e) => e.id !== sourceEntry.id);
-      }
-    }
-    const result = resolveDragMove({ cellEntries, drop: effectiveDrop, groupTag, sourceCell, spanCount });
-
-    if (result.kind === "noop") return;
-
-    if (result.kind === "clear-source") {
-
-      if (!undoRedo.acquire()) return;
-      const changes = [
-        {
-          slotId: result.sourceCell.slotId,
-          dayOfWeek: result.sourceCell.dayOfWeek,
-          groupTag: result.sourceCell.groupTag,
-          before: beforeStateFor(
-            entriesByCell,
-            result.sourceCell.slotId,
-            result.sourceCell.dayOfWeek,
-            result.sourceCell.groupTag
-          ),
-          after: null,
-        },
-      ];
-      clearEntryAt(timetable.id, entriesByCell, result.sourceCell.slotId, result.sourceCell.dayOfWeek, result.sourceCell.groupTag)
-        .then(refreshWorkspace)
-        .then(() => undoRedo.push({ label: "Move subject", changes }))
-        .catch((err) => {
-          reportSaveError(err, "Something went wrong moving this subject.");
-        })
-        .finally(() => undoRedo.release());
       return;
     }
 
-    commitSave(result.payload.target, result.payload);
+    try {
+      await submitBatch([{ op: "delete", entryId: existing.id }]);
+      closePicker();
+    } catch {
+      // submitBatch has already surfaced the server error.
+    }
+  }
+
+  async function saveDraggedSubject({
+    subjectId,
+    slotId,
+    dayOfWeek,
+    groupTag,
+    spanCount = 1,
+    sourceEntryId = null,
+    sourceCell = null,
+  }) {
+    const sourceEntry = sourceEntryId
+      ? entries.find((entry) => entry.id === sourceEntryId) ?? null
+      : null;
+
+    if (
+      sourceEntry &&
+      sourceEntry.start_slot_id === slotId &&
+      sourceEntry.day_of_week === dayOfWeek &&
+      sourceEntry.group_tag === groupTag
+    ) {
+      return;
+    }
+
+    const startIndex = orderedSlots.findIndex((slot) => slot.id === slotId);
+    if (startIndex === -1) return;
+
+    const endIndex = Math.min(
+      startIndex + Math.max(1, spanCount) - 1,
+      orderedSlots.length - 1
+    );
+
+    const fields = {
+      slotId,
+      endSlotId: orderedSlots[endIndex].id,
+      dayOfWeek,
+      subjectId,
+      groupTag,
+      room: sourceEntry?.room ?? sourceCell?.room ?? null,
+    };
+
+    const operation = sourceEntry
+      ? { op: "update", entryId: sourceEntry.id, ...fields }
+      : { op: "create", tempId: createTempId(), ...fields };
+
+    try {
+      await submitBatch([operation]);
+    } catch {
+      // submitBatch has already surfaced the server error.
+    }
   }
 
   async function undo() {
     try {
-      await undoRedo.undo((command) =>
-        applyChanges(command.changes, "undo", {
-          timetableId: timetable.id,
-          entries,
-          orderedSlots,
-          refreshWorkspace,
-        })
-      );
-      setActionNotice(null);
-    } catch (err) {
-      console.error("Undo failed:", err);
-      await recoverFromDesync();
+      await history.undo();
+    } catch (error) {
+      reportSaveError(error, "Something went wrong undoing the last change.");
     }
   }
 
   async function redo() {
     try {
-      await undoRedo.redo((command) =>
-        applyChanges(command.changes, "redo", {
-          timetableId: timetable.id,
-          entries,
-          orderedSlots,
-          refreshWorkspace,
-        })
-      );
-    } catch (err) {
-      console.error("Redo failed:", err);
-      await recoverFromDesync();
+      await history.redo();
+    } catch (error) {
+      reportSaveError(error, "Something went wrong redoing the last change.");
     }
   }
 
-  const activeEntry = activeCell
-    ? (entriesByCell[entryKey(activeCell.slotId, activeCell.dayOfWeek)] || []).find(
-        (e) => e.group_tag === activeCell.groupTag
-      ) || null
-    : null;
+  const activeEntry = findActiveEntry();
 
   return {
     subjects,
+    entriesByCell,
     activeCell,
     activeEntry,
     saveError,
     clearSaveError: () => setSaveError(null),
-    actionNotice,
-    clearActionNotice: () => setActionNotice(null),
     openCell,
     closePicker,
     handleSelect,
@@ -306,7 +275,7 @@ export function useTimetableEntries({ timetable, entriesByCell, entries, onWorks
     resizeEntry,
     undo,
     redo,
-    canUndo: undoRedo.canUndo,
-    canRedo: undoRedo.canRedo,
+    canUndo: history.canUndo,
+    canRedo: history.canRedo,
   };
 }

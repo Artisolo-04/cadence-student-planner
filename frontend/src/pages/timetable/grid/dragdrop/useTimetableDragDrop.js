@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { getSpanCount, computeMaxFreeSpan } from "../layout/slotSpanUtils";
+import { getSpanCount } from "../layout/slotSpanUtils";
 import { computeDragChipDimensions } from "../overlay/overlayGeometry";
 import {
   CANCEL_FADE_ANIMATION,
@@ -13,20 +13,14 @@ export const DRAG_CHIP_MARGIN_PX = 10;
 
 export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDrop }) {
   const [draggingSubject, setDraggingSubject] = useState(null);
-
   const [baseChipSize, setBaseChipSize] = useState(null);
-
   const [singleRowHeight, setSingleRowHeight] = useState(null);
-
   const [dropAnimation, setDropAnimation] = useState(() => CANCEL_FADE_ANIMATION);
   const [landing, setLanding] = useState(null);
-  const landingTimeoutRef = useRef(null);
-
   const [dragSpan, setDragSpan] = useState(1);
-
   const [dragSourceEntryId, setDragSourceEntryId] = useState(null);
-
   const [overCell, setOverCell] = useState(null);
+  const landingTimeoutRef = useRef(null);
 
   useEffect(() => {
     return () => window.clearTimeout(landingTimeoutRef.current);
@@ -43,19 +37,30 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
 
   function parseOverId(overId) {
     if (typeof overId !== "string") return null;
-    const parts = overId.split("::");
-    const cellKey = parts[1];
+
+    const [, cellKey, groupTag = "all"] = overId.split("::");
     if (!cellKey) return null;
-    const groupTag = parts[2] || "all";
-    const [slotIdStr, dayOfWeekStr] = cellKey.split("-");
-    const slotId = Number(slotIdStr);
-    const dayOfWeek = Number(dayOfWeekStr);
+
+    const [slotIdText, dayOfWeekText] = cellKey.split("-");
+    const slotId = Number(slotIdText);
+    const dayOfWeek = Number(dayOfWeekText);
+
     if (Number.isNaN(slotId) || Number.isNaN(dayOfWeek)) return null;
     return { slotId, dayOfWeek, groupTag };
   }
 
+  function resetDragState() {
+    setDraggingSubject(null);
+    setBaseChipSize(null);
+    setSingleRowHeight(null);
+    setDragSpan(1);
+    setDragSourceEntryId(null);
+    setOverCell(null);
+  }
+
   function handleDragStart(event) {
     const data = event.active?.data?.current;
+
     if (data) {
       setDraggingSubject({
         id: data.subjectId,
@@ -67,39 +72,42 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
 
     let span = 1;
     let sourceEntryId = null;
+
     if (data?.source === "cell") {
       const sourceEntry = (entries || []).find(
-        (e) =>
-          e.start_slot_id === data.sourceSlotId &&
-          e.day_of_week === data.sourceDayOfWeek &&
-          e.group_tag === data.sourceGroupTag
+        (entry) =>
+          entry.start_slot_id === data.sourceSlotId &&
+          entry.day_of_week === data.sourceDayOfWeek &&
+          entry.group_tag === data.sourceGroupTag
       );
+
       if (sourceEntry) {
         span = getSpanCount(sourceEntry, orderedSlots);
-        sourceEntryId = sourceEntry.id ?? null;
+        sourceEntryId = sourceEntry.id;
       }
     }
 
-    const cellEl =
+    const cellElement =
       (data?.source === "cell" &&
         document.querySelector(
           `[data-cell-full-key="${data.sourceSlotId}-${data.sourceDayOfWeek}"]`
         )) ||
       document.querySelector("[data-cell-full-key]");
 
-    if (cellEl) {
-      const rect = cellEl.getBoundingClientRect();
+    if (cellElement) {
+      const rect = cellElement.getBoundingClientRect();
       setBaseChipSize({ width: rect.width, height: rect.height });
     } else {
       setBaseChipSize(null);
     }
 
-    const rowRefEl = document.querySelector("[data-row-height-ref]");
-    if (rowRefEl) {
-      setSingleRowHeight(rowRefEl.getBoundingClientRect().height);
-    } else if (cellEl) {
-      const rect = cellEl.getBoundingClientRect();
-      setSingleRowHeight(rect.height / Math.max(1, span));
+    const rowReference = document.querySelector("[data-row-height-ref]");
+    if (rowReference) {
+      setSingleRowHeight(rowReference.getBoundingClientRect().height);
+    } else if (cellElement) {
+      setSingleRowHeight(
+        cellElement.getBoundingClientRect().height / Math.max(1, span)
+      );
     } else {
       setSingleRowHeight(null);
     }
@@ -107,7 +115,6 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
     setDragSpan(Math.max(1, span));
     setDragSourceEntryId(sourceEntryId);
     setOverCell(null);
-
     setDropAnimation(() => CANCEL_FADE_ANIMATION);
     lockPageScroll();
   }
@@ -118,12 +125,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
 
   function handleDragCancel() {
     setDropAnimation(() => CANCEL_FADE_ANIMATION);
-    setDraggingSubject(null);
-    setBaseChipSize(null);
-    setDragSpan(1);
-    setDragSourceEntryId(null);
-    setOverCell(null);
-    setSingleRowHeight(null);
+    resetDragState();
     unlockPageScroll();
   }
 
@@ -134,27 +136,33 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
     if (over) {
       const data = active?.data?.current;
       const subjectId = data?.subjectId;
+      const target = parseOverId(over.id);
+      const slot = target && orderedSlots.find((item) => item.id === target.slotId);
+      const day =
+        target &&
+        orderedDays.find((item) => item.day_of_week === target.dayOfWeek);
 
-      if (subjectId) {
-        const parts = over.id.split("::");
-        const cellKey = parts[1];
-        const groupTag = parts[2] || "all";
-        const [slotIdStr, dayOfWeekStr] = cellKey.split("-");
-        const slotId = Number(slotIdStr);
-        const dayOfWeek = Number(dayOfWeekStr);
+      if (subjectId && target && slot && day) {
+        dropped = true;
 
-        const slot = orderedSlots.find((s) => s.id === slotId);
-        const day = orderedDays.find((d) => d.day_of_week === dayOfWeek);
+        setLanding({
+          key: `${target.slotId}-${target.dayOfWeek}-${target.groupTag}`,
+          color: data.subjectColor,
+        });
+        window.clearTimeout(landingTimeoutRef.current);
+        landingTimeoutRef.current = window.setTimeout(
+          () => setLanding(null),
+          650
+        );
 
-        if (slot && day) {
-          dropped = true;
-
-          const landingKey = `${slotId}-${dayOfWeek}-${groupTag}`;
-          setLanding({ key: landingKey, color: data.subjectColor });
-          window.clearTimeout(landingTimeoutRef.current);
-          landingTimeoutRef.current = window.setTimeout(() => setLanding(null), 650);
-
-          const sourceCell =
+        onDrop({
+          subjectId,
+          slotId: target.slotId,
+          dayOfWeek: target.dayOfWeek,
+          groupTag: target.groupTag,
+          spanCount: dragSpan,
+          sourceEntryId: dragSourceEntryId,
+          sourceCell:
             data.source === "cell"
               ? {
                   slotId: data.sourceSlotId,
@@ -162,43 +170,24 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
                   groupTag: data.sourceGroupTag,
                   room: data.sourceRoom,
                 }
-              : null;
-
-          onDrop({ subjectId, slotId, dayOfWeek, groupTag, sourceCell });
-        }
+              : null,
+        });
       }
     }
 
-    const animation = dropped ? DROP_SCALE_FADE_ANIMATION : CANCEL_FADE_ANIMATION;
+    const animation = dropped
+      ? DROP_SCALE_FADE_ANIMATION
+      : CANCEL_FADE_ANIMATION;
+
     setDropAnimation(() => animation);
     window.setTimeout(unlockPageScroll, animation.duration + 20);
-    setDraggingSubject(null);
-    setBaseChipSize(null);
-    setDragSpan(1);
-    setDragSourceEntryId(null);
-    setOverCell(null);
-    setSingleRowHeight(null);
+    resetDragState();
   }
 
-  let effectiveDragSpan = dragSpan;
-  if (overCell) {
-    const rowIdx = orderedSlots.findIndex((s) => s.id === overCell.slotId);
-    if (rowIdx !== -1) {
-      effectiveDragSpan = computeMaxFreeSpan({
-        entries,
-        orderedSlots,
-        startIdx: rowIdx,
-        dayOfWeek: overCell.dayOfWeek,
-        groupTag: overCell.groupTag,
-        excludeEntryId: dragSourceEntryId,
-        maxSpan: dragSpan,
-      });
-    }
-  }
   const { dragChipSize, dragChipOffsetY } = computeDragChipDimensions({
     baseChipSize,
     singleRowHeight,
-    effectiveDragSpan,
+    effectiveDragSpan: dragSpan,
     marginPx: DRAG_CHIP_MARGIN_PX,
   });
 
@@ -210,7 +199,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
     dropAnimation,
     landing,
     dragSpan,
-    effectiveDragSpan,
+    effectiveDragSpan: dragSpan,
     overCell,
     handleDragStart,
     handleDragMove,
