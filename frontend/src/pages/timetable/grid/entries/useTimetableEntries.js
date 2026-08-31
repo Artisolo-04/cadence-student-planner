@@ -173,7 +173,7 @@ export function useTimetableEntries({
       await submitBatch([operation]);
       closePicker();
     } catch {
-      // submitBatch has already surfaced the server error.
+      
     }
   }
 
@@ -188,7 +188,7 @@ export function useTimetableEntries({
       await submitBatch([{ op: "delete", entryId: existing.id }]);
       closePicker();
     } catch {
-      // submitBatch has already surfaced the server error.
+      
     }
   }
 
@@ -238,7 +238,7 @@ export function useTimetableEntries({
     try {
       await submitBatch([operation]);
     } catch {
-      // submitBatch has already surfaced the server error.
+      
     }
   }
 

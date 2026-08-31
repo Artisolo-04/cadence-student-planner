@@ -323,7 +323,73 @@ async function resolveAndWrite(client, timetableId, slotMap, op, iStart, iEnd) {
     }
   }
 
-  const allFragments = [...createdFragments, ...extraMainFragments];
+  const postWriteDeletedIds = new Set();
+
+  async function coalesceWrittenEntry(entry) {
+    if (!entry || postWriteDeletedIds.has(entry.id)) return null;
+
+    const startSort = slotMap.idToSort.get(entry.start_slot_id);
+    const endSort = slotMap.idToSort.get(entry.end_slot_id);
+    if (startSort == null || endSort == null) return entry;
+
+    const { specs, deletedIds: adjacencyDeletedIds } =
+      await coalesceWithExistingNeighbors(
+        client,
+        timetableId,
+        op.dayOfWeek,
+        entry.id,
+        [{
+          subjectId: entry.subject_id,
+          groupTag: entry.group_tag,
+          room: entry.room,
+          startSort,
+          endSort,
+        }]
+      );
+
+    deletedIds.push(...adjacencyDeletedIds);
+    adjacencyDeletedIds.forEach((id) => postWriteDeletedIds.add(id));
+
+    const merged = specs[0];
+    if (
+      !merged ||
+      (merged.startSort === startSort && merged.endSort === endSort)
+    ) {
+      return entry;
+    }
+
+    const result = await client.query(
+      `UPDATE timetable_entries
+       SET slot_id = $3, end_slot_id = $4, updated_at = NOW()
+       WHERE timetable_id = $1 AND id = $2
+       RETURNING id, timetable_id, slot_id AS start_slot_id, end_slot_id,
+                 day_of_week, subject_id, group_tag, room, created_at, updated_at`,
+      [
+        timetableId,
+        entry.id,
+        slotMap.sortToId.get(merged.startSort),
+        slotMap.sortToId.get(merged.endSort),
+      ]
+    );
+
+    return result.rows[0] ?? entry;
+  }
+
+  mainEntry = await coalesceWrittenEntry(mainEntry);
+
+  for (let index = 0; index < createdFragments.length; index += 1) {
+    createdFragments[index] = await coalesceWrittenEntry(
+      createdFragments[index]
+    );
+  }
+
+  for (let index = 0; index < extraMainFragments.length; index += 1) {
+    extraMainFragments[index] = await coalesceWrittenEntry(
+      extraMainFragments[index]
+    );
+  }
+
+  const allFragments = [...createdFragments, ...extraMainFragments].filter(Boolean);
   const dedupedFragments = mainEntry
     ? allFragments.filter((f) => f.id !== mainEntry.id)
     : allFragments;
