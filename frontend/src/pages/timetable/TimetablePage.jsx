@@ -10,6 +10,7 @@ import TimetableGrid from "./grid/layout/TimetableGrid";
 import AnalyticsPanel from "./analytics/AnalyticsPanel";
 import ViewOptionsPanel from "./ViewOptionsPanel";
 import useTimetableViewOptions from "../../hooks/useTimetableViewOptions";
+import { publishWorkspaceGroupChange } from "../../lib/workspaceGroupSync";
 
 const GAP_PX = 8;
 
@@ -96,6 +97,11 @@ export default function TimetablePage() {
           timetable.id === data.timetable.id ? data.timetable : timetable
         )
       );
+        publishWorkspaceGroupChange({
+          workspaceId: data.timetable.id,
+            myGroup: data.timetable.my_group,
+        });
+
     } catch (err) {
       console.error("Update timetable group error:", err);
     }

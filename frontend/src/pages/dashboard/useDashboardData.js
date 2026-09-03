@@ -1,5 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import api from "../../lib/api";
+import {
+  WORKSPACE_GROUP_CHANGED_EVENT,
+  WORKSPACE_GROUP_SYNC_KEY,
+} from "../../lib/workspaceGroupSync";
 
 function normalizeSubject(raw) {
   return {
@@ -26,7 +30,13 @@ function toMinutes(hhmm) {
 }
 
 export const DAY_LABELS = [
-  "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
 ];
 
 const LAST_WORKSPACE_KEY = "cadence_last_workspace";
@@ -44,31 +54,36 @@ export function useDashboardData() {
   const [entries, setEntries] = useState([]);
   const [subjectsById, setSubjectsById] = useState({});
 
+  const latestGroupByWorkspaceRef = useRef(new Map());
+
   useEffect(() => {
     let cancelled = false;
+
     async function loadList() {
       setLoadingList(true);
       setError(null);
+
       try {
         const [{ data: listData }, { data: subjData }] = await Promise.all([
           api.get("/timetables"),
           api.get("/subjects"),
         ]);
+
         if (cancelled) return;
 
         const list = listData.timetables ?? [];
         setTimetables(list);
 
-        const map = {};
-        (subjData.subjects ?? []).forEach((s) => {
-          const n = normalizeSubject(s);
-          map[n.id] = n;
+        const subjectMap = {};
+        (subjData.subjects ?? []).forEach((subject) => {
+          const normalized = normalizeSubject(subject);
+          subjectMap[normalized.id] = normalized;
         });
-        setSubjectsById(map);
+        setSubjectsById(subjectMap);
 
         if (list.length > 0) {
           const lastId = localStorage.getItem(LAST_WORKSPACE_KEY);
-          const initial = list.find((t) => String(t.id) === lastId) ?? list[0];
+          const initial = list.find((item) => String(item.id) === lastId) ?? list[0];
           setActiveId(initial.id);
         }
       } catch (err) {
@@ -78,7 +93,9 @@ export function useDashboardData() {
         if (!cancelled) setLoadingList(false);
       }
     }
+
     loadList();
+
     return () => {
       cancelled = true;
     };
@@ -86,13 +103,27 @@ export function useDashboardData() {
 
   useEffect(() => {
     if (activeId == null) return;
+
     let cancelled = false;
+
     async function loadDetail() {
       setLoadingDetail(true);
+
       try {
         const { data } = await api.get(`/timetables/${activeId}`);
         if (cancelled) return;
-        setWorkspace(data.timetable);
+
+        const workspaceId = String(activeId);
+        const hasSynchronizedGroup =
+          latestGroupByWorkspaceRef.current.has(workspaceId);
+        const synchronizedGroup =
+          latestGroupByWorkspaceRef.current.get(workspaceId);
+
+        setWorkspace(
+          hasSynchronizedGroup
+            ? { ...data.timetable, my_group: synchronizedGroup }
+            : data.timetable
+        );
         setSlots(data.slots ?? []);
         setEntries(data.entries ?? []);
       } catch (err) {
@@ -102,9 +133,71 @@ export function useDashboardData() {
         if (!cancelled) setLoadingDetail(false);
       }
     }
+
     loadDetail();
+
     return () => {
       cancelled = true;
+    };
+  }, [activeId]);
+
+  useEffect(() => {
+    function applyGroupChange(detail) {
+      if (
+        !detail ||
+        detail.workspaceId == null ||
+        String(detail.workspaceId) !== String(activeId)
+      ) {
+        return;
+      }
+
+      const nextGroup = detail.myGroup ?? null;
+      const workspaceId = String(detail.workspaceId);
+
+      latestGroupByWorkspaceRef.current.set(workspaceId, nextGroup);
+
+      setWorkspace((current) => {
+        if (!current || String(current.id) !== workspaceId) return current;
+        if ((current.my_group ?? null) === nextGroup) return current;
+
+        return { ...current, my_group: nextGroup };
+      });
+
+      setTimetables((current) =>
+        current.map((item) =>
+          String(item.id) === workspaceId
+            ? { ...item, my_group: nextGroup }
+            : item
+        )
+      );
+    }
+
+    function handleCustomGroupChange(event) {
+      applyGroupChange(event.detail);
+    }
+
+    function handleStorageGroupChange(event) {
+      if (!event.newValue || event.key !== WORKSPACE_GROUP_SYNC_KEY) return;
+
+      try {
+        applyGroupChange(JSON.parse(event.newValue));
+      } catch (error) {
+        console.warn("Ignoring invalid workspace group synchronization event:", error);
+      }
+    }
+
+    window.addEventListener(
+      WORKSPACE_GROUP_CHANGED_EVENT,
+      handleCustomGroupChange
+    );
+    window.addEventListener("storage", handleStorageGroupChange);
+
+    return () => {
+      window.removeEventListener(
+        WORKSPACE_GROUP_CHANGED_EVENT,
+        handleCustomGroupChange
+      );
+      window.removeEventListener("storage", handleStorageGroupChange);
     };
   }, [activeId]);
 
@@ -115,39 +208,61 @@ export function useDashboardData() {
 
   const visibleEntries = useMemo(() => {
     if (!workspace) return [];
+
     const myGroup = workspace.my_group ?? workspace.myGroup ?? null;
-    return entries.filter((e) => {
-      const tag = e.group_tag ?? e.groupTag ?? "all";
-      return tag === "all" || !myGroup || tag === myGroup;
+
+    return entries.filter((entry) => {
+      const groupTag = entry.group_tag ?? entry.groupTag ?? "all";
+      return groupTag === "all" || !myGroup || groupTag === myGroup;
     });
   }, [workspace, entries]);
 
   const todaySessions = useMemo(() => {
     if (!workspace) return [];
-    const todayIdx = getTodayIndex();
 
+    const todayIdx = getTodayIndex();
     const slotsById = {};
-    slots.forEach((s) => (slotsById[s.id] = s));
+
+    slots.forEach((slot) => {
+      slotsById[slot.id] = slot;
+    });
 
     return visibleEntries
-      .filter((e) => (e.day_of_week ?? e.dayOfWeek) === todayIdx)
-      .map((e) => {
-        const slotId = e.slot_id ?? e.slotId;
-        const slot = slotsById[slotId];
-        const subjectId = e.subject_id ?? e.subjectId;
+      .filter(
+        (entry) =>
+          Number(entry.day_of_week ?? entry.dayOfWeek) === todayIdx
+      )
+      .map((entry) => {
+        const startSlotId =
+          entry.start_slot_id ??
+          entry.startSlotId ??
+          entry.slot_id ??
+          entry.slotId;
+
+        const endSlotId =
+          entry.end_slot_id ??
+          entry.endSlotId ??
+          startSlotId;
+
+        const startSlot = slotsById[startSlotId];
+        const endSlot = slotsById[endSlotId] ?? startSlot;
+
+        const subjectId = entry.subject_id ?? entry.subjectId;
         const subject = subjectsById[subjectId];
+        const groupTag = entry.group_tag ?? entry.groupTag ?? "all";
+
         return {
-          key: `${slotId}-${e.group_tag ?? e.groupTag ?? "all"}`,
-          start: slot?.start_time ?? slot?.startTime ?? null,
-          end: slot?.end_time ?? slot?.endTime ?? null,
-          subjectName: subject?.name ?? "Unknown subject",
-          teacher: subject?.teacher ?? "",
-          color: subject?.color ?? "#2dd4bf",
-          room: e.room ?? null,
-          groupTag: e.group_tag ?? e.groupTag ?? "all",
+          key: `${startSlotId}-${endSlotId}-${groupTag}`,
+          start: startSlot?.start_time ?? startSlot?.startTime ?? null,
+          end: endSlot?.end_time ?? endSlot?.endTime ?? null,
+          subjectName: subject?.name ?? entry.subject_name ?? "Unknown subject",
+          teacher: subject?.teacher ?? entry.subject_teacher ?? "",
+          color: subject?.color ?? entry.subject_color ?? "#2dd4bf",
+          room: entry.room ?? null,
+          groupTag,
         };
       })
-      .filter((s) => s.start)
+      .filter((session) => session.start && session.end)
       .sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
   }, [workspace, slots, visibleEntries, subjectsById]);
 
@@ -155,12 +270,13 @@ export function useDashboardData() {
     if (!workspace) return { total: 0, busiestDay: null };
 
     const countByDay = {};
-    visibleEntries.forEach((e) => {
-      const day = e.day_of_week ?? e.dayOfWeek;
+
+    visibleEntries.forEach((entry) => {
+      const day = Number(entry.day_of_week ?? entry.dayOfWeek);
       countByDay[day] = (countByDay[day] || 0) + 1;
     });
 
-    const total = Object.values(countByDay).reduce((a, b) => a + b, 0);
+    const total = Object.values(countByDay).reduce((sum, count) => sum + count, 0);
 
     let busiestDay = null;
     Object.entries(countByDay).forEach(([day, count]) => {
@@ -178,10 +294,15 @@ export function useDashboardData() {
   }, [workspace, visibleEntries]);
 
   const nowMin = timeNowMinutes();
+
   const currentKey = todaySessions.find(
-    (s) => toMinutes(s.start) <= nowMin && nowMin < toMinutes(s.end)
+    (session) =>
+      toMinutes(session.start) <= nowMin && nowMin < toMinutes(session.end)
   )?.key;
-  const nextSession = todaySessions.find((s) => toMinutes(s.start) > nowMin);
+
+  const nextSession = todaySessions.find(
+    (session) => toMinutes(session.start) > nowMin
+  );
 
   return {
     loading: loadingList || loadingDetail,
