@@ -7,7 +7,11 @@ const ENTRY_MINUTES_QUERY = `
       e.day_of_week,
       e.group_tag,
       e.subject_id,
+      e.slot_id AS start_slot_id,
+      e.end_slot_id,
+      e.room,
       s.name AS subject_name,
+      s.color AS subject_color,
       s.teacher AS subject_teacher,
       ss.sort_order AS start_sort,
       es.sort_order AS end_sort
@@ -19,14 +23,16 @@ const ENTRY_MINUTES_QUERY = `
   )
   SELECT
     es.id, es.day_of_week, es.group_tag, es.subject_id,
-    es.subject_name, es.subject_teacher, es.start_sort, es.end_sort,
+    es.start_slot_id, es.end_slot_id, es.room,
+    es.subject_name, es.subject_color, es.subject_teacher, es.start_sort, es.end_sort,
     COALESCE(SUM(EXTRACT(EPOCH FROM (sl.end_time - sl.start_time)) / 60), 0) AS minutes
   FROM entry_spans es
   JOIN timetable_slots sl
     ON sl.timetable_id = $1
    AND sl.sort_order BETWEEN es.start_sort AND es.end_sort
   GROUP BY es.id, es.day_of_week, es.group_tag, es.subject_id,
-           es.subject_name, es.subject_teacher, es.start_sort, es.end_sort
+           es.start_slot_id, es.end_slot_id, es.room,
+           es.subject_name, es.subject_color, es.subject_teacher, es.start_sort, es.end_sort
 `;
 
 const ALL_SLOTS_QUERY = `
@@ -57,26 +63,27 @@ async function computeAnalytics(timetableId, myGroup) {
   const allEntries = entriesResult.rows;
   const slots = slotsResult.rows;
 
-  const effectiveEntries = myGroup == null
-    ? allEntries
-    : allEntries.filter((e) => e.group_tag === "all" || e.group_tag === myGroup);
+  const effectiveEntries = allEntries;
 
   const facultyMap = new Map();
   for (const e of effectiveEntries) {
     const teacher = e.subject_teacher?.trim();
     if (!teacher) continue;
     if (!facultyMap.has(teacher)) {
-      facultyMap.set(teacher, { teacher, subjectIds: new Set(), minutes: 0 });
+      facultyMap.set(teacher, { teacher, subjects: new Map(), minutes: 0 });
     }
     const f = facultyMap.get(teacher);
-    f.subjectIds.add(e.subject_id);
+    if (!f.subjects.has(e.subject_id)) {
+      f.subjects.set(e.subject_id, e.subject_name);
+    }
     f.minutes += Number(e.minutes);
   }
   const facultyAllocation = [...facultyMap.values()]
     .map((f) => ({
       teacher: f.teacher,
-      subjectCount: f.subjectIds.size,
+      subjectCount: f.subjects.size,
       weeklyHours: round1(f.minutes / 60),
+      subjects: [...f.subjects.entries()].map(([id, name]) => ({ id, name })),
     }))
     .sort((a, b) => b.weeklyHours - a.weeklyHours);
 
@@ -175,6 +182,18 @@ async function computeAnalytics(timetableId, myGroup) {
     ? activeDays.reduce((max, d) => (d.hours > max.hours ? d : max))
     : null;
 
+  const rawEntries = effectiveEntries.map((e) => ({
+    id: e.id,
+    start_slot_id: e.start_slot_id,
+    end_slot_id: e.end_slot_id,
+    day_of_week: e.day_of_week,
+    group_tag: e.group_tag,
+    subject_name: e.subject_name,
+    subject_color: e.subject_color,
+    room: e.room,
+    teacher: e.subject_teacher,
+  }));
+
   return {
     facultyAllocation,
     subjectDurationRatios,
@@ -182,6 +201,7 @@ async function computeAnalytics(timetableId, myGroup) {
     dailyLoad,
     longestDay: longestDay ? { day: longestDay.day, hours: longestDay.hours } : null,
     totalWeeklyHours: round1(totalEffectiveMinutes / 60),
+    rawEntries,
   };
 }
 
