@@ -37,7 +37,9 @@ function TimetableCell({
     myGroup
   );
 
-  const forceSplit = display.mode === "split" || ((g1Hidden || g2Hidden) && display.mode === "empty");
+  const forceSplit =
+    display.mode === "split" ||
+    ((g1Hidden || g2Hidden) && display.mode === "empty");
 
   if (forceSplit) {
     return (
@@ -67,10 +69,33 @@ function TimetableCell({
     );
   }
 
-  const isFilteredG1 = display.mode === "filtered" && display.groupTag === "g1";
-  const isFilteredG2 = display.mode === "filtered" && display.groupTag === "g2";
+  const isFilteredG1 =
+    display.mode === "filtered" && display.groupTag === "g1";
+  const isFilteredG2 =
+    display.mode === "filtered" && display.groupTag === "g2";
+  const isFilteredLaneCovered =
+    (isFilteredG1 && g1Hidden) ||
+    (isFilteredG2 && g2Hidden);
+
+  if (isFilteredLaneCovered) {
+    return (
+      <div
+        aria-hidden="true"
+        className="pointer-events-none"
+        style={{
+          gridColumn: `${g1Column} / span 2`,
+          gridRow: `${gridRow} / span 1`,
+        }}
+      />
+    );
+  }
+
   const rowSpan = isFilteredG1 ? g1Span : isFilteredG2 ? g2Span : allSpan;
-  const isLastRowForBlock = isFilteredG1 ? g1IsLastRow : isFilteredG2 ? g2IsLastRow : allIsLastRow;
+  const isLastRowForBlock = isFilteredG1
+    ? g1IsLastRow
+    : isFilteredG2
+      ? g2IsLastRow
+      : allIsLastRow;
 
   return (
     <TimetableCellFull
