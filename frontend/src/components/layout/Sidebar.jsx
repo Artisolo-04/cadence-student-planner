@@ -1,5 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import SidebarLink from "./SidebarLink";
+import WorkspaceContextSwitcher from "./WorkspaceContextSwitcher";
 import Tooltip from "../ui/Tooltip";
 import { navItems } from "../../lib/navigation";
 import { useSidebar } from "../../hooks/useSidebar";
@@ -42,15 +43,19 @@ export default function Sidebar() {
         collapsed ? "w-14 px-2" : "w-52 px-2"
       }`}
     >
-      <nav className="flex flex-col gap-2">
-        {navItems.map((item) => (
-          <SidebarLink key={item.path} to={item.path} icon={item.icon} collapsed={collapsed}>
-            {item.label}
-          </SidebarLink>
-        ))}
-      </nav>
+      <div className="flex flex-col">
+        <nav className="flex flex-col gap-2">
+          {navItems.map((item) => (
+            <SidebarLink key={item.path} to={item.path} icon={item.icon} collapsed={collapsed}>
+              {item.label}
+            </SidebarLink>
+          ))}
+        </nav>
+      </div>
 
       <div className="pt-2 border-t border-[var(--color-border)]">
+        <WorkspaceContextSwitcher />
+
         {collapsed ? (
           <Tooltip label="Expand sidebar">{toggleButton}</Tooltip>
         ) : (
