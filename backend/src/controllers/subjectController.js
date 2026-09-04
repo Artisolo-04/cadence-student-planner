@@ -4,9 +4,19 @@ const {
   findSubjectsByUserId,
   updateSubject,
   deleteSubject,
+  findSubjectDetail,
 } = require("../models/Subject");
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
+function parseTimetableId(raw) {
+  if (raw == null || raw === "") return { timetableId: null, invalid: false };
+  const timetableId = Number(raw);
+  if (!Number.isInteger(timetableId) || timetableId <= 0) {
+    return { timetableId: null, invalid: true };
+  }
+  return { timetableId, invalid: false };
+}
 
 async function addSubject(req, res) {
   try {
@@ -37,7 +47,12 @@ async function addSubject(req, res) {
 
 async function listSubjects(req, res) {
   try {
-    const subjects = await findSubjectsByUserId(req.userId);
+    const { timetableId, invalid } = parseTimetableId(req.query.timetableId);
+    if (invalid) {
+      return res.status(400).json({ error: "Invalid timetableId" });
+    }
+
+    const subjects = await findSubjectsByUserId(req.userId, timetableId);
     res.json({ subjects });
   } catch (err) {
     console.error("List subjects error:", err);
@@ -90,9 +105,35 @@ async function removeSubject(req, res) {
   }
 }
 
+async function getSubjectDetail(req, res) {
+  try {
+    const existing = await findSubjectById(req.params.id);
+    if (!existing || existing.user_id !== req.userId) {
+      return res.status(404).json({ error: "Subject not found" });
+    }
+
+    const { timetableId, invalid } = parseTimetableId(req.query.timetableId);
+    if (invalid) {
+      return res.status(400).json({ error: "Invalid timetableId" });
+    }
+
+    if (timetableId == null) {
+      const { homework } = await findSubjectDetail(req.params.id, req.userId, -1);
+      return res.json({ subject: existing, entries: [], homework });
+    }
+
+    const detail = await findSubjectDetail(req.params.id, req.userId, timetableId);
+    res.json({ subject: existing, ...detail });
+  } catch (err) {
+    console.error("Subject detail error:", err);
+    res.status(500).json({ error: "Something went wrong fetching subject details" });
+  }
+}
+
 module.exports = {
   addSubject,
   listSubjects,
   editSubject,
   removeSubject,
+  getSubjectDetail,
 };
