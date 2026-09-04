@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
-import { X, Clock, MapPin, Users, BookOpen } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { X, Clock, MapPin, Users, BookOpen, Plus } from "lucide-react";
 import api from "../../lib/api";
+import Checkbox from "../../components/ui/Checkbox";
+import Input from "../../components/ui/Input";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const PRIORITY_DOT = {
+  high: "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.7)]",
+  normal: "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]",
+  low: "bg-slate-500 shadow-[0_0_4px_rgba(100,116,139,0.4)]",
+};
 
 function formatTime(t) {
   if (!t) return "";
@@ -13,6 +21,35 @@ function formatTime(t) {
   return `${displayHour}:${m} ${suffix}`;
 }
 
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function useScrollFade(deps) {
+  const ref = useRef(null);
+  const [showTop, setShowTop] = useState(false);
+  const [showBottom, setShowBottom] = useState(false);
+
+  function update() {
+    const el = ref.current;
+    if (!el) return;
+    setShowTop(el.scrollTop > 4);
+    setShowBottom(el.scrollTop + el.clientHeight < el.scrollHeight - 4);
+  }
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(update);
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", update);
+    };
+    
+  }, deps);
+
+  return { ref, showTop, showBottom, onScroll: update };
+}
+
 export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
   const open = Boolean(subject);
   const [mounted, setMounted] = useState(false);
@@ -20,6 +57,14 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState("");
+
+  const [togglingIds, setTogglingIds] = useState(() => new Set());
+  const [newTitle, setNewTitle] = useState("");
+  const [addingHomework, setAddingHomework] = useState(false);
+  const [addError, setAddError] = useState("");
+
+  const scheduleFade = useScrollFade([detail?.entries]);
+  const homeworkFade = useScrollFade([detail?.homework]);
 
   useEffect(() => {
     let raf1, raf2;
@@ -53,6 +98,8 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
     setLoading(true);
     setError("");
     setDetail(null);
+    setNewTitle("");
+    setAddError("");
 
     api
       .get(`/subjects/${subject.id}/detail`, {
@@ -74,6 +121,72 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
     };
   }, [open, subject, timetableId]);
 
+  async function toggleHomeworkStatus(hw) {
+    const nextStatus = hw.status === "done" ? "todo" : "done";
+
+    setTogglingIds((prev) => new Set(prev).add(hw.id));
+    setDetail((prev) => ({
+      ...prev,
+      homework: prev.homework.map((item) =>
+        item.id === hw.id ? { ...item, status: nextStatus } : item
+      ),
+    }));
+
+    try {
+      const { data } = await api.patch(`/homework/${hw.id}/status`, {
+        status: nextStatus,
+      });
+      setDetail((prev) => ({
+        ...prev,
+        homework: prev.homework.map((item) =>
+          item.id === hw.id ? { ...item, ...data } : item
+        ),
+      }));
+    } catch (err) {
+      console.error("Toggle homework status error:", err);
+      setDetail((prev) => ({
+        ...prev,
+        homework: prev.homework.map((item) =>
+          item.id === hw.id ? { ...item, status: hw.status } : item
+        ),
+      }));
+    } finally {
+      setTogglingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(hw.id);
+        return next;
+      });
+    }
+  }
+
+  async function handleAddHomework(e) {
+    e.preventDefault();
+    const title = newTitle.trim();
+    if (!title || addingHomework) return;
+
+    setAddingHomework(true);
+    setAddError("");
+
+    try {
+      const { data } = await api.post("/homework", {
+        subjectId: subject.id,
+        title,
+        dueDate: todayISO(),
+        status: "todo",
+      });
+      setDetail((prev) => ({
+        ...prev,
+        homework: [...prev.homework, data],
+      }));
+      setNewTitle("");
+    } catch (err) {
+      console.error("Create homework error:", err);
+      setAddError("Couldn't add that task.");
+    } finally {
+      setAddingHomework(false);
+    }
+  }
+
   if (!mounted) return null;
 
   return (
@@ -86,20 +199,20 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
         aria-hidden="true"
       />
       <aside
-        className={`relative flex h-full w-full max-w-sm flex-col overflow-hidden border-l border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] backdrop-blur-2xl shadow-[0_0_60px_-15px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out ${
+        className={`relative flex h-full w-full max-w-sm flex-col overflow-hidden border-l border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] shadow-[0_0_60px_-15px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out ${
           visible ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {subject && (
           <>
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl"
-              style={{ backgroundColor: subject.color }}
-            />
+            <div className="relative z-10 flex shrink-0 items-start justify-between gap-3 overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl"
+                style={{ backgroundColor: subject.color }}
+              />
 
-            <div className="relative z-10 flex shrink-0 items-start justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
-              <div className="flex items-center gap-3">
+              <div className="relative z-10 flex items-center gap-3">
                 <span
                   className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--color-border)]"
                   style={{
@@ -119,91 +232,186 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
+                className="relative z-10 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="relative z-10 min-h-0 flex-1 overflow-y-auto scrollbar-cadence px-5 py-4">
+            <div className="relative z-10 flex min-h-0 flex-1 flex-col px-5 py-4 backdrop-blur-2xl">
               {loading && <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>}
               {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
 
               {!loading && !error && detail && (
-                <>
-                  <section className="mb-6">
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                <div className="flex min-h-0 flex-1 flex-col gap-4">
+                  {}
+                  <section className="flex min-h-0 flex-1 basis-0 flex-col">
+                    <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                       Weekly schedule
                     </h4>
-                    {detail.entries.length === 0 ? (
-                      <p className="text-sm text-[var(--color-text-muted)]">
-                        {timetableId
-                          ? "Not scheduled in this workspace."
-                          : "Select a workspace to see scheduling."}
-                      </p>
-                    ) : (
-                      <ul className="flex flex-col gap-2">
-                        {detail.entries.map((entry) => (
-                          <li
-                            key={entry.id}
-                            className="rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-2 text-sm text-[var(--color-text)]"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium">{DAY_LABELS[entry.day_of_week]}</span>
-                              <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
-                                <Clock size={12} />
-                                {formatTime(entry.start_time)}–{formatTime(entry.end_time)}
-                              </span>
-                            </div>
-                            {(entry.room || entry.group_tag !== "all") && (
-                              <div className="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
-                                {entry.room && (
-                                  <span className="flex items-center gap-1">
-                                    <MapPin size={12} />
-                                    {entry.room}
+                    <div className="relative min-h-0 flex-1">
+                      <div
+                        ref={scheduleFade.ref}
+                        onScroll={scheduleFade.onScroll}
+                        className="h-full overflow-y-auto scrollbar-cadence pr-1"
+                      >
+                        {detail.entries.length === 0 ? (
+                          <p className="text-sm text-[var(--color-text-muted)]">
+                            {timetableId
+                              ? "Not scheduled in this workspace."
+                              : "Select a workspace to see scheduling."}
+                          </p>
+                        ) : (
+                          <ul className="flex flex-col gap-2">
+                            {detail.entries.map((entry) => (
+                              <li
+                                key={entry.id}
+                                className="rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-2 text-sm text-[var(--color-text)]"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-medium">{DAY_LABELS[entry.day_of_week]}</span>
+                                  <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                                    <Clock size={12} />
+                                    {formatTime(entry.start_time)}–{formatTime(entry.end_time)}
                                   </span>
+                                </div>
+                                {(entry.room || entry.group_tag !== "all") && (
+                                  <div className="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                                    {entry.room && (
+                                      <span className="flex items-center gap-1">
+                                        <MapPin size={12} />
+                                        {entry.room}
+                                      </span>
+                                    )}
+                                    {entry.group_tag !== "all" && (
+                                      <span className="flex items-center gap-1">
+                                        <Users size={12} />
+                                        {entry.group_tag.toUpperCase()}
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
-                                {entry.group_tag !== "all" && (
-                                  <span className="flex items-center gap-1">
-                                    <Users size={12} />
-                                    {entry.group_tag.toUpperCase()}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+                          scheduleFade.showTop ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                      <div
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+                          scheduleFade.showBottom ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                    </div>
                   </section>
 
-                  <section>
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                  <div className="shrink-0 border-t border-[var(--color-border)]" />
+
+                  {}
+                  <section className="flex min-h-0 flex-1 basis-0 flex-col">
+                    <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
                       Homework
                     </h4>
-                    {detail.homework.length === 0 ? (
-                      <p className="text-sm text-[var(--color-text-muted)]">No homework linked yet.</p>
-                    ) : (
-                      <ul className="flex flex-col gap-2">
-                        {detail.homework.map((hw) => (
-                          <li
-                            key={hw.id}
-                            className="rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-2 text-sm"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-[var(--color-text)] line-clamp-1">
-                                {hw.title}
-                              </span>
-                              <span className="shrink-0 text-xs text-[var(--color-text-muted)]">
-                                {hw.due_date?.slice(0, 10)}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
+
+                    <form onSubmit={handleAddHomework} className="mb-3 flex shrink-0 items-center gap-2">
+                      <div className="flex-1">
+                        <Input
+                          id="quick-add-homework"
+                          value={newTitle}
+                          onChange={(e) => setNewTitle(e.target.value)}
+                          placeholder="Add a task…"
+                          disabled={addingHomework}
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={!newTitle.trim() || addingHomework}
+                        aria-label="Add task"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] disabled:opacity-40 disabled:hover:border-[var(--color-border)] disabled:hover:text-[var(--color-text-muted)]"
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </form>
+                    {addError && (
+                      <p className="mb-2 shrink-0 text-xs text-[var(--color-danger)]">{addError}</p>
                     )}
+
+                    <div className="relative min-h-0 flex-1">
+                      <div
+                        ref={homeworkFade.ref}
+                        onScroll={homeworkFade.onScroll}
+                        className="h-full overflow-y-auto scrollbar-cadence pr-1"
+                      >
+                        {detail.homework.length === 0 ? (
+                          <p className="text-sm text-[var(--color-text-muted)]">No homework linked yet.</p>
+                        ) : (
+                          <ul className="flex flex-col gap-2">
+                            {detail.homework.map((hw) => {
+                              const isDone = hw.status === "done";
+                              const isToggling = togglingIds.has(hw.id);
+                              const dotClass = PRIORITY_DOT[hw.priority] || PRIORITY_DOT.normal;
+                              return (
+                                <li
+                                  key={hw.id}
+                                  className="rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-2 text-sm"
+                                >
+                                  <div className="flex items-center gap-2.5">
+                                    <Checkbox
+                                      id={`hw-${hw.id}`}
+                                      checked={isDone}
+                                      disabled={isToggling}
+                                      onChange={() => toggleHomeworkStatus(hw)}
+                                      className="shrink-0"
+                                    />
+
+                                    <span
+                                      aria-hidden="true"
+                                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`}
+                                      title={`${hw.priority || "normal"} priority`}
+                                    />
+
+                                    <span
+                                      className={`flex-1 font-medium line-clamp-1 transition-all duration-200 ${
+                                        isDone
+                                          ? "text-[var(--color-text-muted)] line-through opacity-40"
+                                          : "text-[var(--color-text)] opacity-100"
+                                      }`}
+                                    >
+                                      {hw.title}
+                                    </span>
+                                    <span className="shrink-0 text-xs text-[var(--color-text-muted)]">
+                                      {hw.due_date?.slice(0, 10)}
+                                    </span>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+                          homeworkFade.showTop ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                      <div
+                        aria-hidden="true"
+                        className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+                          homeworkFade.showBottom ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                    </div>
                   </section>
-                </>
+                </div>
               )}
             </div>
           </>
