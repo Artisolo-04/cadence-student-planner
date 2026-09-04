@@ -99,6 +99,18 @@ export default function FocusTimeline({ sessions }) {
       })`
     : undefined;
 
+  const timelineGroups = [];
+  if (hasSessions) {
+    sessions.forEach((session) => {
+      const lastGroup = timelineGroups[timelineGroups.length - 1];
+      if (lastGroup && lastGroup.start === session.start && lastGroup.end === session.end) {
+        lastGroup.items.push(session);
+      } else {
+        timelineGroups.push({ start: session.start, end: session.end, items: [session] });
+      }
+    });
+  }
+
   return (
     <div
       className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
@@ -164,26 +176,29 @@ export default function FocusTimeline({ sessions }) {
             }
             className="scrollbar-cadence relative mt-4 flex-1 min-h-0 overflow-y-auto border-t border-white/10 pl-1 pr-1 pt-4 transition-[mask-image] duration-150"
           >
-            {sessions.map((session, i) => {
-              const start = toMinutes(session.start);
-              const end = toMinutes(session.end);
+            {timelineGroups.map((group, gi) => {
+              const start = toMinutes(group.start);
+              const end = toMinutes(group.end);
               const isCurrent = nowMin >= start && nowMin < end;
               const isPast = end <= nowMin;
               const progress = isCurrent
                 ? Math.min(100, Math.max(0, ((nowMin - start) / (end - start)) * 100))
                 : 0;
               const minutesLeft = isCurrent ? Math.max(0, end - nowMin) : 0;
-              const isLast = i === sessions.length - 1;
+              const isLast = gi === timelineGroups.length - 1;
+              const isSplit = group.items.length > 1;
 
-              const next = sessions[i + 1];
-              const gap = next ? toMinutes(next.start) - end : null;
+              const nextGroup = timelineGroups[gi + 1];
+              const gap = nextGroup ? toMinutes(nextGroup.start) - end : null;
+
+              const nodeAccent = isSplit ? "var(--color-primary)" : group.items[0].color;
 
               const nodeStyle = isCurrent
                 ? {
-                    backgroundColor: session.color,
-                    borderColor: session.color,
+                    backgroundColor: nodeAccent,
+                    borderColor: nodeAccent,
                     color: "#fff",
-                    boxShadow: `0 0 0 4px color-mix(in srgb, ${session.color} 25%, transparent)`,
+                    boxShadow: `0 0 0 4px color-mix(in srgb, ${nodeAccent} 25%, transparent)`,
                   }
                 : isPast
                 ? {
@@ -198,13 +213,13 @@ export default function FocusTimeline({ sessions }) {
                   };
 
               return (
-                <div key={session.key} className="flex gap-2">
+                <div key={`${group.start}-${group.end}`} className="flex gap-2">
                   <div className="flex flex-col items-center">
                     <span
                       className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 font-mono text-[9px] font-bold transition-colors duration-300"
                       style={nodeStyle}
                     >
-                      {isPast ? <Check size={10} strokeWidth={3} /> : `S${i + 1}`}
+                      {isPast ? <Check size={10} strokeWidth={3} /> : `S${gi + 1}`}
                     </span>
 
                     {!isLast && (
@@ -213,7 +228,7 @@ export default function FocusTimeline({ sessions }) {
                           className="absolute inset-x-0 top-0 rounded-full transition-[height] duration-500"
                           style={{
                             height: isPast ? "100%" : isCurrent ? `${progress}%` : "0%",
-                            backgroundColor: isCurrent ? session.color : "var(--color-primary)",
+                            backgroundColor: isCurrent ? nodeAccent : "var(--color-primary)",
                           }}
                         />
                       </div>
@@ -221,68 +236,118 @@ export default function FocusTimeline({ sessions }) {
                   </div>
 
                   <div className={`min-w-0 flex-1 ${isLast ? "pb-0.5" : "pb-4"}`}>
+                    {}
                     <div
-                      className={`rounded-lg ${isCurrent ? "px-2 py-1.5" : "py-0.5"} ${
-                        isPast ? "opacity-50" : ""
-                      }`}
-                      style={
-                        isCurrent
-                          ? {
-                              backgroundColor: "rgba(255,255,255,0.06)",
-                              boxShadow: [
-                                `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
-                                `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
-                              ].join(", "),
-                            }
-                          : undefined
+                      className={
+                        isSplit
+                          ? "flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-2"
+                          : ""
                       }
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-mono text-[11px] text-[var(--color-text-muted)]">
-                          {session.start.slice(0, 5)}–{session.end.slice(0, 5)}
-                        </p>
-                        {isCurrent && (
-                          <span
-                            className="inline-flex shrink-0 items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
-                            style={{
-                              borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
-                              backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,
-                              color: session.color,
-                            }}
-                          >
-                            now
-                          </span>
-                        )}
-                      </div>
+                      {group.items.map((session, idx) => {
+                        const badgeLabel = session.groupTag || (isSplit ? `G${idx + 1}` : "All");
+                        const isNotLastInGroup = isSplit && idx < group.items.length - 1;
 
-                      <p
-                        className={`mt-0.5 truncate text-sm ${
-                          isCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
-                        }`}
-                      >
-                        {session.subjectName}
-                      </p>
-
-                      {(session.teacher || session.room) && (
-                        <p className="truncate text-[11px] text-[var(--color-text-muted)]">
-                          {session.teacher}
-                          {session.room ? ` · ${session.room}` : ""}
-                        </p>
-                      )}
-
-                      {isCurrent && (
-                        <>
-                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                        return (
+                          <div key={session.key}>
                             <div
-                              className="h-full rounded-full"
-                              style={{ width: `${progress}%`, backgroundColor: session.color }}
-                            />
+                              className={`min-w-0 w-full rounded-lg ${isCurrent ? "px-2 py-1.5" : "py-0.5"} ${
+                                isPast ? "opacity-50" : ""
+                              }`}
+                              style={
+                                isCurrent
+                                  ? {
+                                      backgroundColor: "rgba(255,255,255,0.06)",
+                                      boxShadow: [
+                                        `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
+                                        `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
+                                      ].join(", "),
+                                    }
+                                  : undefined
+                              }
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="flex items-center gap-1.5">
+                                  {isSplit && (
+                                    <span
+                                      className="h-1.5 w-1.5 shrink-0 rounded-full"
+                                      style={{ backgroundColor: session.color }}
+                                    />
+                                  )}
+                                  <p className="font-mono text-[11px] text-[var(--color-text-muted)]">
+                                    {group.start.slice(0, 5)}–{group.end.slice(0, 5)}
+                                  </p>
+                                </span>
+                                <span className="flex shrink-0 items-center gap-1">
+                                  <span
+                                    className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                                    style={
+                                      isSplit
+                                        ? {
+                                            borderColor: `color-mix(in srgb, ${session.color} 40%, transparent)`,
+                                            backgroundColor: `color-mix(in srgb, ${session.color} 14%, transparent)`,
+                                            color: session.color,
+                                          }
+                                        : {
+                                            borderColor: "rgba(255,255,255,0.15)",
+                                            backgroundColor: "rgba(255,255,255,0.04)",
+                                            color: "var(--color-text-muted)",
+                                          }
+                                    }
+                                  >
+                                    {badgeLabel}
+                                  </span>
+                                  {isCurrent && (
+                                    <span
+                                      className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                                      style={{
+                                        borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
+                                        backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,
+                                        color: session.color,
+                                      }}
+                                    >
+                                      now
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+
+                              <p
+                                className={`mt-0.5 truncate text-sm ${
+                                  isCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
+                                }`}
+                              >
+                                {session.subjectName}
+                              </p>
+
+                              {(session.teacher || session.room) && (
+                                <p className="truncate text-[11px] text-[var(--color-text-muted)]">
+                                  {session.teacher}
+                                  {session.room ? ` · ${session.room}` : ""}
+                                </p>
+                              )}
+
+                              {isCurrent && (
+                                <>
+                                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{ width: `${progress}%`, backgroundColor: session.color }}
+                                    />
+                                  </div>
+                                  <p className="mt-1 font-mono text-[11px] font-medium" style={{ color: session.color }}>
+                                    {minutesLeft}m left
+                                  </p>
+                                </>
+                              )}
+                            </div>
+
+                            {isNotLastInGroup && (
+                              <div className="mx-1 border-t border-white/[0.08]" />
+                            )}
                           </div>
-                          <p className="mt-1 font-mono text-[11px] font-medium" style={{ color: session.color }}>
-                            {minutesLeft}m left
-                          </p>
-                        </>
-                      )}
+                        );
+                      })}
                     </div>
 
                     {gap != null && gap >= 15 && (
