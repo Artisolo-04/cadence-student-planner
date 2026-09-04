@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 const TIPS = [
   "Set your group per workspace to filter your schedule to just your sessions.",
   "Update your faculty and class/year anytime — changes apply everywhere instantly.",
-  "Switch workspaces from the dashboard dropdown to see a different timetable's today view.",
+  "Switch workspaces anytime from the selector at the top of the sidebar.",
 ];
 
 export function AppearanceCard() {

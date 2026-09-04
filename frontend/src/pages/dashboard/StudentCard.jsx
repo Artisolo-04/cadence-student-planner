@@ -31,6 +31,7 @@ export default function StudentCard({ user, profile, groupTag }) {
   const validThru = formatIssueDate(profile?.updated_at) !== "—"
     ? formatIssueDate(new Date(new Date(profile.updated_at).setFullYear(new Date(profile.updated_at).getFullYear() + 1)))
     : "—";
+  const showGroupField = groupTag && groupTag !== "all";
 
   return (
     <div
@@ -94,15 +95,11 @@ export default function StudentCard({ user, profile, groupTag }) {
             <div className="mt-1 flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
               <GraduationCap size={14} className="shrink-0" />
               <span className="truncate">
-                {[profile?.faculty, profile?.class_year].filter(Boolean).join(" · ") || "No faculty set"}
+                {[profile?.faculty, profile?.class_year, showGroupField ? groupTag.toUpperCase() : null]
+                  .filter(Boolean)
+                  .join(" · ")}
               </span>
             </div>
-
-            {groupTag && groupTag !== "all" && (
-              <span className="mt-2 inline-flex items-center rounded-full border border-white/10 bg-white/[0.06] px-2 py-0.5 text-xs font-medium text-[var(--color-text-muted)]">
-                Group {groupTag}
-              </span>
-            )}
           </div>
         </div>
 

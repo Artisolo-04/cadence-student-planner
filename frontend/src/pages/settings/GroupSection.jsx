@@ -17,6 +17,7 @@ export default function GroupSection() {
     selectedWorkspace,
     updateGroup,
     savingGroup,
+    activeId,
   } = useSettingsData();
 
   if (loading) {
@@ -40,6 +41,15 @@ export default function GroupSection() {
   }
 
   const currentGroup = selectedWorkspace?.my_group ?? "none";
+  const isSelectedActive = String(selectedId) === String(activeId);
+
+  // Dropdown only renders plain-text option labels, so the in-list marker
+  // is a text suffix rather than a styled badge — the real badge renders
+  // below, outside that constraint.
+  const workspaceOptions = workspaces.map((w) => ({
+    value: w.id,
+    label: String(w.id) === String(activeId) ? `${w.name} · Active` : w.name,
+  }));
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
@@ -49,13 +59,22 @@ export default function GroupSection() {
       </p>
 
       <div className="flex flex-col gap-4 max-w-md">
-        <Dropdown
-          id="settings-workspace"
-          label="Workspace"
-          value={selectedId}
-          onChange={(e) => setSelectedId(Number(e.target.value))}
-          options={workspaces.map((w) => ({ value: w.id, label: w.name }))}
-        />
+        <div className="flex flex-col gap-1.5">
+          <Dropdown
+            id="settings-workspace"
+            label="Workspace"
+            value={selectedId}
+            onChange={(e) => setSelectedId(Number(e.target.value))}
+            options={workspaceOptions}
+          />
+          {isSelectedActive && (
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-lg py-1 border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--color-primary)] backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
+              Currently active workspace
+            </span>
+          )}
+        </div>
+
         <Dropdown
           id="settings-group"
           label="Group"

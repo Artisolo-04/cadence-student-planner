@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, CalendarDays, Plus, Trash2 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }) {
+  const { activeId } = useWorkspace();
   const scrollRef = useRef(null);
   const [selectedTimetable, setSelectedTimetable] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -70,68 +72,96 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
           className="h-full overflow-y-auto rounded-xl p-3 pr-4 scrollbar-cadence sm:p-5 sm:pr-6"
         >
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {timetables.map((timetable) => (
-              <article
-                key={timetable.id}
-                style={{
-                  backgroundImage:
-                    "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
-                }}
-                className="group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)]"
-              >
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[var(--color-primary)] opacity-20 blur-3xl transition-opacity duration-300 group-hover:opacity-35"
-                />
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent"
-                />
+            {timetables.map((timetable) => {
+              const isActive = String(timetable.id) === String(activeId);
 
-                <button
-                  type="button"
-                  onClick={() => onOpen(timetable.id)}
-                  className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
-                  aria-label={`Open ${timetable.name}`}
-                />
-
-                <div className="relative z-10 flex items-start justify-between">
-                  <span
-                    className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-white/15 backdrop-blur-md"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 40%, black 20%) 0%, color-mix(in srgb, var(--color-primary) 15%, black 45%) 100%)",
-                      boxShadow:
-                        "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
-                    }}
+              return (
+                <article
+                  key={timetable.id}
+                  style={{
+                    backgroundImage: isActive
+                      ? "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, color-mix(in srgb, var(--color-primary) 14%, transparent) 55%, transparent 100%)"
+                      : "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
+                  }}
+                  className={`group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-xl border bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
+                    isActive ? "border-[var(--color-primary)]/50" : "border-white/10"
+                  }`}
+                >
+                  <div
                     aria-hidden="true"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
-                    />
-                    <CalendarDays size={16} className="relative z-10 text-[var(--color-primary)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
-                  </span>
+                    className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[var(--color-primary)] opacity-20 blur-3xl transition-opacity duration-300 group-hover:opacity-35"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent"
+                  />
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setError("");
-                      setSelectedTimetable(timetable);
-                    }}
-                    className="relative z-20 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
-                    aria-label={`Delete ${timetable.name}`}
-                    title="Delete timetable"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                    onClick={() => onOpen(timetable.id)}
+                    className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                    aria-label={`Open ${timetable.name}`}
+                  />
 
-                <span className="relative z-10 pr-7 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
-                  {timetable.name}
-                </span>
-              </article>
-            ))}
+                  <div className="relative z-10 flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-white/15 backdrop-blur-md"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 40%, black 20%) 0%, color-mix(in srgb, var(--color-primary) 15%, black 45%) 100%)",
+                          boxShadow:
+                            "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
+                        }}
+                        aria-hidden="true"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
+                        />
+                        <CalendarDays size={16} className="relative z-10 text-[var(--color-primary)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                      </span>
+
+                      {isActive && (
+                        <span
+                          className="relative z-10 inline-flex h-9 w-fit items-center gap-1.5 overflow-hidden rounded-md px-2.5 text-[11px] font-semibold tracking-wide text-[var(--color-surface)]"
+                          style={{
+                            backgroundImage:
+                              "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 100%, white 8%) 0%, var(--color-primary) 100%)",
+                            boxShadow:
+                              "0 1px 0 0 rgba(255,255,255,0.2) inset, 0 -1px 3px 0 rgba(0,0,0,0.25) inset, 0 4px 10px -4px color-mix(in srgb, var(--color-primary) 60%, transparent)",
+                          }}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/15 to-transparent"
+                          />
+                          <span className="relative z-10 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-surface)]" />
+                          <span className="relative z-10">Active</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setError("");
+                        setSelectedTimetable(timetable);
+                      }}
+                      className="relative z-20 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                      aria-label={`Delete ${timetable.name}`}
+                      title="Delete timetable"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+
+                  <span className="relative z-10 pr-7 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
+                    {timetable.name}
+                  </span>
+                </article>
+              );
+            })}
 
           </div>
         </div>

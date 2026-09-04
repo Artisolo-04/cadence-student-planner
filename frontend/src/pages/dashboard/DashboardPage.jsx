@@ -1,7 +1,6 @@
 import { useAuth } from "../../hooks/useAuth";
 import { useDashboardData } from "./useDashboardData";
 import { useDueSoonHomework } from "./useDueSoonHomework";
-import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import StudentCard from "./StudentCard";
 import FocusTimeline from "./FocusTimeline";
 import DueSoonCard from "./DueSoonCard";
@@ -9,14 +8,7 @@ import DueSoonCard from "./DueSoonCard";
 export default function DashboardPage() {
   const { user, profile } = useAuth();
 
-  const {
-    loading,
-    timetables,
-    activeId,
-    selectWorkspace,
-    workspace,
-    todaySessions,
-  } = useDashboardData();
+  const { loading, timetables, workspace, todaySessions } = useDashboardData();
 
   const {
     homework: dueSoonHomework,
@@ -32,14 +24,6 @@ export default function DashboardPage() {
       <aside className="flex flex-col gap-4 lg:min-h-0 lg:overflow-hidden">
         <div className="shrink-0">
           <StudentCard user={user} profile={profile} groupTag={groupTag} />
-        </div>
-
-        <div className="shrink-0 lg:mt-auto">
-          <WorkspaceSwitcher
-            timetables={timetables}
-            activeId={activeId}
-            onSelect={selectWorkspace}
-          />
         </div>
       </aside>
 

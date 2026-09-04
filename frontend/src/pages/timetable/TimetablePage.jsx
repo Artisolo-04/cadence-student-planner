@@ -11,13 +11,21 @@ import AnalyticsPanel from "./analytics/AnalyticsPanel";
 import ViewOptionsPanel from "./ViewOptionsPanel";
 import useTimetableViewOptions from "../../hooks/useTimetableViewOptions";
 import { publishWorkspaceGroupChange } from "../../lib/workspaceGroupSync";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 const GAP_PX = 8;
 
 export default function TimetablePage() {
+  const {
+    timetables,
+    activeId,
+    selectWorkspace,
+    refreshTimetables,
+    loading: workspacesLoading,
+  } = useWorkspace();
+
   const [view, setView] = useState("loading");
   const [wizardMode, setWizardMode] = useState("create");
-  const [timetables, setTimetables] = useState([]);
   const [workspace, setWorkspace] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [activePanel, setActivePanel] = useState("grid");
@@ -27,26 +35,31 @@ export default function TimetablePage() {
     workspace?.timetable?.id
   );
 
+  const openedIdRef = useRef(null);
+  const viewRef = useRef(view);
+  viewRef.current = view;
+
   useEffect(() => {
-    loadTimetables();
-  }, []);
+    if (workspacesLoading) return;
+    if (view !== "loading") return;
+    setView(timetables.length === 0 ? "empty" : "list");
+    
+  }, [workspacesLoading]);
 
-  async function loadTimetables() {
-    try {
-      const { data } = await api.get("/timetables");
-      setTimetables(data.timetables);
-      setView(data.timetables.length === 0 ? "empty" : "list");
-    } catch (err) {
-      console.error("Load timetables error:", err);
-      setView("empty");
-    }
-  }
+  useEffect(() => {
+    if (activeId == null) return;
+    if (String(activeId) === String(openedIdRef.current)) return;
+    if (viewRef.current !== "grid") return;
 
-  async function openWorkspace(id) {
+    openWorkspaceById(activeId);
+    
+  }, [activeId]);
+
+  async function openWorkspaceById(id) {
+    openedIdRef.current = id;
     try {
       const { data } = await api.get(`/timetables/${id}`);
       setWorkspace(data);
-      localStorage.setItem("cadence_last_workspace", String(id));
       setIsEditMode(false);
       setActivePanel("grid");
       setView("grid");
@@ -55,27 +68,32 @@ export default function TimetablePage() {
     }
   }
 
+  async function openWorkspace(id) {
+    selectWorkspace(id);
+    await openWorkspaceById(id);
+  }
+
   async function handleWizardComplete(detail) {
     setWorkspace(detail);
     setIsEditMode(false);
     setActivePanel("grid");
     setView("grid");
+    openedIdRef.current = detail.timetable.id;
 
-    try {
-      const { data } = await api.get("/timetables");
-      setTimetables(data.timetables);
-    } catch (err) {
-      console.error("Refresh timetables error:", err);
-    }
+    await refreshTimetables();
+    selectWorkspace(detail.timetable.id);
   }
 
   async function handleDeleteTimetable(id) {
     await api.delete(`/timetables/${id}`);
-    setTimetables((current) => {
-      const remaining = current.filter((timetable) => timetable.id !== id);
-      setView(remaining.length ? "list" : "empty");
-      return remaining;
-    });
+    const remaining = timetables.filter((t) => t.id !== id);
+
+    if (String(id) === String(openedIdRef.current)) {
+      openedIdRef.current = null;
+    }
+
+    await refreshTimetables();
+    setView(remaining.length ? "list" : "empty");
   }
 
   async function handleMyGroupChange(myGroup) {
@@ -92,16 +110,10 @@ export default function TimetablePage() {
         timetable: data.timetable,
       }));
 
-      setTimetables((current) =>
-        current.map((timetable) =>
-          timetable.id === data.timetable.id ? data.timetable : timetable
-        )
-      );
-        publishWorkspaceGroupChange({
-          workspaceId: data.timetable.id,
-            myGroup: data.timetable.my_group,
-        });
-
+      publishWorkspaceGroupChange({
+        workspaceId: data.timetable.id,
+        myGroup: data.timetable.my_group,
+      });
     } catch (err) {
       console.error("Update timetable group error:", err);
     }

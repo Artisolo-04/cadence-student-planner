@@ -1,9 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../../lib/api";
-import {
-  WORKSPACE_GROUP_CHANGED_EVENT,
-  WORKSPACE_GROUP_SYNC_KEY,
-} from "../../lib/workspaceGroupSync";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 function normalizeSubject(raw) {
   return {
@@ -39,40 +36,33 @@ export const DAY_LABELS = [
   "Saturday",
 ];
 
-const LAST_WORKSPACE_KEY = "cadence_last_workspace";
-
 export function useDashboardData() {
-  const [loadingList, setLoadingList] = useState(true);
+  const {
+    timetables,
+    activeId,
+    activeWorkspace,
+    selectWorkspace,
+    loading: loadingWorkspaces,
+    error: workspaceError,
+  } = useWorkspace();
+
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState(null);
-
-  const [timetables, setTimetables] = useState([]);
-  const [activeId, setActiveId] = useState(null);
 
   const [workspace, setWorkspace] = useState(null);
   const [slots, setSlots] = useState([]);
   const [entries, setEntries] = useState([]);
   const [subjectsById, setSubjectsById] = useState({});
 
-  const latestGroupByWorkspaceRef = useRef(new Map());
-
   useEffect(() => {
     let cancelled = false;
 
-    async function loadList() {
-      setLoadingList(true);
-      setError(null);
-
+    async function loadSubjects() {
+      setLoadingSubjects(true);
       try {
-        const [{ data: listData }, { data: subjData }] = await Promise.all([
-          api.get("/timetables"),
-          api.get("/subjects"),
-        ]);
-
+        const { data: subjData } = await api.get("/subjects");
         if (cancelled) return;
-
-        const list = listData.timetables ?? [];
-        setTimetables(list);
 
         const subjectMap = {};
         (subjData.subjects ?? []).forEach((subject) => {
@@ -80,50 +70,40 @@ export function useDashboardData() {
           subjectMap[normalized.id] = normalized;
         });
         setSubjectsById(subjectMap);
-
-        if (list.length > 0) {
-          const lastId = localStorage.getItem(LAST_WORKSPACE_KEY);
-          const initial = list.find((item) => String(item.id) === lastId) ?? list[0];
-          setActiveId(initial.id);
-        }
       } catch (err) {
-        console.error("Dashboard list load error:", err);
-        if (!cancelled) setError("Couldn't load your workspaces right now.");
+        console.error("Dashboard subjects load error:", err);
+        if (!cancelled) setError("Couldn't load your subjects right now.");
       } finally {
-        if (!cancelled) setLoadingList(false);
+        if (!cancelled) setLoadingSubjects(false);
       }
     }
 
-    loadList();
-
+    loadSubjects();
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
-    if (activeId == null) return;
+    if (activeId == null) {
+      setWorkspace(null);
+      setSlots([]);
+      setEntries([]);
+      return;
+    }
 
     let cancelled = false;
 
     async function loadDetail() {
       setLoadingDetail(true);
-
       try {
         const { data } = await api.get(`/timetables/${activeId}`);
         if (cancelled) return;
 
-        const workspaceId = String(activeId);
-        const hasSynchronizedGroup =
-          latestGroupByWorkspaceRef.current.has(workspaceId);
-        const synchronizedGroup =
-          latestGroupByWorkspaceRef.current.get(workspaceId);
-
-        setWorkspace(
-          hasSynchronizedGroup
-            ? { ...data.timetable, my_group: synchronizedGroup }
-            : data.timetable
-        );
+        setWorkspace({
+          ...data.timetable,
+          my_group: activeWorkspace?.my_group ?? data.timetable.my_group,
+        });
         setSlots(data.slots ?? []);
         setEntries(data.entries ?? []);
       } catch (err) {
@@ -135,76 +115,20 @@ export function useDashboardData() {
     }
 
     loadDetail();
-
     return () => {
       cancelled = true;
     };
+
   }, [activeId]);
 
   useEffect(() => {
-    function applyGroupChange(detail) {
-      if (
-        !detail ||
-        detail.workspaceId == null ||
-        String(detail.workspaceId) !== String(activeId)
-      ) {
-        return;
-      }
-
-      const nextGroup = detail.myGroup ?? null;
-      const workspaceId = String(detail.workspaceId);
-
-      latestGroupByWorkspaceRef.current.set(workspaceId, nextGroup);
-
-      setWorkspace((current) => {
-        if (!current || String(current.id) !== workspaceId) return current;
-        if ((current.my_group ?? null) === nextGroup) return current;
-
-        return { ...current, my_group: nextGroup };
-      });
-
-      setTimetables((current) =>
-        current.map((item) =>
-          String(item.id) === workspaceId
-            ? { ...item, my_group: nextGroup }
-            : item
-        )
-      );
-    }
-
-    function handleCustomGroupChange(event) {
-      applyGroupChange(event.detail);
-    }
-
-    function handleStorageGroupChange(event) {
-      if (!event.newValue || event.key !== WORKSPACE_GROUP_SYNC_KEY) return;
-
-      try {
-        applyGroupChange(JSON.parse(event.newValue));
-      } catch (error) {
-        console.warn("Ignoring invalid workspace group synchronization event:", error);
-      }
-    }
-
-    window.addEventListener(
-      WORKSPACE_GROUP_CHANGED_EVENT,
-      handleCustomGroupChange
-    );
-    window.addEventListener("storage", handleStorageGroupChange);
-
-    return () => {
-      window.removeEventListener(
-        WORKSPACE_GROUP_CHANGED_EVENT,
-        handleCustomGroupChange
-      );
-      window.removeEventListener("storage", handleStorageGroupChange);
-    };
-  }, [activeId]);
-
-  const selectWorkspace = useCallback((id) => {
-    setActiveId(id);
-    localStorage.setItem(LAST_WORKSPACE_KEY, String(id));
-  }, []);
+    if (!activeWorkspace) return;
+    setWorkspace((current) => {
+      if (!current || String(current.id) !== String(activeWorkspace.id)) return current;
+      if ((current.my_group ?? null) === (activeWorkspace.my_group ?? null)) return current;
+      return { ...current, my_group: activeWorkspace.my_group ?? null };
+    });
+  }, [activeWorkspace]);
 
   const visibleEntries = useMemo(() => {
     if (!workspace) return [];
@@ -305,8 +229,8 @@ export function useDashboardData() {
   );
 
   return {
-    loading: loadingList || loadingDetail,
-    error,
+    loading: loadingWorkspaces || loadingSubjects || loadingDetail,
+    error: error || workspaceError,
     timetables,
     activeId,
     selectWorkspace,

@@ -1,45 +1,82 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../../lib/api";
-import { publishWorkspaceGroupChange } from "../../lib/workspaceGroupSync";
+import {
+  publishWorkspaceGroupChange,
+  WORKSPACE_LIST_CHANGED_EVENT,
+} from "../../lib/workspaceGroupSync";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 export function useSettingsData() {
+  const { activeId } = useWorkspace();
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedIdState] = useState(null);
   const [savingGroup, setSavingGroup] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const hasUserSelectedRef = useRef(false);
 
-    async function load() {
+  const setSelectedId = useCallback((id) => {
+    hasUserSelectedRef.current = true;
+    setSelectedIdState(id);
+  }, []);
+
+  const load = useCallback(
+    async ({ preserveSelection } = {}) => {
       setLoading(true);
       setError(null);
 
       try {
         const { data } = await api.get("/timetables");
-        if (cancelled) return;
-
         const list = data.timetables ?? [];
         setWorkspaces(list);
 
-        if (list.length > 0) {
-          setSelectedId(list[0].id);
-        }
+        setSelectedIdState((current) => {
+          if (preserveSelection && current != null && list.some((w) => w.id === current)) {
+            return current;
+          }
+          if (list.length === 0) return null;
+          if (hasUserSelectedRef.current && current != null && list.some((w) => w.id === current)) {
+            return current;
+          }
+
+          const activeMatch = list.find((w) => String(w.id) === String(activeId));
+          return activeMatch ? activeMatch.id : list[0].id;
+        });
       } catch (err) {
         console.error("Settings workspaces load error:", err);
-        if (!cancelled) setError("Couldn't load your workspaces right now.");
+        setError("Couldn't load your workspaces right now.");
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
+    },
+    [activeId]
+  );
+
+  useEffect(() => {
+    load();
+    
+  }, []);
+
+  useEffect(() => {
+    if (hasUserSelectedRef.current) return;
+    if (activeId == null) return;
+
+    setSelectedIdState((current) => {
+      if (String(current) === String(activeId)) return current;
+      const match = workspaces.find((w) => String(w.id) === String(activeId));
+      return match ? match.id : current;
+    });
+  }, [activeId, workspaces]);
+
+  useEffect(() => {
+    function handleListChanged() {
+      load({ preserveSelection: true });
     }
 
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    window.addEventListener(WORKSPACE_LIST_CHANGED_EVENT, handleListChanged);
+    return () => window.removeEventListener(WORKSPACE_LIST_CHANGED_EVENT, handleListChanged);
+  }, [load]);
 
   const selectedWorkspace =
     workspaces.find((workspace) => workspace.id === selectedId) ?? null;
@@ -85,5 +122,6 @@ export function useSettingsData() {
     selectedWorkspace,
     updateGroup,
     savingGroup,
+    activeId,
   };
 }
