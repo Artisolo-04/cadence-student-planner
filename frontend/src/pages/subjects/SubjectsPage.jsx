@@ -4,20 +4,27 @@ import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import SubjectList from "./SubjectList";
 import SubjectFormModal from "./SubjectFormModal";
+import SubjectDetailDrawer from "./SubjectDetailDrawer";
+import { useWorkspace } from "../../hooks/useWorkspace";
 
 export default function SubjectsPage() {
+  const { activeId } = useWorkspace();
   const [view, setView] = useState("loading");
   const [subjects, setSubjects] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
+  const [detailSubject, setDetailSubject] = useState(null);
 
   useEffect(() => {
     loadSubjects();
-  }, []);
+    
+  }, [activeId]);
 
   async function loadSubjects() {
     try {
-      const { data } = await api.get("/subjects");
+      const { data } = await api.get("/subjects", {
+        params: activeId ? { timetableId: activeId } : undefined,
+      });
       setSubjects(data.subjects);
       setView(data.subjects.length === 0 ? "empty" : "list");
     } catch (err) {
@@ -36,15 +43,19 @@ export default function SubjectsPage() {
     setFormOpen(true);
   }
 
+  function openDetail(subject) {
+    setDetailSubject(subject);
+  }
+
   async function handleFormSubmit(payload) {
     if (editingSubject) {
       const { data } = await api.patch(`/subjects/${editingSubject.id}`, payload);
       setSubjects((current) =>
-        current.map((s) => (s.id === data.subject.id ? data.subject : s))
+        current.map((s) => (s.id === data.subject.id ? { ...s, ...data.subject } : s))
       );
     } else {
       const { data } = await api.post("/subjects", payload);
-      setSubjects((current) => [data.subject, ...current]);
+      setSubjects((current) => [{ ...data.subject, weekly_hours: 0 }, ...current]);
       setView("list");
     }
   }
@@ -70,6 +81,7 @@ export default function SubjectsPage() {
           onAddNew={startCreate}
           onEdit={startEdit}
           onDelete={handleDelete}
+          onSelect={openDetail}
         />
       ) : (
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
@@ -94,6 +106,12 @@ export default function SubjectsPage() {
         onClose={() => setFormOpen(false)}
         subject={editingSubject}
         onSubmit={handleFormSubmit}
+      />
+
+      <SubjectDetailDrawer
+        subject={detailSubject}
+        timetableId={activeId}
+        onClose={() => setDetailSubject(null)}
       />
     </>
   );
