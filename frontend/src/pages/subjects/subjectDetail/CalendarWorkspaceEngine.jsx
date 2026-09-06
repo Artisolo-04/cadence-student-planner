@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import api from "../../../lib/api";
 import { sortDaysByWeekOrder } from "../../../lib/days";
 import { buildSpanLayout } from "../../timetable/grid/layout/slotSpanUtils";
@@ -10,6 +10,7 @@ import SubjectLabel from "../../timetable/grid/subjects/SubjectLabel";
 
 const ROW_HEIGHT = 56;
 const HEADER_HEIGHT = 40;
+const DEFAULT_FOCUS_LEVEL = 0.8;
 
 function timeRangeLabel(startTime, endTime) {
   const start = startTime?.slice(0, 5) ?? "--:--";
@@ -17,20 +18,38 @@ function timeRangeLabel(startTime, endTime) {
   return `${start} - ${end}`;
 }
 
-function ToggleButton({ active, onClick, icon, label }) {
+function OpacityRangeControl({ value, onChange }) {
+  const pct = Math.round(value * 100);
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors duration-150 ${
-        active
-          ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
-          : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
+    <div className="flex items-center gap-2.5 w-full max-w-[220px]">
+      <SlidersHorizontal size={12} className="shrink-0 text-[var(--color-text-muted)]" />
+      <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+        Focus
+      </span>
+
+      <div className="relative flex-1 flex items-center h-5">
+        <div className="absolute inset-x-0 h-1.5 rounded-full bg-[var(--color-border)]" />
+        <div
+          className="absolute h-1.5 rounded-full bg-[var(--color-primary)]"
+          style={{ width: `${pct}%` }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.1}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="zoom-slider relative w-full appearance-none bg-transparent cursor-pointer"
+          aria-label="Non-active subject opacity"
+        />
+      </div>
+
+      <span className="shrink-0 w-9 text-right text-[11px] font-semibold tabular-nums text-[var(--color-text)]">
+        {pct}%
+      </span>
+    </div>
   );
 }
 
@@ -38,7 +57,8 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
   const [workspace, setWorkspace] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [highlightOnly, setHighlightOnly] = useState(true);
+  const [focusLevel, setFocusLevel] = useState(DEFAULT_FOCUS_LEVEL);
+  const dimOpacity = 1 - focusLevel;
 
   useEffect(() => {
     if (!enabled || !timetableId) return;
@@ -95,16 +115,11 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
       {!loading && !error && orderedDays.length > 0 && (
-        <div className="flex shrink-0 items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+        <div className="flex shrink-0 items-center justify-between gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5">
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
             Controls
           </span>
-          <ToggleButton
-            active={highlightOnly}
-            onClick={() => setHighlightOnly((v) => !v)}
-            icon={highlightOnly ? <Eye size={12} /> : <EyeOff size={12} />}
-            label={highlightOnly ? "Highlighting this subject" : "Showing all subjects"}
-          />
+          <OpacityRangeControl value={focusLevel} onChange={setFocusLevel} />
         </div>
       )}
 
@@ -188,16 +203,24 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
                             isLastCol ? "" : "border-r"
                           } ${matrixRow.allIsLastRow ? "" : "border-b"}`}
                         >
-                          <SubjectLabel
-                            entry={allInfo.entry}
-                            slotId={slot.id}
-                            dayOfWeek={day.day_of_week}
-                            dragGroupTag="all"
-                            isEditMode={false}
-                            orderedSlots={orderedSlots}
-                            showRoom
-                            dimmed={highlightOnly && !isMatch}
-                          />
+                          <div
+                            className="h-full w-full"
+                            style={{
+                              opacity: isMatch ? 1 : dimOpacity,
+                              transition: "none",
+                            }}
+                          >
+                            <SubjectLabel
+                              entry={allInfo.entry}
+                              slotId={slot.id}
+                              dayOfWeek={day.day_of_week}
+                              dragGroupTag="all"
+                              isEditMode={false}
+                              orderedSlots={orderedSlots}
+                              showRoom
+                              dimmed={false}
+                            />
+                          </div>
                         </div>
                       );
                     }
@@ -221,17 +244,26 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
                             }`}
                           >
                             {g1Info?.type === "start" && (
-                              <SubjectLabel
-                                entry={g1Info.entry}
-                                groupTag="g1"
-                                slotId={slot.id}
-                                dayOfWeek={day.day_of_week}
-                                dragGroupTag="g1"
-                                isEditMode={false}
-                                orderedSlots={orderedSlots}
-                                showRoom
-                                dimmed={highlightOnly && g1Info.entry.subject_id !== subject.id}
-                              />
+                              <div
+                                className="h-full w-full"
+                                style={{
+                                  opacity:
+                                    g1Info.entry.subject_id === subject.id ? 1 : dimOpacity,
+                                  transition: "none",
+                                }}
+                              >
+                                <SubjectLabel
+                                  entry={g1Info.entry}
+                                  groupTag="g1"
+                                  slotId={slot.id}
+                                  dayOfWeek={day.day_of_week}
+                                  dragGroupTag="g1"
+                                  isEditMode={false}
+                                  orderedSlots={orderedSlots}
+                                  showRoom
+                                  dimmed={false}
+                                />
+                              </div>
                             )}
                           </div>
                         )}
@@ -249,17 +281,26 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
                             }`}
                           >
                             {g2Info?.type === "start" && (
-                              <SubjectLabel
-                                entry={g2Info.entry}
-                                groupTag="g2"
-                                slotId={slot.id}
-                                dayOfWeek={day.day_of_week}
-                                dragGroupTag="g2"
-                                isEditMode={false}
-                                orderedSlots={orderedSlots}
-                                showRoom
-                                dimmed={highlightOnly && g2Info.entry.subject_id !== subject.id}
-                              />
+                              <div
+                                className="h-full w-full"
+                                style={{
+                                  opacity:
+                                    g2Info.entry.subject_id === subject.id ? 1 : dimOpacity,
+                                  transition: "none",
+                                }}
+                              >
+                                <SubjectLabel
+                                  entry={g2Info.entry}
+                                  groupTag="g2"
+                                  slotId={slot.id}
+                                  dayOfWeek={day.day_of_week}
+                                  dragGroupTag="g2"
+                                  isEditMode={false}
+                                  orderedSlots={orderedSlots}
+                                  showRoom
+                                  dimmed={false}
+                                />
+                              </div>
                             )}
                           </div>
                         )}
