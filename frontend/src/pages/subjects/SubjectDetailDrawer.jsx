@@ -6,6 +6,7 @@ import ScheduleSection from "./subjectDetail/ScheduleSection";
 import HomeworkSection from "./subjectDetail/HomeworkSection";
 import SummaryHud from "./subjectDetail/SummaryHud";
 import { useScrollFade } from "./subjectDetail/useScrollFade";
+import CalendarWorkspaceEngine from "./subjectDetail/CalendarWorkspaceEngine";
 import {
   groupEntriesByDay,
   todayISO,
@@ -34,7 +35,7 @@ export default function SubjectDetailDrawer({
   const [addError, setAddError] = useState("");
 
   const [activeTab, setActiveTab] = useState("schedule");
-  const [viewMode, setViewMode] = useState("default"); 
+  const [viewMode, setViewMode] = useState("default");
 
   const scheduleFade = useScrollFade([detail?.entries]);
   const homeworkFade = useScrollFade([detail?.homework]);
@@ -300,20 +301,19 @@ export default function SubjectDetailDrawer({
                       </div>
                     </div>
 
-                    <div
-                      className={`absolute inset-0 flex items-center justify-center px-8 transition-opacity duration-200 ${
-                        viewMode === "grid"
-                          ? "pointer-events-auto opacity-100"
-                          : "pointer-events-none opacity-0"
-                      }`}
-                    >
-                      <div className="flex max-w-md flex-col items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-8 py-10 text-center backdrop-blur-xl">
-                        <Calendar size={28} className="text-[var(--color-text-muted)]" />
-                        <p className="text-sm font-medium text-[var(--color-text)]">
-                          Visual Calendar Workspace Engine — Focusing exclusively on {subject.name} slots. Take a deep breath!
-                        </p>
+<div
+  className={`absolute inset-0 px-5 py-5 transition-opacity duration-200 ${
+    viewMode === "grid"
+      ? "pointer-events-auto opacity-100"
+      : "pointer-events-none opacity-0"
+  }`}
+>
+                        <CalendarWorkspaceEngine
+                          subject={subject}
+                          timetableId={timetableId}
+                          enabled={viewMode === "grid"}
+                        />
                       </div>
-                    </div>
                   </div>
                 </div>
               )}

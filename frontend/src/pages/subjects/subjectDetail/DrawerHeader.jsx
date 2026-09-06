@@ -2,7 +2,7 @@ import { X, BookOpen, Calendar, ListChecks, CalendarDays } from "lucide-react";
 
 function MetricBadge({ icon: Icon, label }) {
   return (
-    <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] backdrop-blur-md">
+    <span className="flex shrink-0 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] backdrop-blur-md">
       <Icon size={13} className="text-[var(--color-text-muted)]" />
       {label}
     </span>
