@@ -5,6 +5,7 @@ const profileRoutes = require("./profile");
 const timetableRoutes = require("./timetable");
 const subjectRoutes = require("./subject");
 const homeworkRoutes = require("./homework");
+const vaultRoutes = require("./vault");
 
 router.get("/hello", (req, res) => {
   res.json({ message: "Hello from your automatically generated backend!" });
@@ -15,5 +16,6 @@ router.use("/profile", profileRoutes);
 router.use("/timetables", timetableRoutes);
 router.use("/subjects", subjectRoutes);
 router.use("/homework", homeworkRoutes);
+router.use("/vault", vaultRoutes);
 
 module.exports = router;
