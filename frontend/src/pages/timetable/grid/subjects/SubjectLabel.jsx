@@ -121,7 +121,7 @@ function SubjectLabel({
       {roomText && (
         <span
           title={roomText}
-          className="absolute right-1 top-1 z-10 max-w-[45%] truncate rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90"
+          className="absolute right-1 top-1 z-20 max-w-[45%] truncate rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90"
         >
           {roomText}
         </span>
