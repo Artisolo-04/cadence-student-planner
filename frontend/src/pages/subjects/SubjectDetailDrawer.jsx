@@ -1,12 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
+import { Calendar, ClipboardList, Search } from "lucide-react";
 import api from "../../lib/api";
 import DrawerHeader from "./subjectDetail/DrawerHeader";
 import ScheduleSection from "./subjectDetail/ScheduleSection";
 import HomeworkSection from "./subjectDetail/HomeworkSection";
+import SummaryHud from "./subjectDetail/SummaryHud";
 import { useScrollFade } from "./subjectDetail/useScrollFade";
-import { groupEntriesByDay, todayISO } from "./subjectDetail/subjectDetailUtils";
+import {
+  groupEntriesByDay,
+  todayISO,
+  getNextSession,
+  sumEntryMinutes,
+} from "./subjectDetail/subjectDetailUtils";
 
-export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
+const FALLBACK_TOTAL_WEEKLY_MINUTES = 1800;
+
+export default function SubjectDetailDrawer({
+  subject,
+  timetableId,
+  onClose,
+  totalWeeklyMinutes = FALLBACK_TOTAL_WEEKLY_MINUTES,
+}) {
   const open = Boolean(subject);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -19,6 +33,9 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
   const [addingHomework, setAddingHomework] = useState(false);
   const [addError, setAddError] = useState("");
 
+  const [activeTab, setActiveTab] = useState("schedule");
+  const [viewMode, setViewMode] = useState("default"); 
+
   const scheduleFade = useScrollFade([detail?.entries]);
   const homeworkFade = useScrollFade([detail?.homework]);
 
@@ -27,10 +44,40 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
     [detail?.entries]
   );
 
+  const activeTaskCount = useMemo(
+    () => (detail?.homework ? detail.homework.filter((hw) => hw.status !== "done").length : 0),
+    [detail?.homework]
+  );
+
+  const daysPerWeek = scheduleDays.length;
+
+  const nextSession = useMemo(
+    () => (detail?.entries ? getNextSession(detail.entries) : null),
+    [detail?.entries]
+  );
+
+  const subjectWeeklyMinutes = useMemo(
+    () => (detail?.entries ? sumEntryMinutes(detail.entries) : 0),
+    [detail?.entries]
+  );
+
+  const footprintPercent = useMemo(() => {
+    if (!totalWeeklyMinutes) return 0;
+    return Math.round((subjectWeeklyMinutes / totalWeeklyMinutes) * 100);
+  }, [subjectWeeklyMinutes, totalWeeklyMinutes]);
+
+  const tasksCompleted = useMemo(
+    () => (detail?.homework ? detail.homework.filter((hw) => hw.status === "done").length : 0),
+    [detail?.homework]
+  );
+  const tasksTotal = detail?.homework?.length || 0;
+
   useEffect(() => {
     let raf1, raf2;
     if (open) {
       setMounted(true);
+      setActiveTab("schedule");
+      setViewMode("default");
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => setVisible(true));
       });
@@ -151,55 +198,160 @@ export default function SubjectDetailDrawer({ subject, timetableId, onClose }) {
   if (!mounted) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex justify-end">
+    <div className="absolute inset-0 z-50 flex items-center justify-center p-4 md:p-8">
       <div
-        className={`absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-200 ${
+        className={`absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
         aria-hidden="true"
       />
-      <aside
-        className={`relative flex h-full w-full max-w-sm flex-col overflow-hidden border-l border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] shadow-[0_0_60px_-15px_rgba(0,0,0,0.35)] transition-transform duration-200 ease-out ${
-          visible ? "translate-x-0" : "translate-x-full"
+
+      <div
+        className={`relative flex h-full w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_92%,transparent)] shadow-[0_0_80px_-20px_rgba(0,0,0,0.5)] transition-all duration-200 ease-out md:h-[90vh] ${
+          visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
       >
         {subject && (
           <>
-            <DrawerHeader subject={subject} onClose={onClose} />
+            <DrawerHeader
+              subject={subject}
+              onClose={onClose}
+              weeklySlots={detail?.entries?.length || 0}
+              activeTasks={activeTaskCount}
+              daysPerWeek={daysPerWeek}
+            />
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col px-5 py-4 backdrop-blur-2xl">
-              {loading && <p className="text-sm text-[var(--color-text-muted)]">Loading…</p>}
-              {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
+            <div className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl">
+              {loading && (
+                <p className="p-5 text-sm text-[var(--color-text-muted)]">Loading…</p>
+              )}
+              {error && (
+                <p className="p-5 text-sm text-[var(--color-danger)]">{error}</p>
+              )}
 
               {!loading && !error && detail && (
-                <div className="flex min-h-0 flex-1 flex-col gap-4">
-                  <ScheduleSection
-                    entries={detail.entries}
-                    timetableId={timetableId}
-                    scheduleDays={scheduleDays}
-                    fade={scheduleFade}
-                  />
+                <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+                  <div className="hidden shrink-0 flex-col gap-5 px-5 py-5 md:flex md:w-72 md:border-r md:border-[var(--color-border)]">
+                    <SummaryHud
+                      nextSession={nextSession}
+                      footprintPercent={footprintPercent}
+                      accentColor={subject.color}
+                      tasksCompleted={tasksCompleted}
+                      tasksTotal={tasksTotal}
+                    />
 
-                  <div className="shrink-0 border-t border-[var(--color-border)]" />
+                    <div className="mt-auto">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setViewMode((prev) => (prev === "default" ? "grid" : "default"))
+                        }
+                        aria-pressed={viewMode === "grid"}
+                        className={`flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium backdrop-blur-md transition-colors duration-200 ${
+                          viewMode === "grid"
+                            ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] text-[var(--color-primary)]"
+                            : "border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] text-[var(--color-text)] hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]"
+                        }`}
+                      >
+                        <Search size={14} />
+                        {viewMode === "grid" ? "Back to Panel View" : "Toggle Timetable Grid View"}
+                      </button>
+                    </div>
+                  </div>
 
-                  <HomeworkSection
-                    homework={detail.homework}
-                    togglingIds={togglingIds}
-                    newTitle={newTitle}
-                    setNewTitle={setNewTitle}
-                    addingHomework={addingHomework}
-                    addError={addError}
-                    onSubmit={handleAddHomework}
-                    onToggle={toggleHomeworkStatus}
-                    fade={homeworkFade}
-                  />
+                  <div className="relative min-h-0 flex-1">
+                    <div
+                      className={`absolute inset-0 flex min-h-0 flex-col transition-opacity duration-200 md:flex-row ${
+                        viewMode === "default"
+                          ? "pointer-events-auto opacity-100"
+                          : "pointer-events-none opacity-0"
+                      }`}
+                    >
+                      <div
+                        className={`min-h-0 flex-1 flex-col px-5 py-4 pb-24 md:flex md:border-r md:border-[var(--color-border)] md:pb-4 ${
+                          activeTab === "schedule" ? "flex" : "hidden"
+                        }`}
+                      >
+                        <ScheduleSection
+                          entries={detail.entries}
+                          timetableId={timetableId}
+                          scheduleDays={scheduleDays}
+                          fade={scheduleFade}
+                        />
+                      </div>
+
+                      <div
+                        className={`min-h-0 flex-1 flex-col px-5 py-4 pb-24 md:flex md:pb-4 ${
+                          activeTab === "tasks" ? "flex" : "hidden"
+                        }`}
+                      >
+                        <HomeworkSection
+                          homework={detail.homework}
+                          togglingIds={togglingIds}
+                          newTitle={newTitle}
+                          setNewTitle={setNewTitle}
+                          addingHomework={addingHomework}
+                          addError={addError}
+                          onSubmit={handleAddHomework}
+                          onToggle={toggleHomeworkStatus}
+                          fade={homeworkFade}
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      className={`absolute inset-0 flex items-center justify-center px-8 transition-opacity duration-200 ${
+                        viewMode === "grid"
+                          ? "pointer-events-auto opacity-100"
+                          : "pointer-events-none opacity-0"
+                      }`}
+                    >
+                      <div className="flex max-w-md flex-col items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-8 py-10 text-center backdrop-blur-xl">
+                        <Calendar size={28} className="text-[var(--color-text-muted)]" />
+                        <p className="text-sm font-medium text-[var(--color-text)]">
+                          Visual Calendar Workspace Engine — Focusing exclusively on {subject.name} slots. Take a deep breath!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
+
+            {!loading && !error && detail && viewMode === "default" && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center md:hidden">
+                <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_75%,transparent)] p-1 shadow-[0_8px_30px_-8px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("schedule")}
+                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+                      activeTab === "schedule"
+                        ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
+                        : "text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    <Calendar size={14} />
+                    Schedule
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("tasks")}
+                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-colors ${
+                      activeTab === "tasks"
+                        ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
+                        : "text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    <ClipboardList size={14} />
+                    Tasks
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
-      </aside>
+      </div>
     </div>
   );
 }
