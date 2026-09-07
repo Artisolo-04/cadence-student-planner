@@ -7,6 +7,7 @@ import TimetablePage from "./pages/timetable/TimetablePage";
 import SubjectsPage from "./pages/subjects/SubjectsPage";
 import HomeworkPage from "./pages/homework/HomeworkPage";
 import SettingsPage from "./pages/settings/SettingsPage";
+import VaultPage from "./pages/vault/VaultPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "./layouts/ProtectedLayout";
 
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/subjects" element={<SubjectsPage />} />
+        <Route path="/vault" element={<VaultPage />} />
         <Route path="/homework" element={<HomeworkPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

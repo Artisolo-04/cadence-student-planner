@@ -15,12 +15,12 @@ export default function ConfirmDialog({
     <Modal open={open} onClose={onCancel} title={title} elevated>
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
-            <AlertTriangle size={18} className="text-amber-500" />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger)]/10">
+            <AlertTriangle size={18} className="text-[var(--color-danger)]" />
           </span>
           <ul className="flex flex-1 flex-col gap-1.5 pt-1.5 text-sm text-[var(--color-text-muted)]">
             {messages.map((msg, i) => (
-              <li key={i} className="list-disc marker:text-amber-500/60 ml-4">
+              <li key={i} className="list-disc marker:text-[var(--color-danger)]/60 ml-4">
                 {msg}
               </li>
             ))}
@@ -34,7 +34,7 @@ export default function ConfirmDialog({
           <Button
             type="button"
             onClick={onConfirm}
-            className="bg-red-600 text-white hover:bg-red-500"
+            className="bg-[var(--color-danger)] text-white hover:opacity-90"
           >
             {confirmLabel}
           </Button>
