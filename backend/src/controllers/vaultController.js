@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs/promises");
+
 const {
   createResource,
   findResourcesByUserId,
@@ -7,6 +8,9 @@ const {
   updateResource,
   deleteResource,
 } = require("../models/Vault");
+
+const pool = require("../config/db");
+const { VAULT_EXT_TYPE_MAP, VAULT_FILE_TYPES } = require("../middleware/upload");
 
 const VALID_TYPES = ["pdf", "link"];
 const VAULT_UPLOADS_DIR = path.join(__dirname, "..", "..", "uploads", "vault-docs");
@@ -151,7 +155,7 @@ async function removeVaultItem(req, res) {
       return res.status(404).json({ error: "Resource not found" });
     }
 
-    if (existing.resource_type === "pdf" && existing.url_path && !/^https?:\/\//i.test(existing.url_path)) {
+    if (VAULT_FILE_TYPES.includes(existing.resource_type) && existing.url_path && !/^https?:\/\//i.test(existing.url_path)) {
       const safeFileName = path.basename(existing.url_path);
       const filePath = path.join(VAULT_UPLOADS_DIR, safeFileName);
       try {
@@ -171,4 +175,66 @@ async function removeVaultItem(req, res) {
   }
 }
 
-module.exports = { listVault, addVaultItem, updateVaultItem, removeVaultItem };
+async function safeUnlink(filePath) {
+  try {
+    await fs.unlink(filePath);
+  } catch (err) {
+    if (err.code !== "ENOENT") {
+      console.error("VAULT UPLOAD CLEANUP WARNING:", err);
+    }
+  }
+}
+
+async function uploadDocument(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file provided" });
+  }
+
+  const writtenPath = req.file.path;
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  const resourceType = VAULT_EXT_TYPE_MAP[ext];
+
+  if (!resourceType) {
+    await safeUnlink(writtenPath);
+    return res.status(400).json({ error: "Unsupported file type" });
+  }
+
+  const rawTitle = req.body?.title;
+  const title = (typeof rawTitle === "string" && rawTitle.trim()) || req.file.originalname;
+
+  const rawFolderName = req.body?.folderName;
+  const folderName =
+    typeof rawFolderName === "string" && rawFolderName.trim()
+      ? rawFolderName.trim()
+      : "Custom Workspaces";
+
+  const urlPath = `/uploads/vault-docs/${req.file.filename}`;
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `INSERT INTO subject_resources (user_id, subject_id, folder_name, resource_type, title, url_path)
+       VALUES ($1, NULL, $2, $3, $4, $5)
+       RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path, created_at, updated_at`,
+      [req.userId, folderName, resourceType, title, urlPath]
+    );
+
+    await client.query("COMMIT");
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackErr) {
+      console.error("VAULT UPLOAD ROLLBACK FAILED:", rollbackErr);
+    }
+    console.error("UPLOAD VAULT DOC ERROR:", err);
+    await safeUnlink(writtenPath);
+    res.status(500).json({ error: "Failed to save document" });
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = { listVault, addVaultItem, updateVaultItem, removeVaultItem, uploadDocument };
