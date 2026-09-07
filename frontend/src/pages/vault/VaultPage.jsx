@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { FolderOpen, Landmark, LayoutGrid, List, Plus } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FolderOpen, Landmark, LayoutGrid, List, Plus, UploadCloud } from "lucide-react";
 import api from "../../lib/api";
 import { useVaultData } from "./useVaultData";
 import VaultFolderCard from "./VaultFolderCard";
@@ -18,7 +18,7 @@ const LAYOUT_MODES = [
 ];
 
 export default function VaultPage() {
-  const { bySubject, byFolder, loading, error, addItem, removeItem } = useVaultData();
+  const { bySubject, byFolder, loading, error, addItem, removeItem, refetch } = useVaultData();
   const [formOpen, setFormOpen] = useState(false);
   const [allSubjects, setAllSubjects] = useState([]);
   const [contentView, setContentView] = useState("university");
@@ -26,6 +26,10 @@ export default function VaultPage() {
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const dragCounter = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,13 +65,68 @@ export default function VaultPage() {
   const isUniversity = contentView === "university";
   const activeGroups = isUniversity ? bySubject : byFolder;
   const activeAccent = isUniversity ? "var(--color-primary)" : "var(--color-accent)";
-  const activeHeading = isUniversity ? "University tracks" : "Custom folders";
   const emptyMessage = isUniversity
     ? "No subject-linked resources yet."
     : "No custom folders yet. Add a resource above and choose \"Custom folder\" to create one.";
 
+  const handleDragEnter = useCallback((e) => {
+    e.preventDefault();
+    if (!e.dataTransfer?.types?.includes("Files")) return;
+    dragCounter.current += 1;
+    setIsDragging(true);
+  }, []);
+
+  const handleDragOver = useCallback((e) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault();
+    dragCounter.current -= 1;
+    if (dragCounter.current <= 0) {
+      dragCounter.current = 0;
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    async (e) => {
+      e.preventDefault();
+      dragCounter.current = 0;
+      setIsDragging(false);
+
+      const file = e.dataTransfer.files?.[0];
+      if (!file) return;
+
+      setUploadError(null);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const { status } = await api.post("/vault/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        if (status === 201) {
+          await refetch();
+        } else {
+          setUploadError("Upload did not complete. Please try again.");
+        }
+      } catch (err) {
+        console.error("Vault drag-drop upload error:", err);
+        setUploadError(err?.response?.data?.message || "Upload failed. Please try again.");
+      }
+    },
+    [refetch]
+  );
+
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
+    <div
+      className="relative mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <header className="flex shrink-0 items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
@@ -76,35 +135,35 @@ export default function VaultPage() {
           </p>
         </div>
 
-<div className="flex items-center gap-3">
-  <SegmentedControl
-    ariaLabel="Content view"
-    options={CONTENT_VIEWS}
-    value={contentView}
-    onChange={setContentView}
-    variant="labeled"
-    size="md"
-  />
+        <div className="flex items-center gap-3">
+          <SegmentedControl
+            ariaLabel="Content view"
+            options={CONTENT_VIEWS}
+            value={contentView}
+            onChange={setContentView}
+            variant="labeled"
+            size="md"
+          />
 
-  <SegmentedControl
-    ariaLabel="Layout"
-    options={LAYOUT_MODES}
-    value={layoutMode}
-    onChange={setLayoutMode}
-    variant="icon"
-    size="md"
-  />
+          <SegmentedControl
+            ariaLabel="Layout"
+            options={LAYOUT_MODES}
+            value={layoutMode}
+            onChange={setLayoutMode}
+            variant="icon"
+            size="md"
+          />
 
-  <Button type="button" onClick={() => setFormOpen(true)} className="h-9 shrink-0">
-    <Plus size={16} />
-    Add resource
-  </Button>
-</div>
+          <Button type="button" onClick={() => setFormOpen(true)} className="h-9 shrink-0">
+            <Plus size={16} />
+            Add resource
+          </Button>
+        </div>
       </header>
 
-      {error && (
+      {(error || uploadError) && (
         <div className="shrink-0 rounded-md border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
-          {error}
+          {uploadError || error}
         </div>
       )}
 
@@ -174,6 +233,39 @@ export default function VaultPage() {
         onClose={() => setFormOpen(false)}
         destination={isUniversity ? "subject" : "folder"}
       />
+
+      {isDragging && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6 backdrop-blur-sm transition-opacity duration-150"
+          style={{ backgroundColor: "color-mix(in srgb, var(--color-bg) 78%, transparent)" }}
+        >
+          <div
+            className="pointer-events-none flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border-2 border-dashed px-10 py-14 text-center shadow-2xl"
+            style={{
+              borderColor: "var(--color-primary)",
+              backgroundColor: "var(--color-surface)",
+            }}
+          >
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-2xl"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--color-primary) 14%, transparent)",
+                color: "var(--color-primary)",
+              }}
+            >
+              <UploadCloud size={28} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-[var(--color-text)]">
+                Drop file to upload
+              </p>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                It'll land in Custom Workspaces instantly
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
