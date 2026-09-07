@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ExternalLink, FileText, Folder, Link2, Trash2 } from "lucide-react";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 
-export default function VaultFolderCard({ title, itemCount, items, accent, onDeleteItem }) {
+export default function VaultFolderCard({ title, itemCount, items, accent, onDeleteItem, layout = "grid" }) {
   const [open, setOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -17,6 +17,99 @@ export default function VaultFolderCard({ title, itemCount, items, accent, onDel
       setDeleting(false);
     }
   };
+
+  const itemRows = (compact) => (
+    <div className={`relative z-10 flex flex-col ${compact ? "" : "border-t border-[var(--color-border)]"}`}>
+      {items.length === 0 ? (
+        <p className="px-5 py-3 text-sm text-[var(--color-text-muted)]">No items yet.</p>
+      ) : (
+        items.map((item) => (
+          <div
+            key={item.id}
+            className={`flex items-center gap-2 border-t border-[var(--color-border)] px-5 first:border-t-0 ${
+              compact ? "py-2" : "py-2.5"
+            }`}
+          >
+            <span className="shrink-0 text-[var(--color-text-muted)]">
+              {item.resource_type === "pdf" ? <FileText size={14} /> : <Link2 size={14} />}
+            </span>
+            <span className="min-w-0 flex-1 truncate text-sm text-[var(--color-text)]">
+              {item.title}
+            </span>
+
+            <a
+
+              href={item.url_path}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)]"
+            >
+              <ExternalLink size={14} />
+            </a>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPendingDelete({ id: item.id, title: item.title });
+              }}
+              aria-label="Delete"
+              className="inline-flex shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  if (layout === "list") {
+    return (
+      <>
+        <article
+          style={{ "--folder-color": accent }}
+          className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)]"
+        >
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+          >
+            <div className="flex min-w-0 items-center gap-2.5">
+              <Folder size={15} style={{ color: accent }} className="shrink-0" />
+              <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text)]">
+                {title}
+              </span>
+              <span className="shrink-0 text-xs font-medium" style={{ color: accent }}>
+                {itemCount} {itemCount === 1 ? "resource" : "resources"}
+              </span>
+            </div>
+            <ChevronDown
+              size={14}
+              className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-150 ${
+                open ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {open && itemRows(true)}
+        </article>
+
+        <ConfirmDialog
+          open={!!pendingDelete}
+          title="Delete this file?"
+          messages={[
+            pendingDelete ? `"${pendingDelete.title}" will be removed from ${title}.` : "",
+            "This can't be undone — the hosted file or link record is permanently wiped from disk.",
+          ]}
+          confirmLabel={deleting ? "Deleting…" : "Delete"}
+          cancelLabel="Keep it"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => !deleting && setPendingDelete(null)}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -83,47 +176,7 @@ export default function VaultFolderCard({ title, itemCount, items, accent, onDel
           />
         </button>
 
-        {open && (
-          <div className="relative z-10 flex flex-col border-t border-[var(--color-border)]">
-            {items.length === 0 ? (
-              <p className="px-5 py-3 text-sm text-[var(--color-text-muted)]">No items yet.</p>
-            ) : (
-              items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2 border-t border-[var(--color-border)] px-5 py-2.5 first:border-t-0"
-                >
-                  <span className="shrink-0 text-[var(--color-text-muted)]">
-                    {item.resource_type === "pdf" ? <FileText size={14} /> : <Link2 size={14} />}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-sm text-[var(--color-text)]">
-                    {item.title}
-                  </span>
-                  <a
-                    href={item.url_path}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Open"
-                    onClick={(e) => e.stopPropagation()}
-                    className="inline-flex shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)]"
-                  >
-                    <ExternalLink size={14} />
-                  </a>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setPendingDelete({ id: item.id, title: item.title });
-                    }}
-                    aria-label="Delete"
-                    className="inline-flex shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        )}
+        {open && itemRows(false)}
       </article>
 
       <ConfirmDialog

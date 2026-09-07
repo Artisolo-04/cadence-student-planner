@@ -1,15 +1,28 @@
 import { useEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { FolderOpen, Landmark, LayoutGrid, List, Plus } from "lucide-react";
 import api from "../../lib/api";
 import { useVaultData } from "./useVaultData";
 import VaultFolderCard from "./VaultFolderCard";
 import AddVaultItemForm from "./AddVaultItemForm";
 import Button from "../../components/ui/Button";
+import SegmentedControl from "../../components/ui/SegmentedControl";
+
+const CONTENT_VIEWS = [
+  { id: "university", label: "University Tracks", Icon: Landmark },
+  { id: "custom", label: "Custom Workspaces", Icon: FolderOpen },
+];
+
+const LAYOUT_MODES = [
+  { id: "grid", label: "Grid", Icon: LayoutGrid },
+  { id: "list", label: "List", Icon: List },
+];
 
 export default function VaultPage() {
   const { bySubject, byFolder, loading, error, addItem, removeItem } = useVaultData();
   const [formOpen, setFormOpen] = useState(false);
   const [allSubjects, setAllSubjects] = useState([]);
+  const [contentView, setContentView] = useState("university");
+  const [layoutMode, setLayoutMode] = useState("grid");
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
@@ -43,7 +56,15 @@ export default function VaultPage() {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", updateScrollFades);
     };
-  }, [bySubject, byFolder, loading]);
+  }, [bySubject, byFolder, loading, contentView, layoutMode]);
+
+  const isUniversity = contentView === "university";
+  const activeGroups = isUniversity ? bySubject : byFolder;
+  const activeAccent = isUniversity ? "var(--color-primary)" : "var(--color-accent)";
+  const activeHeading = isUniversity ? "University tracks" : "Custom folders";
+  const emptyMessage = isUniversity
+    ? "No subject-linked resources yet."
+    : "No custom folders yet. Add a resource above and choose \"Custom folder\" to create one.";
 
   return (
     <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
@@ -54,10 +75,31 @@ export default function VaultPage() {
             Your documents and links, organized by subject or custom folder.
           </p>
         </div>
-        <Button type="button" onClick={() => setFormOpen(true)} className="shrink-0">
-          <Plus size={16} />
-          Add resource
-        </Button>
+
+<div className="flex items-center gap-3">
+  <SegmentedControl
+    ariaLabel="Content view"
+    options={CONTENT_VIEWS}
+    value={contentView}
+    onChange={setContentView}
+    variant="labeled"
+    size="md"
+  />
+
+  <SegmentedControl
+    ariaLabel="Layout"
+    options={LAYOUT_MODES}
+    value={layoutMode}
+    onChange={setLayoutMode}
+    variant="icon"
+    size="md"
+  />
+
+  <Button type="button" onClick={() => setFormOpen(true)} className="h-9 shrink-0">
+    <Plus size={16} />
+    Add resource
+  </Button>
+</div>
       </header>
 
       {error && (
@@ -75,54 +117,38 @@ export default function VaultPage() {
           {loading ? (
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
           ) : (
-            <div className="flex flex-col gap-7">
-              <div className="flex flex-col gap-4">
-                <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-                  University tracks
-                </h2>
-                {bySubject.length === 0 ? (
-                  <p className="text-sm text-[var(--color-text-muted)]">
-                    No subject-linked resources yet.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {bySubject.map((group) => (
-                      <VaultFolderCard
-                        key={group.subjectId}
-                        title={group.subjectName}
-                        itemCount={group.items.length}
-                        items={group.items}
-                        accent="var(--color-primary)"
-                        onDeleteItem={removeItem}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-4">
-                <h2 className="text-sm font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
-                  Custom folders
-                </h2>
-                {byFolder.length === 0 ? (
-                  <p className="text-sm text-[var(--color-text-muted)]">
-                    No custom folders yet. Add a resource above and choose "Custom folder" to create one.
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {byFolder.map((group) => (
-                      <VaultFolderCard
-                        key={group.folderName}
-                        title={group.folderName}
-                        itemCount={group.items.length}
-                        items={group.items}
-                        accent="var(--color-accent)"
-                        onDeleteItem={removeItem}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="flex flex-col gap-4">
+              {activeGroups.length === 0 ? (
+                <p className="text-sm text-[var(--color-text-muted)]">{emptyMessage}</p>
+              ) : layoutMode === "grid" ? (
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {activeGroups.map((group) => (
+                    <VaultFolderCard
+                      key={isUniversity ? group.subjectId : group.folderName}
+                      title={isUniversity ? group.subjectName : group.folderName}
+                      itemCount={group.items.length}
+                      items={group.items}
+                      accent={activeAccent}
+                      onDeleteItem={removeItem}
+                      layout="grid"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {activeGroups.map((group) => (
+                    <VaultFolderCard
+                      key={isUniversity ? group.subjectId : group.folderName}
+                      title={isUniversity ? group.subjectName : group.folderName}
+                      itemCount={group.items.length}
+                      items={group.items}
+                      accent={activeAccent}
+                      onDeleteItem={removeItem}
+                      layout="list"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -146,6 +172,7 @@ export default function VaultPage() {
         subjects={allSubjects}
         onSubmit={addItem}
         onClose={() => setFormOpen(false)}
+        destination={isUniversity ? "subject" : "folder"}
       />
     </div>
   );
