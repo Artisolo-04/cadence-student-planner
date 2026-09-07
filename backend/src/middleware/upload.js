@@ -56,6 +56,10 @@ const VAULT_MIME_MAP = {
   ".txt": ["text/plain"],
 };
 
+function fixFilenameEncoding(originalName) {
+  return Buffer.from(originalName, "latin1").toString("utf8");
+}
+
 function sanitizeBaseName(originalName) {
   const base = path.basename(originalName, path.extname(originalName));
   return base
@@ -67,15 +71,20 @@ function sanitizeBaseName(originalName) {
 const vaultStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, vaultDocsDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const safeBase = sanitizeBaseName(file.originalname);
+    const decodedName = fixFilenameEncoding(file.originalname);
+    
+    file.originalname = decodedName;
+
+    const ext = path.extname(decodedName).toLowerCase();
+    const safeBase = sanitizeBaseName(decodedName);
     const uniqueSuffix = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
     cb(null, `user-${req.userId}-${safeBase}-${uniqueSuffix}${ext}`);
   },
 });
 
 function vaultFileFilter(req, file, cb) {
-  const ext = path.extname(file.originalname).toLowerCase();
+  const decodedName = fixFilenameEncoding(file.originalname);
+  const ext = path.extname(decodedName).toLowerCase();
   const allowedType = VAULT_EXT_TYPE_MAP[ext];
 
   if (!allowedType) {
