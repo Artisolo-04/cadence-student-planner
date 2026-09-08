@@ -75,7 +75,7 @@ export default function VaultPage() {
 
   const isUniversity = contentView === "university";
   const activeGroups = isUniversity ? bySubject : byFolder;
-  const activeAccent = isUniversity ? "var(--color-primary)" : "var(--color-accent)";
+  const activeAccent = "var(--color-primary)";
   const emptyMessage = isUniversity
     ? "No subject-linked resources yet."
     : "No custom folders yet. Add a resource above and choose \"Custom folder\" to create one.";
