@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { FolderOpen, Landmark, LayoutGrid, List, Plus } from "lucide-react";
+import { FolderOpen, FolderPlus, Landmark, LayoutGrid, List } from "lucide-react";
 import api from "../../lib/api";
 import { useVaultData } from "./useVaultData";
 import VaultFolderCard from "./VaultFolderCard";
 import AddVaultItemForm from "./AddVaultItemForm";
+import CreateWorkspaceForm from "./CreateWorkspaceForm";
 import Button from "../../components/ui/Button";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
@@ -22,6 +23,8 @@ const LAYOUT_MODES = [
 export default function VaultPage() {
   const { bySubject, byFolder, loading, error, addItem, removeItem, refetch } = useVaultData();
   const [formOpen, setFormOpen] = useState(false);
+  const [lockedTarget, setLockedTarget] = useState(null);
+  const [createFormOpen, setCreateFormOpen] = useState(false);
   const [allSubjects, setAllSubjects] = useState([]);
   const [contentView, setContentView] = useState("university");
   const [layoutMode, setLayoutMode] = useState("grid");
@@ -83,8 +86,26 @@ export default function VaultPage() {
   const activeGroups = isUniversity ? bySubject : byFolder;
   const activeAccent = "var(--color-primary)";
   const emptyMessage = isUniversity
-    ? "No subject-linked resources yet."
-    : "No custom folders yet. Add a resource above and choose \"Custom folder\" to create one.";
+    ? "No subject-linked resources yet. Click \"New workspace\" to start one."
+    : "No custom folders yet. Click \"New workspace\" to create one.";
+
+  const availableSubjectsForCreate = allSubjects.filter(
+    (s) => !bySubject.some((g) => g.subjectId === s.id)
+  );
+  const existingFolderNamesForCreate = byFolder.map((f) => f.folderName);
+
+  function openAddResourceForm(target) {
+    setLockedTarget(target || null);
+    setFormOpen(true);
+  }
+
+  function handleWorkspaceCreated(target) {
+    setCreateFormOpen(false);
+    setOpenFolderKey({
+      isUniversity: target.type === "subject",
+      key: target.type === "subject" ? target.id : target.name,
+    });
+  }
 
   const handleOpenFolder = (group) => {
     setOpenFolderKey({
@@ -103,6 +124,9 @@ export default function VaultPage() {
     ? {
         ...rawOpenFolder,
         title: openFolderKey.isUniversity ? rawOpenFolder.subjectName : rawOpenFolder.folderName,
+        target: openFolderKey.isUniversity
+          ? { type: "subject", id: rawOpenFolder.subjectId, name: rawOpenFolder.subjectName }
+          : { type: "folder", id: rawOpenFolder.folderName, name: rawOpenFolder.folderName },
       }
     : null;
 
@@ -135,9 +159,9 @@ export default function VaultPage() {
             size="md"
           />
 
-          <Button type="button" onClick={() => setFormOpen(true)} className="h-9 shrink-0">
-            <Plus size={16} />
-            Add resource
+          <Button type="button" onClick={() => setCreateFormOpen(true)} className="h-9 shrink-0">
+            <FolderPlus size={16} />
+            New workspace
           </Button>
         </div>
       </header>
@@ -209,14 +233,28 @@ export default function VaultPage() {
         />
       </section>
 
+      <CreateWorkspaceForm
+        open={createFormOpen}
+        mode={isUniversity ? "subject" : "folder"}
+        subjects={availableSubjectsForCreate}
+        existingFolderNames={existingFolderNamesForCreate}
+        onClose={() => setCreateFormOpen(false)}
+        onCreateItem={addItem}
+        onCreated={handleWorkspaceCreated}
+      />
+
       <AddVaultItemForm
         open={formOpen}
         subjects={allSubjects}
-        existingFolders={byFolder.map((f) => f.folderName)}
+        existingFolders={existingFolderNamesForCreate}
         onSubmit={addItem}
         onUploadComplete={refetch}
-        onClose={() => setFormOpen(false)}
+        onClose={() => {
+          setFormOpen(false);
+          setLockedTarget(null);
+        }}
         destination={isUniversity ? "subject" : "folder"}
+        lockedTarget={lockedTarget}
       />
 
       <FolderExplorerModal
@@ -224,6 +262,7 @@ export default function VaultPage() {
         accent={activeAccent}
         onClose={() => setOpenFolderKey(null)}
         onRequestDelete={setPendingDelete}
+        onAddResource={openAddResourceForm}
       />
 
       <ConfirmDialog

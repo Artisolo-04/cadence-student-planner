@@ -1,6 +1,7 @@
-import { Folder, X } from "lucide-react";
+import { Folder, Plus, X } from "lucide-react";
+import Button from "../../../components/ui/Button";
 
-export default function ExplorerHeader({ title, accent, onClose }) {
+export default function ExplorerHeader({ title, accent, onClose, onAddResource }) {
   return (
     <div className="relative z-10 flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4">
       <div
@@ -23,14 +24,27 @@ export default function ExplorerHeader({ title, accent, onClose }) {
         </h3>
       </div>
 
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close"
-        className="relative z-10 shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
-      >
-        <X size={18} />
-      </button>
+      <div className="relative z-10 flex shrink-0 items-center gap-2">
+        {onAddResource && (
+          <Button
+            variant="secondary"
+            onClick={onAddResource}
+            className="gap-1.5 px-3 py-2 text-xs"
+          >
+            <Plus size={14} />
+            Add resource
+          </Button>
+        )}
+
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
+        >
+          <X size={18} />
+        </button>
+      </div>
     </div>
   );
 }

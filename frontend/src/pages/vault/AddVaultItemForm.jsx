@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Folder, FolderPlus, Search, UploadCloud } from "lucide-react";
+import { Check, Folder, FolderPlus, Landmark, Lock, Search, UploadCloud } from "lucide-react";
 import api from "../../lib/api";
 import Dropdown from "../../components/ui/Dropdown";
 import Input from "../../components/ui/Input";
@@ -15,6 +15,21 @@ const VISIBLE_ITEMS = 5;
 function stripExtension(filename) {
   const lastDot = filename.lastIndexOf(".");
   return lastDot > 0 ? filename.slice(0, lastDot) : filename;
+}
+
+function LockedDestination({ icon: Icon, label, name }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-[var(--color-primary)]">
+        <Icon size={14} />
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate text-sm font-medium text-[var(--color-text)]">{name}</span>
+        <span className="text-[11px] text-[var(--color-text-muted)]">{label}</span>
+      </div>
+      <Lock size={13} className="ml-auto shrink-0 text-[var(--color-text-muted)]" />
+    </div>
+  );
 }
 
 function FolderCombobox({ value, onChange, options }) {
@@ -221,7 +236,16 @@ function FolderCombobox({ value, onChange, options }) {
   );
 }
 
-export default function AddVaultItemForm({ open, subjects, existingFolders, onSubmit, onUploadComplete, onClose, destination }) {
+export default function AddVaultItemForm({
+  open,
+  subjects,
+  existingFolders,
+  onSubmit,
+  onUploadComplete,
+  onClose,
+  destination,
+  lockedTarget,
+}) {
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? "");
   const [folderName, setFolderName] = useState("");
   const [resourceType, setResourceType] = useState("link");
@@ -235,16 +259,20 @@ export default function AddVaultItemForm({ open, subjects, existingFolders, onSu
   const dragCounter = useRef(0);
   const fileInputRef = useRef(null);
 
+  const isLocked = Boolean(lockedTarget);
+  const effectiveDestination = isLocked ? lockedTarget.type : destination;
+
   const folderOptions = useMemo(() => {
     const unique = new Set((existingFolders || []).filter(Boolean));
     return Array.from(unique).sort((a, b) => a.localeCompare(b));
   }, [existingFolders]);
 
   useEffect(() => {
+    if (isLocked) return;
     if (destination === "subject" && !subjectId && subjects[0]?.id) {
       setSubjectId(subjects[0].id);
     }
-  }, [destination, subjects, subjectId]);
+  }, [destination, subjects, subjectId, isLocked]);
 
   function resetAndClose() {
     setFolderName("");
@@ -265,16 +293,21 @@ export default function AddVaultItemForm({ open, subjects, existingFolders, onSu
     setTitle((prev) => (prev.trim() ? prev : stripExtension(file.name)));
   }
 
+  const targetSubjectId =
+    effectiveDestination === "subject" ? (isLocked ? lockedTarget.id : subjectId) : null;
+  const targetFolderName =
+    effectiveDestination === "folder" ? (isLocked ? lockedTarget.name : folderName.trim()) : null;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
     if (selectedFile) {
-      if (destination === "subject" && !subjectId) {
+      if (effectiveDestination === "subject" && !targetSubjectId) {
         setError("Choose a subject.");
         return;
       }
-      if (destination === "folder" && !folderName.trim()) {
+      if (effectiveDestination === "folder" && !targetFolderName) {
         setError("Folder name is required.");
         return;
       }
@@ -285,10 +318,10 @@ export default function AddVaultItemForm({ open, subjects, existingFolders, onSu
       if (title.trim()) {
         formData.append("title", title.trim());
       }
-      if (destination === "subject") {
-        formData.append("subjectId", subjectId);
+      if (effectiveDestination === "subject") {
+        formData.append("subjectId", targetSubjectId);
       } else {
-        formData.append("folderName", folderName.trim());
+        formData.append("folderName", targetFolderName);
       }
 
       try {
@@ -314,19 +347,19 @@ export default function AddVaultItemForm({ open, subjects, existingFolders, onSu
       setError("Title and URL are required.");
       return;
     }
-    if (destination === "subject" && !subjectId) {
+    if (effectiveDestination === "subject" && !targetSubjectId) {
       setError("Choose a subject.");
       return;
     }
-    if (destination === "folder" && !folderName.trim()) {
+    if (effectiveDestination === "folder" && !targetFolderName) {
       setError("Folder name is required.");
       return;
     }
     setSubmitting(true);
     try {
       await onSubmit({
-        subjectId: destination === "subject" ? subjectId : null,
-        folderName: destination === "folder" ? folderName.trim() : null,
+        subjectId: effectiveDestination === "subject" ? targetSubjectId : null,
+        folderName: effectiveDestination === "folder" ? targetFolderName : null,
         resourceType,
         title: title.trim(),
         urlPath: urlPath.trim(),
@@ -387,7 +420,14 @@ export default function AddVaultItemForm({ open, subjects, existingFolders, onSu
     <Modal
       open={open}
       onClose={() => !submitting && resetAndClose()}
-      title={destination === "subject" ? "Add resource · University track" : "Add resource · Custom workspace"}
+      elevated={isLocked}
+      title={
+        isLocked
+          ? `Add resource · ${lockedTarget.name}`
+          : destination === "subject"
+          ? "Add resource · University track"
+          : "Add resource · Custom workspace"
+      }
       footer={
         <>
           <Button type="button" variant="secondary" onClick={resetAndClose} disabled={submitting}>
@@ -400,13 +440,19 @@ export default function AddVaultItemForm({ open, subjects, existingFolders, onSu
       }
     >
       <form id="add-vault-item-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {destination === "subject" ? (
-          <Dropdown
-            value={subjectId}
-            onChange={(e) => setSubjectId(e.target.value)}
-            options={subjectOptions}
-            placeholder="No subjects available"
-          />
+        {effectiveDestination === "subject" ? (
+          isLocked ? (
+            <LockedDestination icon={Landmark} label="University track" name={lockedTarget.name} />
+          ) : (
+            <Dropdown
+              value={subjectId}
+              onChange={(e) => setSubjectId(e.target.value)}
+              options={subjectOptions}
+              placeholder="No subjects available"
+            />
+          )
+        ) : isLocked ? (
+          <LockedDestination icon={Folder} label="Custom workspace" name={lockedTarget.name} />
         ) : (
           <FolderCombobox value={folderName} onChange={setFolderName} options={folderOptions} />
         )}

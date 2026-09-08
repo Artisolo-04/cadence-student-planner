@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, FileSpreadsheet, Globe2, ExternalLink, Trash2, File as FileIcon } from "lucide-react";
+import { FileText, FileSpreadsheet, Globe2, ExternalLink, Plus, Trash2, File as FileIcon } from "lucide-react";
 import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
 
@@ -122,7 +122,7 @@ function FileCard({ item, folderTitle, onRequestDelete }) {
   );
 }
 
-export default function FolderExplorerModal({ folder, accent, onClose, onRequestDelete }) {
+export default function FolderExplorerModal({ folder, accent, onClose, onRequestDelete, onAddResource }) {
   const open = Boolean(folder);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -173,14 +173,24 @@ export default function FolderExplorerModal({ folder, accent, onClose, onRequest
       >
         {folder && (
           <>
-            <ExplorerHeader title={folder.title} accent={accent} onClose={onClose} />
+            <ExplorerHeader title={folder.title} accent={accent} onClose={onClose} onAddResource={onAddResource ? () => onAddResource(folder.target) : undefined} />
 
             <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 scrollbar-cadence">
               {items.length === 0 ? (
-                <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))]">
+                <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))]">
                   <p className="text-sm text-[var(--color-text-muted)]">
                     No resources yet in this folder.
                   </p>
+                  {onAddResource && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => onAddResource(folder.target)}
+                      className="gap-1.5 px-3 py-2 text-xs"
+                    >
+                      <Plus size={14} />
+                      Add the first resource
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
