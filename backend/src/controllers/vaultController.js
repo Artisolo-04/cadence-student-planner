@@ -199,14 +199,27 @@ async function uploadDocument(req, res) {
     return res.status(400).json({ error: "Unsupported file type" });
   }
 
+  const rawSubjectId = req.body?.subjectId;
+  const rawFolderName = req.body?.folderName;
+
+  let subjectId = null;
+  let folderName = null;
+
+  if (rawSubjectId !== undefined && rawSubjectId !== null && String(rawSubjectId).trim() !== "") {
+    const parsedSubjectId = parseInt(rawSubjectId, 10);
+    if (Number.isNaN(parsedSubjectId)) {
+      await safeUnlink(writtenPath);
+      return res.status(400).json({ error: "subjectId must be an integer" });
+    }
+    subjectId = parsedSubjectId;
+  } else if (typeof rawFolderName === "string" && rawFolderName.trim()) {
+    folderName = rawFolderName.trim();
+  } else {
+    folderName = "Custom Workspaces";
+  }
+
   const rawTitle = req.body?.title;
   const title = (typeof rawTitle === "string" && rawTitle.trim()) || req.file.originalname;
-
-  const rawFolderName = req.body?.folderName;
-  const folderName =
-    typeof rawFolderName === "string" && rawFolderName.trim()
-      ? rawFolderName.trim()
-      : "Custom Workspaces";
 
   const urlPath = `/uploads/vault-docs/${req.file.filename}`;
 
@@ -216,9 +229,9 @@ async function uploadDocument(req, res) {
 
     const result = await client.query(
       `INSERT INTO subject_resources (user_id, subject_id, folder_name, resource_type, title, url_path)
-       VALUES ($1, NULL, $2, $3, $4, $5)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path, created_at, updated_at`,
-      [req.userId, folderName, resourceType, title, urlPath]
+      [req.userId, subjectId, folderName, resourceType, title, urlPath]
     );
 
     await client.query("COMMIT");
