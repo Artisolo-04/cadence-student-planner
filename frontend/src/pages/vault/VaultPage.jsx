@@ -29,7 +29,7 @@ export default function VaultPage() {
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
 
-  const [openFolder, setOpenFolder] = useState(null);
+  const [openFolderKey, setOpenFolderKey] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -75,12 +75,36 @@ export default function VaultPage() {
     };
   }, [bySubject, byFolder, loading, contentView, layoutMode]);
 
+  useEffect(() => {
+    setOpenFolderKey(null);
+  }, [contentView]);
+
   const isUniversity = contentView === "university";
   const activeGroups = isUniversity ? bySubject : byFolder;
   const activeAccent = "var(--color-primary)";
   const emptyMessage = isUniversity
     ? "No subject-linked resources yet."
     : "No custom folders yet. Add a resource above and choose \"Custom folder\" to create one.";
+
+  const handleOpenFolder = (group) => {
+    setOpenFolderKey({
+      isUniversity,
+      key: isUniversity ? group.subjectId : group.folderName,
+    });
+  };
+
+  const rawOpenFolder = openFolderKey
+    ? activeGroups.find((g) =>
+        openFolderKey.isUniversity ? g.subjectId === openFolderKey.key : g.folderName === openFolderKey.key
+      ) || null
+    : null;
+
+  const openFolder = rawOpenFolder
+    ? {
+        ...rawOpenFolder,
+        title: openFolderKey.isUniversity ? rawOpenFolder.subjectName : rawOpenFolder.folderName,
+      }
+    : null;
 
   return (
     <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
@@ -146,7 +170,7 @@ export default function VaultPage() {
                       items={group.items}
                       accent={activeAccent}
                       onRequestDelete={setPendingDelete}
-                      onOpen={setOpenFolder}
+                      onOpen={() => handleOpenFolder(group)}
                       layout="grid"
                     />
                   ))}
@@ -161,7 +185,7 @@ export default function VaultPage() {
                       items={group.items}
                       accent={activeAccent}
                       onRequestDelete={setPendingDelete}
-                      onOpen={setOpenFolder}
+                      onOpen={() => handleOpenFolder(group)}
                       layout="list"
                     />
                   ))}
@@ -198,7 +222,8 @@ export default function VaultPage() {
       <FolderExplorerModal
         folder={openFolder}
         accent={activeAccent}
-        onClose={() => setOpenFolder(null)}
+        onClose={() => setOpenFolderKey(null)}
+        onRequestDelete={setPendingDelete}
       />
 
       <ConfirmDialog
