@@ -7,6 +7,7 @@ import AddVaultItemForm from "./AddVaultItemForm";
 import Button from "../../components/ui/Button";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import FolderExplorerModal from "./folderExplorer/FolderExplorerModal";
 
 const CONTENT_VIEWS = [
   { id: "university", label: "University Tracks", Icon: Landmark },
@@ -28,6 +29,7 @@ export default function VaultPage() {
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
 
+  const [openFolder, setOpenFolder] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -144,6 +146,7 @@ export default function VaultPage() {
                       items={group.items}
                       accent={activeAccent}
                       onRequestDelete={setPendingDelete}
+                      onOpen={setOpenFolder}
                       layout="grid"
                     />
                   ))}
@@ -158,6 +161,7 @@ export default function VaultPage() {
                       items={group.items}
                       accent={activeAccent}
                       onRequestDelete={setPendingDelete}
+                      onOpen={setOpenFolder}
                       layout="list"
                     />
                   ))}
@@ -189,6 +193,12 @@ export default function VaultPage() {
         onUploadComplete={refetch}
         onClose={() => setFormOpen(false)}
         destination={isUniversity ? "subject" : "folder"}
+      />
+
+      <FolderExplorerModal
+        folder={openFolder}
+        accent={activeAccent}
+        onClose={() => setOpenFolder(null)}
       />
 
       <ConfirmDialog

@@ -72,14 +72,23 @@ function CountBadge({ count, accent, className = "" }) {
   );
 }
 
-export default function VaultFolderCard({ title, itemCount, items, accent, layout = "grid" }) {
+export default function VaultFolderCard({ title, itemCount, items, accent, layout = "grid", onOpen }) {
   const breakdown = buildBreakdown(items);
 
   if (layout === "list") {
     return (
       <article
         style={{ "--folder-color": accent }}
-        className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)]"
+        role="button"
+        tabIndex={0}
+        onClick={() => onOpen?.({ title, items })}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpen?.({ title, items });
+          }
+        }}
+        className="cursor-pointer overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
       >
         <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2.5">
@@ -108,7 +117,16 @@ export default function VaultFolderCard({ title, itemCount, items, accent, layou
         backgroundImage:
           "linear-gradient(155deg, color-mix(in srgb, var(--folder-color) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
       }}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--folder-color)_35%,transparent)]"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen?.({ title, items })}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpen?.({ title, items });
+        }
+      }}
+      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--folder-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
     >
       <div
         aria-hidden="true"
