@@ -185,6 +185,46 @@ async function safeUnlink(filePath) {
   }
 }
 
+/**
+ * @param {string} filePath
+ * @returns {Promise<number|null>}
+*/
+
+async function extractPdfPageCount(filePath) {
+  try {
+    const buffer = await fs.readFile(filePath);
+    const MAX_SCAN_BYTES = 10 * 1024 * 1024;
+    const scanBuffer = buffer.length > MAX_SCAN_BYTES ? buffer.subarray(0, MAX_SCAN_BYTES) : buffer;
+    const text = scanBuffer.toString("latin1");
+    const pageTreePattern = /\/Type\s*\/Pages[^>]{0,500}?\/Count\s+(\d+)/g;
+    const countOnlyPattern = /\/Count\s+(\d+)/g;
+
+    let maxCount = null;
+
+    let match;
+    while ((match = pageTreePattern.exec(text)) !== null) {
+      const n = parseInt(match[1], 10);
+      if (!Number.isNaN(n) && (maxCount === null || n > maxCount)) {
+        maxCount = n;
+      }
+    }
+
+    if (maxCount === null) {
+      while ((match = countOnlyPattern.exec(text)) !== null) {
+        const n = parseInt(match[1], 10);
+        if (!Number.isNaN(n) && (maxCount === null || n > maxCount)) {
+          maxCount = n;
+        }
+      }
+    }
+
+    return maxCount;
+  } catch (err) {
+    console.error("PDF PAGE COUNT PARSE WARNING:", err);
+    return null;
+  }
+}
+
 async function uploadDocument(req, res) {
   if (!req.file) {
     return res.status(400).json({ error: "No file provided" });
@@ -197,6 +237,26 @@ async function uploadDocument(req, res) {
   if (!resourceType) {
     await safeUnlink(writtenPath);
     return res.status(400).json({ error: "Unsupported file type" });
+  }
+
+  let fileSizeBytes = req.file.size ?? null;
+  if (fileSizeBytes == null) {
+    try {
+      const stats = await fs.stat(writtenPath);
+      fileSizeBytes = stats.size;
+    } catch (statErr) {
+      console.error("VAULT FILE STAT WARNING:", statErr);
+    }
+  }
+  const mimeType = req.file.mimetype || null;
+
+  let pageCount = null;
+  if (req.file.mimetype === "application/pdf") {
+    try {
+      pageCount = await extractPdfPageCount(writtenPath);
+    } catch (pageErr) {
+      console.error("VAULT PAGE COUNT WARNING:", pageErr);
+    }
   }
 
   const rawSubjectId = req.body?.subjectId;
@@ -228,10 +288,13 @@ async function uploadDocument(req, res) {
     await client.query("BEGIN");
 
     const result = await client.query(
-      `INSERT INTO subject_resources (user_id, subject_id, folder_name, resource_type, title, url_path)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path, created_at, updated_at`,
-      [req.userId, subjectId, folderName, resourceType, title, urlPath]
+      `INSERT INTO subject_resources
+         (user_id, subject_id, folder_name, resource_type, title, url_path,
+          file_size_bytes, mime_type, page_count)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path,
+                 file_size_bytes, mime_type, page_count, created_at, updated_at`,
+      [req.userId, subjectId, folderName, resourceType, title, urlPath, fileSizeBytes, mimeType, pageCount]
     );
 
     await client.query("COMMIT");

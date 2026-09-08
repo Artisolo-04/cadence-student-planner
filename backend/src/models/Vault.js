@@ -1,11 +1,27 @@
 const pool = require("../config/db");
 
-async function createResource(userId, { subjectId, folderName, resourceType, title, urlPath }) {
+async function createResource(
+  userId,
+  { subjectId, folderName, resourceType, title, urlPath, fileSizeBytes, mimeType, pageCount }
+) {
   const result = await pool.query(
-    `INSERT INTO subject_resources (user_id, subject_id, folder_name, resource_type, title, url_path)
-     VALUES ($1, $2, $3, $4, $5, $6)
-     RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path, created_at, updated_at`,
-    [userId, subjectId || null, folderName || null, resourceType, title, urlPath]
+    `INSERT INTO subject_resources
+       (user_id, subject_id, folder_name, resource_type, title, url_path,
+        file_size_bytes, mime_type, page_count)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path,
+               file_size_bytes, mime_type, page_count, created_at, updated_at`,
+    [
+      userId,
+      subjectId || null,
+      folderName || null,
+      resourceType,
+      title,
+      urlPath,
+      fileSizeBytes ?? null,
+      mimeType ?? null,
+      pageCount ?? null,
+    ]
   );
   return result.rows[0];
 }
@@ -13,7 +29,9 @@ async function createResource(userId, { subjectId, folderName, resourceType, tit
 async function findResourcesByUserId(userId) {
   const result = await pool.query(
     `SELECT r.id, r.subject_id, s.name AS subject_name, r.folder_name,
-            r.resource_type, r.title, r.url_path, r.created_at, r.updated_at
+            r.resource_type, r.title, r.url_path,
+            r.file_size_bytes, r.mime_type, r.page_count,
+            r.created_at, r.updated_at
      FROM subject_resources r
      LEFT JOIN subjects s ON s.id = r.subject_id
      WHERE r.user_id = $1
@@ -25,7 +43,9 @@ async function findResourcesByUserId(userId) {
 
 async function findResourceById(id, userId) {
   const result = await pool.query(
-    "SELECT id, user_id, subject_id, folder_name, resource_type, title, url_path FROM subject_resources WHERE id = $1 AND user_id = $2",
+    `SELECT id, user_id, subject_id, folder_name, resource_type, title, url_path,
+            file_size_bytes, mime_type, page_count
+     FROM subject_resources WHERE id = $1 AND user_id = $2`,
     [id, userId]
   );
   return result.rows[0];
@@ -62,7 +82,8 @@ async function updateResource(id, userId, updates) {
     `UPDATE subject_resources
      SET ${setClauses.join(", ")}
      WHERE id = $${idParam} AND user_id = $${userIdParam}
-     RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path, created_at, updated_at`,
+     RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path,
+               file_size_bytes, mime_type, page_count, created_at, updated_at`,
     values
   );
   return result.rows[0];
