@@ -1,54 +1,79 @@
-import { useState } from "react";
-import { ChevronDown, ExternalLink, FileText, Folder, Link2, Trash2 } from "lucide-react";
+import { Folder } from "lucide-react";
 
-export default function VaultFolderCard({ title, itemCount, items, accent, onRequestDelete, layout = "grid" }) {
-  const [open, setOpen] = useState(false);
+const EXTENSION_LABELS = {
+  pdf: "PDF",
+  doc: "Word",
+  docx: "Word",
+  xls: "Excel",
+  xlsx: "Excel",
+  csv: "Excel",
+  ppt: "PowerPoint",
+  pptx: "PowerPoint",
+  txt: "Text",
+  png: "Image",
+  jpg: "Image",
+  jpeg: "Image",
+  gif: "Image",
+  webp: "Image",
+};
 
-  const itemRows = (compact) => (
-    <div className={`relative z-10 flex flex-col ${compact ? "" : "border-t border-[var(--color-border)]"}`}>
-      {items.length === 0 ? (
-        <p className="px-5 py-3 text-sm text-[var(--color-text-muted)]">No items yet.</p>
-      ) : (
-        items.map((item) => (
-          <div
-            key={item.id}
-            className={`flex items-center gap-2 border-t border-[var(--color-border)] px-5 first:border-t-0 ${
-              compact ? "py-2" : "py-2.5"
-            }`}
-          >
-            <span className="shrink-0 text-[var(--color-text-muted)]">
-              {item.resource_type === "pdf" ? <FileText size={14} /> : <Link2 size={14} />}
-            </span>
-            <span className="min-w-0 flex-1 truncate text-sm text-[var(--color-text)]">
-              {item.title}
-            </span>
+function resolveKind(item) {
+  const type = (item.resource_type || "").toLowerCase();
+  if (type === "link" || type === "url") return "Link";
+  if (type && EXTENSION_LABELS[type]) return EXTENSION_LABELS[type];
 
-            <a
+  const source = item.title || item.url_path || "";
+  const match = /\.([a-zA-Z0-9]+)(?:[?#].*)?$/.exec(source);
+  if (match) {
+    const ext = match[1].toLowerCase();
+    if (EXTENSION_LABELS[ext]) return EXTENSION_LABELS[ext];
+    return ext.toUpperCase();
+  }
 
-              href={item.url_path}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Open"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)]"
-            >
-              <ExternalLink size={14} />
-            </a>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onRequestDelete({ id: item.id, title: item.title, folderTitle: title });
-              }}
-              aria-label="Delete"
-              className="inline-flex shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        ))
-      )}
-    </div>
+  return "Link";
+}
+
+function pluralize(label, count) {
+  if (count === 1) return label;
+  return label.endsWith("s") ? label : `${label}s`;
+}
+
+function buildBreakdown(items) {
+  const counts = new Map();
+  for (const item of items) {
+    const kind = resolveKind(item);
+    counts.set(kind, (counts.get(kind) || 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([label, count]) => ({ label: pluralize(label, count), count }));
+}
+
+function Chip({ children }) {
+  return (
+    <span className="inline-flex h-6 items-center rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-2 text-[11px] font-medium leading-none text-[var(--color-text-muted)]">
+      {children}
+    </span>
   );
+}
+
+function CountBadge({ count, accent, className = "" }) {
+  return (
+    <span
+      className={`inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-md px-2.5 text-[11px] font-semibold leading-none ${className}`}
+      style={{
+        color: accent,
+        backgroundColor: "color-mix(in srgb, var(--folder-color) 16%, transparent)",
+        border: "1px solid color-mix(in srgb, var(--folder-color) 32%, transparent)",
+      }}
+    >
+      {count} {count === 1 ? "resource" : "resources"}
+    </span>
+  );
+}
+
+export default function VaultFolderCard({ title, itemCount, items, accent, layout = "grid" }) {
+  const breakdown = buildBreakdown(items);
 
   if (layout === "list") {
     return (
@@ -56,28 +81,22 @@ export default function VaultFolderCard({ title, itemCount, items, accent, onReq
         style={{ "--folder-color": accent }}
         className="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)]"
       >
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
-        >
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2.5">
             <Folder size={15} style={{ color: accent }} className="shrink-0" />
             <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text)]">
               {title}
             </span>
-            <span className="shrink-0 text-xs font-medium" style={{ color: accent }}>
-              {itemCount} {itemCount === 1 ? "resource" : "resources"}
-            </span>
           </div>
-          <ChevronDown
-            size={14}
-            className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-150 ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-        {open && itemRows(true)}
+          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
+            {breakdown.map(({ label, count }) => (
+              <Chip key={label}>
+                {count} {label}
+              </Chip>
+            ))}
+            <CountBadge count={itemCount} accent={accent} />
+          </div>
+        </div>
       </article>
     );
   }
@@ -101,52 +120,50 @@ export default function VaultFolderCard({ title, itemCount, items, accent, onReq
         className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[color-mix(in_srgb,var(--color-text)_4%,transparent)] to-transparent"
       />
 
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="relative z-10 flex items-center justify-between gap-3 p-5 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
-      >
-        <div className="flex min-w-0 items-center gap-3">
-          <span
-            className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
-            style={{
-              backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accent} 40%, black 20%) 0%, color-mix(in srgb, ${accent} 15%, black 45%) 100%)`,
-              boxShadow:
-                "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
-            }}
-            aria-hidden="true"
-          >
+      <div className="relative z-10 flex flex-col gap-4 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <span
+              className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
+              style={{
+                backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accent} 40%, black 20%) 0%, color-mix(in srgb, ${accent} 15%, black 45%) 100%)`,
+                boxShadow:
+                  "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
+              }}
               aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
-            />
-            <Folder
-              size={16}
-              style={{ color: accent }}
-              className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
-            />
-          </span>
-          <div className="min-w-0">
-            <span className="block text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
+              />
+              <Folder
+                size={16}
+                style={{ color: accent }}
+                className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+              />
+            </span>
+            <span className="min-w-0 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
               {title}
             </span>
-            <span
-              className="mt-1 inline-flex w-fit items-center gap-1.5 text-xs font-medium"
-              style={{ color: accent }}
-            >
-              {itemCount} {itemCount === 1 ? "resource" : "resources"}
-            </span>
           </div>
-        </div>
-        <ChevronDown
-          size={16}
-          className={`shrink-0 text-[var(--color-text-muted)] transition-transform duration-150 ${
-            open ? "rotate-180" : ""
-          }`}
-        />
-      </button>
 
-      {open && itemRows(false)}
+          <CountBadge
+            count={itemCount}
+            accent={accent}
+            className="h-auto px-2.5 py-1 text-xs"
+          />
+        </div>
+
+        {breakdown.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {breakdown.map(({ label, count }) => (
+              <Chip key={label}>
+                {count} {label}
+              </Chip>
+            ))}
+          </div>
+        )}
+      </div>
     </article>
   );
 }
