@@ -6,6 +6,7 @@ import VaultFolderCard from "./VaultFolderCard";
 import AddVaultItemForm from "./AddVaultItemForm";
 import Button from "../../components/ui/Button";
 import SegmentedControl from "../../components/ui/SegmentedControl";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 
 const CONTENT_VIEWS = [
   { id: "university", label: "University Tracks", Icon: Landmark },
@@ -30,6 +31,20 @@ export default function VaultPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const dragCounter = useRef(0);
+
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      await removeItem(pendingDelete.id);
+      setPendingDelete(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -121,7 +136,7 @@ export default function VaultPage() {
 
   return (
     <div
-      className="relative mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5"
+      className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5"
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -188,7 +203,7 @@ export default function VaultPage() {
                       itemCount={group.items.length}
                       items={group.items}
                       accent={activeAccent}
-                      onDeleteItem={removeItem}
+                      onRequestDelete={setPendingDelete}
                       layout="grid"
                     />
                   ))}
@@ -202,7 +217,7 @@ export default function VaultPage() {
                       itemCount={group.items.length}
                       items={group.items}
                       accent={activeAccent}
-                      onDeleteItem={removeItem}
+                      onRequestDelete={setPendingDelete}
                       layout="list"
                     />
                   ))}
@@ -232,6 +247,19 @@ export default function VaultPage() {
         onSubmit={addItem}
         onClose={() => setFormOpen(false)}
         destination={isUniversity ? "subject" : "folder"}
+      />
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title="Delete this file?"
+        messages={[
+          pendingDelete ? `"${pendingDelete.title}" will be removed from ${pendingDelete.folderTitle}.` : "",
+          "This can't be undone — the hosted file or link record is permanently wiped from disk.",
+        ]}
+        confirmLabel={deleting ? "Deleting…" : "Delete"}
+        cancelLabel="Keep it"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => !deleting && setPendingDelete(null)}
       />
 
       {isDragging && (
