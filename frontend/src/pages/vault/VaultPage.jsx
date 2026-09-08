@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { FolderOpen, Landmark, LayoutGrid, List, Plus, UploadCloud } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { FolderOpen, Landmark, LayoutGrid, List, Plus } from "lucide-react";
 import api from "../../lib/api";
 import { useVaultData } from "./useVaultData";
 import VaultFolderCard from "./VaultFolderCard";
@@ -27,10 +27,6 @@ export default function VaultPage() {
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
-  const dragCounter = useRef(0);
 
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -84,64 +80,8 @@ export default function VaultPage() {
     ? "No subject-linked resources yet."
     : "No custom folders yet. Add a resource above and choose \"Custom folder\" to create one.";
 
-  const handleDragEnter = useCallback((e) => {
-    e.preventDefault();
-    if (!e.dataTransfer?.types?.includes("Files")) return;
-    dragCounter.current += 1;
-    setIsDragging(true);
-  }, []);
-
-  const handleDragOver = useCallback((e) => {
-    e.preventDefault();
-  }, []);
-
-  const handleDragLeave = useCallback((e) => {
-    e.preventDefault();
-    dragCounter.current -= 1;
-    if (dragCounter.current <= 0) {
-      dragCounter.current = 0;
-      setIsDragging(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback(
-    async (e) => {
-      e.preventDefault();
-      dragCounter.current = 0;
-      setIsDragging(false);
-
-      const file = e.dataTransfer.files?.[0];
-      if (!file) return;
-
-      setUploadError(null);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const { status } = await api.post("/vault/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        if (status === 201) {
-          await refetch();
-        } else {
-          setUploadError("Upload did not complete. Please try again.");
-        }
-      } catch (err) {
-        console.error("Vault drag-drop upload error:", err);
-        setUploadError(err?.response?.data?.message || "Upload failed. Please try again.");
-      }
-    },
-    [refetch]
-  );
-
   return (
-    <div
-      className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5"
-      onDragEnter={handleDragEnter}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
+    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
       <header className="flex shrink-0 items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
@@ -176,9 +116,9 @@ export default function VaultPage() {
         </div>
       </header>
 
-      {(error || uploadError) && (
+      {error && (
         <div className="shrink-0 rounded-md border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
-          {uploadError || error}
+          {error}
         </div>
       )}
 
@@ -244,7 +184,9 @@ export default function VaultPage() {
       <AddVaultItemForm
         open={formOpen}
         subjects={allSubjects}
+        existingFolders={byFolder.map((f) => f.folderName)}
         onSubmit={addItem}
+        onUploadComplete={refetch}
         onClose={() => setFormOpen(false)}
         destination={isUniversity ? "subject" : "folder"}
       />
@@ -261,39 +203,6 @@ export default function VaultPage() {
         onConfirm={handleConfirmDelete}
         onCancel={() => !deleting && setPendingDelete(null)}
       />
-
-      {isDragging && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-6 backdrop-blur-sm transition-opacity duration-150"
-          style={{ backgroundColor: "color-mix(in srgb, var(--color-bg) 78%, transparent)" }}
-        >
-          <div
-            className="pointer-events-none flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border-2 border-dashed px-10 py-14 text-center shadow-2xl"
-            style={{
-              borderColor: "var(--color-primary)",
-              backgroundColor: "var(--color-surface)",
-            }}
-          >
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-2xl"
-              style={{
-                backgroundColor: "color-mix(in srgb, var(--color-primary) 14%, transparent)",
-                color: "var(--color-primary)",
-              }}
-            >
-              <UploadCloud size={28} strokeWidth={2} />
-            </div>
-            <div>
-              <p className="text-base font-semibold text-[var(--color-text)]">
-                Drop file to upload
-              </p>
-              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                It'll land in Custom Workspaces instantly
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
