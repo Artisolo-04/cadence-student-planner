@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "../../lib/api";
 
+const SENTINEL_TITLE = ".vault_sentinel";
+
+function stripSentinelItems(groups) {
+  return (groups || []).map((group) => ({
+    ...group,
+    items: (group.items || []).filter((item) => item.title !== SENTINEL_TITLE),
+  }));
+}
+
 export function useVaultData() {
   const [bySubject, setBySubject] = useState([]);
   const [byFolder, setByFolder] = useState([]);
@@ -12,8 +21,8 @@ export function useVaultData() {
     setError(null);
     try {
       const { data } = await api.get("/vault");
-      setBySubject(data.bySubject || []);
-      setByFolder(data.byFolder || []);
+      setBySubject(stripSentinelItems(data.bySubject));
+      setByFolder(stripSentinelItems(data.byFolder));
     } catch (err) {
       setError(err.response?.data?.error || "Failed to load vault");
     } finally {
