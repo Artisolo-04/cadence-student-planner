@@ -1,7 +1,128 @@
 import { useEffect, useState } from "react";
+import { FileText, FileSpreadsheet, Globe2, ExternalLink, Trash2, File as FileIcon } from "lucide-react";
 import ExplorerHeader from "./ExplorerHeader";
+import Button from "../../../components/ui/Button";
 
-export default function FolderExplorerModal({ folder, accent, onClose }) {
+function getFileMeta(item) {
+  const type = (item.resource_type || "").toLowerCase();
+  const source = item.url_path || item.title || "";
+  const extMatch = source.match(/\.([a-z0-9]+)(?:\?.*)?$/i);
+  const ext = extMatch ? extMatch[1].toLowerCase() : "";
+
+  if (type === "link" || (!ext && /^https?:\/\//i.test(source))) {
+    return { kind: "url", badge: "URL", Icon: Globe2, accentVar: "--color-primary" };
+  }
+  if (ext === "pdf" || type === "pdf") {
+    return { kind: "pdf", badge: "PDF", Icon: FileText, accentVar: "--color-danger" };
+  }
+  if (["xls", "xlsx", "csv"].includes(ext)) {
+    return { kind: "sheet", badge: ext.toUpperCase(), Icon: FileSpreadsheet, accentVar: "--color-success" };
+  }
+  if (["doc", "docx", "txt", "md"].includes(ext)) {
+    return { kind: "doc", badge: ext.toUpperCase(), Icon: FileText, accentVar: "--color-success" };
+  }
+  return { kind: "generic", badge: ext ? ext.toUpperCase() : "FILE", Icon: FileIcon, accentVar: "--color-text-muted" };
+}
+
+function ThumbnailBlock({ meta }) {
+  const { kind, Icon, accentVar } = meta;
+
+  return (
+    <div className="relative flex h-28 w-full items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))]">
+      {kind === "pdf" && (
+        <div className="relative flex h-16 w-12 flex-col justify-end gap-1 rounded-[3px] border-2 p-1.5" style={{ borderColor: `var(${accentVar})` }}>
+          <span className="absolute -top-px -right-px h-3 w-3 border-b-2 border-l-2 rounded-bl-[3px]" style={{ borderColor: `var(${accentVar})` }} />
+          <span className="h-[3px] w-full rounded-full" style={{ backgroundColor: `var(${accentVar})`, opacity: 0.85 }} />
+          <span className="h-[3px] w-3/4 rounded-full" style={{ backgroundColor: `var(${accentVar})`, opacity: 0.6 }} />
+          <span className="h-[3px] w-full rounded-full" style={{ backgroundColor: `var(${accentVar})`, opacity: 0.4 }} />
+        </div>
+      )}
+
+      {(kind === "sheet" || kind === "doc") && (
+        <div className="grid h-16 w-14 grid-cols-3 grid-rows-4 gap-[2px] rounded-[3px] border border-[var(--color-border)] p-1">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <span
+              key={i}
+              className="rounded-[1px]"
+              style={{
+                backgroundColor: i % 4 === 0 ? `var(${accentVar})` : "var(--color-border)",
+                opacity: i % 4 === 0 ? 0.85 : 0.5,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {kind === "url" && (
+        <span
+          className="flex h-14 w-14 items-center justify-center rounded-full border"
+          style={{ borderColor: `var(${accentVar})`, backgroundColor: `color-mix(in srgb, var(${accentVar}) 12%, transparent)` }}
+        >
+          <Icon size={26} style={{ color: `var(${accentVar})` }} />
+        </span>
+      )}
+
+      {kind === "generic" && <Icon size={28} style={{ color: `var(${accentVar})` }} />}
+    </div>
+  );
+}
+
+function FileCard({ item, folderTitle, onRequestDelete }) {
+  const meta = getFileMeta(item);
+
+  const handleOpen = () => {
+    if (item.url_path) window.open(item.url_path, "_blank", "noopener,noreferrer");
+  };
+
+  const handleDeleteClick = () => {
+    onRequestDelete?.({ ...item, folderTitle });
+  };
+
+  return (
+    <div className="group relative flex flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--color-border))]">
+      <ThumbnailBlock meta={meta} />
+
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <p className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
+          {item.title}
+        </p>
+        <span
+          className="w-fit shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide"
+          style={{
+            borderColor: `color-mix(in srgb, var(${meta.accentVar}) 45%, transparent)`,
+            color: `var(${meta.accentVar})`,
+            backgroundColor: `color-mix(in srgb, var(${meta.accentVar}) 10%, transparent)`,
+          }}
+        >
+          {meta.badge}
+        </span>
+      </div>
+
+      <div className="mt-1 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
+        <Button
+          variant="secondary"
+          onClick={handleOpen}
+          disabled={!item.url_path}
+          className="flex-1 gap-1.5 px-3 py-2 text-xs"
+        >
+          <ExternalLink size={13} />
+          Open
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleDeleteClick}
+          aria-label={`Delete ${item.title}`}
+          className="h-9 w-9 text-[var(--color-text-muted)] hover:bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] hover:text-[var(--color-danger)]"
+        >
+          <Trash2 size={13} />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export default function FolderExplorerModal({ folder, accent, onClose, onRequestDelete }) {
   const open = Boolean(folder);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -33,6 +154,8 @@ export default function FolderExplorerModal({ folder, accent, onClose }) {
 
   if (!mounted) return null;
 
+  const items = folder?.items || [];
+
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center p-4 md:p-8">
       <div
@@ -52,12 +175,25 @@ export default function FolderExplorerModal({ folder, accent, onClose }) {
           <>
             <ExplorerHeader title={folder.title} accent={accent} onClose={onClose} />
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col p-5">
-              <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))]">
-                <p className="text-sm text-[var(--color-text-muted)]">
-                  This is a folder: {folder.title}
-                </p>
-              </div>
+            <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 scrollbar-cadence">
+              {items.length === 0 ? (
+                <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))]">
+                  <p className="text-sm text-[var(--color-text-muted)]">
+                    No resources yet in this folder.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                  {items.map((item) => (
+                    <FileCard
+                      key={item.id}
+                      item={item}
+                      folderTitle={folder.title}
+                      onRequestDelete={onRequestDelete}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}
