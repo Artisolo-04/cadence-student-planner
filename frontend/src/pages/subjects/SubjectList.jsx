@@ -157,13 +157,19 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     </div>
                   </div>
 
-                  <div className="relative z-10 mt-5 flex flex-1 flex-col justify-between">
-                    <div>
-                      <span className="block text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
+                  <div className="relative z-10 mt-5 flex min-w-0 flex-1 flex-col justify-between">
+                    <div className="min-w-0">
+                      <span
+                        title={subject.name}
+                        className="block w-full truncate text-base font-semibold leading-snug text-[var(--color-text)]"
+                      >
                         {subject.name}
                       </span>
                       {subject.teacher && (
-                        <span className="mt-1 block text-sm text-[var(--color-text-muted)] line-clamp-1">
+                        <span
+                          title={subject.teacher}
+                          className="mt-1 block w-full truncate text-sm text-[var(--color-text-muted)]"
+                        >
                           {subject.teacher}
                         </span>
                       )}

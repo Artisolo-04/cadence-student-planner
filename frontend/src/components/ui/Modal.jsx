@@ -44,10 +44,16 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           transition-[opacity,transform] duration-200 ease-out
           ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
       >
-        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
-          <h2 className="text-base font-semibold">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Close"
-            className="rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]">
+        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
+          <h2 title={title} className="min-w-0 flex-1 truncate text-base font-semibold">
+            {title}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="shrink-0 rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]"
+          >
             <X size={18} />
           </button>
         </div>

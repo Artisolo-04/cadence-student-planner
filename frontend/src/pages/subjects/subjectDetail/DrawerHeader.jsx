@@ -24,7 +24,7 @@ export default function DrawerHeader({
         style={{ backgroundColor: subject.color }}
       />
 
-      <div className="relative z-10 flex min-w-0 items-center gap-3">
+      <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3">
         <span
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)]"
           style={{
@@ -33,12 +33,18 @@ export default function DrawerHeader({
         >
           <BookOpen size={18} style={{ color: subject.color }} />
         </span>
-        <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold text-[var(--color-text)]">
+        <div className="min-w-0 flex-1">
+          <h3
+            title={subject.name}
+            className="truncate text-sm font-semibold text-[var(--color-text)]"
+          >
             {subject.name}
           </h3>
           {subject.teacher && (
-            <p className="truncate text-xs text-[var(--color-text-muted)]">
+            <p
+              title={subject.teacher}
+              className="truncate text-xs text-[var(--color-text-muted)]"
+            >
               {subject.teacher}
             </p>
           )}
