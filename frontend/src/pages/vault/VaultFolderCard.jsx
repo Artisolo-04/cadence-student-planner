@@ -99,10 +99,10 @@ export default function VaultFolderCard({
         }}
         className="cursor-pointer overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
       >
-        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex w-full flex-nowrap items-center justify-between gap-3 px-4 py-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <Folder size={15} style={{ color: accent }} className="shrink-0" />
-            <span className="min-w-0 truncate text-sm font-medium text-[var(--color-text)]">
+            <span className="min-w-0 w-full truncate text-sm font-medium text-[var(--color-text)]">
               {title}
             </span>
           </div>
@@ -183,43 +183,49 @@ export default function VaultFolderCard({
                 className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
               />
             </span>
-            <span className="min-w-0 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
+            <span
+              title={title}
+              className="block w-full min-w-0 truncate text-base font-semibold leading-snug text-[var(--color-text)]"
+            >
               {title}
             </span>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          {deletable && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteFolder?.({ title, items });
+              }}
+              className="shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+              aria-label={`Delete ${title}`}
+              title="Delete folder"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <div>
             <CountBadge
               count={itemCount}
               accent={accent}
               className="h-auto px-2.5 py-1 text-xs"
             />
-            {deletable && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteFolder?.({ title, items });
-                }}
-                className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
-                aria-label={`Delete ${title}`}
-                title="Delete folder"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
           </div>
-        </div>
 
-        {breakdown.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            {breakdown.map(({ label, count }) => (
-              <Chip key={label}>
-                {count} {label}
-              </Chip>
-            ))}
-          </div>
-        )}
+          {breakdown.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {breakdown.map(({ label, count }) => (
+                <Chip key={label}>
+                  {count} {label}
+                </Chip>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </article>
   );
