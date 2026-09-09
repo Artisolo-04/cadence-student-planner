@@ -160,3 +160,12 @@
 .animate-cadence-shake {
   animation: cadence-shake 260ms ease-out;
 }
+
+@keyframes cadence-flash-ring {
+  0%, 100% { box-shadow: 0 0 0 1px var(--color-danger); }
+  50% { box-shadow: 0 0 0 3px var(--color-danger); }
+}
+
+.animate-cadence-flash {
+  animation: cadence-flash-ring 320ms ease-out;
+}
