@@ -21,7 +21,7 @@ const LAYOUT_MODES = [
 ];
 
 export default function VaultPage() {
-  const { bySubject, byFolder, loading, error, addItem, removeItem, refetch } = useVaultData();
+  const { bySubject, byFolder, loading, error, addItem, removeItem, refetch, renameFolder } = useVaultData();
   const [formOpen, setFormOpen] = useState(false);
   const [lockedTarget, setLockedTarget] = useState(null);
   const [createFormOpen, setCreateFormOpen] = useState(false);
@@ -129,6 +129,18 @@ export default function VaultPage() {
           : { type: "folder", id: rawOpenFolder.folderName, name: rawOpenFolder.folderName },
       }
     : null;
+
+  const handleRenameFolder = (newTitle) => {
+    if (!openFolder || openFolder.target.type !== "folder") return;
+    const trimmed = newTitle.trim();
+    if (!trimmed || trimmed === openFolder.title) return;
+    const oldTitle = openFolder.target.id;
+    const itemIds = openFolder.items.map((item) => item.id);
+    renameFolder(oldTitle, trimmed, itemIds).catch((err) => {
+      console.error("Rename folder failed:", err);
+    });
+    setOpenFolderKey({ isUniversity: false, key: trimmed });
+  };
 
   return (
     <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
@@ -263,6 +275,9 @@ export default function VaultPage() {
         onClose={() => setOpenFolderKey(null)}
         onRequestDelete={setPendingDelete}
         onAddResource={openAddResourceForm}
+        isCustomWorkspace={openFolder?.target?.type === "folder"}
+        onRenameFolder={handleRenameFolder}
+        existingFolderNames={existingFolderNamesForCreate}
       />
 
       <ConfirmDialog

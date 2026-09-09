@@ -122,7 +122,16 @@ function FileCard({ item, folderTitle, onRequestDelete }) {
   );
 }
 
-export default function FolderExplorerModal({ folder, accent, onClose, onRequestDelete, onAddResource }) {
+export default function FolderExplorerModal({
+  folder,
+  accent,
+  onClose,
+  onRequestDelete,
+  onAddResource,
+  isCustomWorkspace,
+  onRenameFolder,
+  existingFolderNames = [],
+}) {
   const open = Boolean(folder);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -173,7 +182,15 @@ export default function FolderExplorerModal({ folder, accent, onClose, onRequest
       >
         {folder && (
           <>
-            <ExplorerHeader title={folder.title} accent={accent} onClose={onClose} onAddResource={onAddResource ? () => onAddResource(folder.target) : undefined} />
+            <ExplorerHeader
+              title={folder.title}
+              accent={accent}
+              onClose={onClose}
+              onAddResource={onAddResource ? () => onAddResource(folder.target) : undefined}
+              isCustomWorkspace={isCustomWorkspace}
+              onRenameFolder={onRenameFolder}
+              existingFolderNames={existingFolderNames}
+            />
 
             <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 scrollbar-cadence">
               {items.length === 0 ? (

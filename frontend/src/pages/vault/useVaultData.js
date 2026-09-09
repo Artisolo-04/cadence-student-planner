@@ -57,5 +57,49 @@ export function useVaultData() {
     [fetchVault]
   );
 
-  return { bySubject, byFolder, loading, error, refetch: fetchVault, addItem, removeItem };
+  const renameFolder = useCallback(
+    (oldFolderName, newFolderName, itemIds) => {
+      const idSet = new Set(itemIds);
+
+      setByFolder((prev) => {
+        const rest = prev.filter(
+          (g) => g.folderName !== oldFolderName && g.folderName !== newFolderName
+        );
+        const oldGroup = prev.find((g) => g.folderName === oldFolderName);
+        const targetGroup = prev.find((g) => g.folderName === newFolderName);
+        const movedItems = (oldGroup?.items || []).map((item) =>
+          idSet.has(item.id) ? { ...item, folder_name: newFolderName } : item
+        );
+        return [
+          ...rest,
+          { folderName: newFolderName, items: [...(targetGroup?.items || []), ...movedItems] },
+        ];
+      });
+
+      const persist = async () => {
+        try {
+          await Promise.all(
+            itemIds.map((id) => api.patch(`/vault/items/${id}`, { folderName: newFolderName }))
+          );
+        } catch (err) {
+          await fetchVault();
+          throw err;
+        }
+      };
+
+      return persist();
+    },
+    [fetchVault]
+  );
+
+  return {
+    bySubject,
+    byFolder,
+    loading,
+    error,
+    refetch: fetchVault,
+    addItem,
+    removeItem,
+    renameFolder,
+  };
 }
