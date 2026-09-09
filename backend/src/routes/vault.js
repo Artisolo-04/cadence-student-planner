@@ -8,6 +8,7 @@ const {
   updateVaultItem,
   removeVaultItem,
   removeVaultFolder,
+  removeVaultSubject,
   uploadDocument,
 } = require("../controllers/vaultController");
 
@@ -16,6 +17,7 @@ router.post("/items", requireAuth, addVaultItem);
 router.patch("/items/:id", requireAuth, updateVaultItem);
 router.delete("/items/:id", requireAuth, removeVaultItem);
 router.delete("/folders/:name", requireAuth, removeVaultFolder);
+router.delete("/subjects/:id", requireAuth, removeVaultSubject);
 
 router.post("/upload", requireAuth, (req, res, next) => {
   vaultDocUpload(req, res, (err) => {

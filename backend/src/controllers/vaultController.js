@@ -216,6 +216,69 @@ async function removeVaultFolder(req, res) {
   }
 }
 
+async function removeVaultSubject(req, res) {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ error: "Invalid subject id" });
+  }
+
+  const client = await pool.connect();
+  let resources;
+  try {
+    await client.query("BEGIN");
+
+    const selectResult = await client.query(
+      `SELECT id, url_path, resource_type
+         FROM subject_resources
+        WHERE user_id = $1 AND subject_id = $2`,
+      [req.userId, id]
+    );
+    resources = selectResult.rows;
+
+    if (resources.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Subject vault is empty or not found" });
+    }
+
+    await client.query(
+      `DELETE FROM subject_resources WHERE user_id = $1 AND subject_id = $2`,
+      [req.userId, id]
+    );
+
+    await client.query("COMMIT");
+  } catch (err) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackErr) {
+      console.error("VAULT SUBJECT UNLINK ROLLBACK FAILED:", rollbackErr);
+    }
+    console.error("REMOVE VAULT SUBJECT ERROR:", err);
+    return res.status(500).json({ error: "Failed to unlink subject vault" });
+  } finally {
+    client.release();
+  }
+
+  const unlinkTargets = resources.filter(
+    (r) =>
+      VAULT_FILE_TYPES.includes(r.resource_type) &&
+      r.url_path &&
+      !/^https?:\/\//i.test(r.url_path)
+  );
+
+  await Promise.all(
+    unlinkTargets.map((r) =>
+      safeUnlink(path.join(VAULT_UPLOADS_DIR, path.basename(r.url_path)))
+    )
+  );
+
+  res.json({
+    deleted: true,
+    subjectId: id,
+    rowsDeleted: resources.length,
+    filesUnlinked: unlinkTargets.length,
+  });
+}
+
 async function safeUnlink(filePath) {
   try {
     await fs.unlink(filePath);
@@ -354,4 +417,12 @@ async function uploadDocument(req, res) {
   }
 }
 
-module.exports = { listVault, addVaultItem, updateVaultItem, removeVaultItem, removeVaultFolder, uploadDocument };
+module.exports = {
+  listVault,
+  addVaultItem,
+  updateVaultItem,
+  removeVaultItem,
+  removeVaultFolder,
+  removeVaultSubject,
+  uploadDocument,
+};
