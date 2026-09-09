@@ -21,7 +21,18 @@ const LAYOUT_MODES = [
 ];
 
 export default function VaultPage() {
-  const { bySubject, byFolder, loading, error, addItem, removeItem, refetch, renameFolder } = useVaultData();
+  const {
+    bySubject,
+    byFolder,
+    loading,
+    error,
+    addItem,
+    removeItem,
+    removeFolder,
+    removeSubjectVault,
+    refetch,
+    renameFolder,
+  } = useVaultData();
   const [formOpen, setFormOpen] = useState(false);
   const [lockedTarget, setLockedTarget] = useState(null);
   const [createFormOpen, setCreateFormOpen] = useState(false);
@@ -35,6 +46,42 @@ export default function VaultPage() {
   const [openFolderKey, setOpenFolderKey] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const [isDeletingFolder, setIsDeletingFolder] = useState(false);
+  const [folderDeleteError, setFolderDeleteError] = useState(null);
+
+  const [selectedSubjectVault, setSelectedSubjectVault] = useState(null);
+  const [isDeletingSubjectVault, setIsDeletingSubjectVault] = useState(false);
+  const [subjectVaultDeleteError, setSubjectVaultDeleteError] = useState(null);
+
+  const handleConfirmDeleteSubjectVault = async () => {
+    if (!selectedSubjectVault) return;
+    setIsDeletingSubjectVault(true);
+    setSubjectVaultDeleteError(null);
+    try {
+      await removeSubjectVault(selectedSubjectVault.subjectId);
+      setSelectedSubjectVault(null);
+    } catch (err) {
+      setSubjectVaultDeleteError(err.response?.data?.error || "Failed to clear subject vault.");
+    } finally {
+      setIsDeletingSubjectVault(false);
+    }
+  };
+
+  const handleConfirmDeleteFolder = async () => {
+    if (!selectedFolder) return;
+    setIsDeletingFolder(true);
+    setFolderDeleteError(null);
+    try {
+      await removeFolder(selectedFolder.folderName);
+      setSelectedFolder(null);
+    } catch (err) {
+      setFolderDeleteError(err.response?.data?.error || "Failed to delete folder.");
+    } finally {
+      setIsDeletingFolder(false);
+    }
+  };
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
@@ -208,6 +255,20 @@ export default function VaultPage() {
                       onRequestDelete={setPendingDelete}
                       onOpen={() => handleOpenFolder(group)}
                       layout="grid"
+                      deletable={true}
+                      onDeleteFolder={() =>
+                        isUniversity
+                          ? setSelectedSubjectVault({
+                              subjectId: group.subjectId,
+                              title: group.subjectName,
+                              itemCount: group.items.length,
+                            })
+                          : setSelectedFolder({
+                              folderName: group.folderName,
+                              title: group.folderName,
+                              itemCount: group.items.length,
+                            })
+                      }
                     />
                   ))}
                 </div>
@@ -223,6 +284,20 @@ export default function VaultPage() {
                       onRequestDelete={setPendingDelete}
                       onOpen={() => handleOpenFolder(group)}
                       layout="list"
+                      deletable={true}
+                      onDeleteFolder={() =>
+                        isUniversity
+                          ? setSelectedSubjectVault({
+                              subjectId: group.subjectId,
+                              title: group.subjectName,
+                              itemCount: group.items.length,
+                            })
+                          : setSelectedFolder({
+                              folderName: group.folderName,
+                              title: group.folderName,
+                              itemCount: group.items.length,
+                            })
+                      }
                     />
                   ))}
                 </div>
@@ -291,6 +366,41 @@ export default function VaultPage() {
         cancelLabel="Keep it"
         onConfirm={handleConfirmDelete}
         onCancel={() => !deleting && setPendingDelete(null)}
+      />
+
+      <ConfirmDialog
+        open={!!selectedFolder}
+        title="Delete this folder?"
+        messages={[
+          selectedFolder
+            ? `"${selectedFolder.title}" and its ${selectedFolder.itemCount} resource${
+                selectedFolder.itemCount === 1 ? "" : "s"
+              } will be permanently removed.`
+            : "",
+          folderDeleteError || "This can't be undone — files are unlinked from disk and records deleted.",
+        ]}
+        confirmLabel={isDeletingFolder ? "Deleting…" : "Delete folder"}
+        cancelLabel="Keep it"
+        onConfirm={handleConfirmDeleteFolder}
+        onCancel={() => !isDeletingFolder && setSelectedFolder(null)}
+      />
+
+      <ConfirmDialog
+        open={!!selectedSubjectVault}
+        title="Clear this subject's vault?"
+        messages={[
+          selectedSubjectVault
+            ? `"${selectedSubjectVault.title}" has ${selectedSubjectVault.itemCount} resource${
+                selectedSubjectVault.itemCount === 1 ? "" : "s"
+              } that will be permanently removed.`
+            : "",
+          subjectVaultDeleteError ||
+            "This cannot be undone. Files are unlinked from disk. GPA logs, exams, and assignments for this subject are not affected.",
+        ]}
+        confirmLabel={isDeletingSubjectVault ? "Clearing…" : "Clear vault"}
+        cancelLabel="Keep it"
+        onConfirm={handleConfirmDeleteSubjectVault}
+        onCancel={() => !isDeletingSubjectVault && setSelectedSubjectVault(null)}
       />
     </div>
   );

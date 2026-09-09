@@ -57,6 +57,22 @@ export function useVaultData() {
     [fetchVault]
   );
 
+  const removeFolder = useCallback(
+    async (folderName) => {
+      await api.delete(`/vault/folders/${encodeURIComponent(folderName)}`);
+      await fetchVault();
+    },
+    [fetchVault]
+  );
+
+  const removeSubjectVault = useCallback(
+    async (subjectId) => {
+      await api.delete(`/vault/subjects/${subjectId}`);
+      await fetchVault();
+    },
+    [fetchVault]
+  );
+
   const renameFolder = useCallback(
     (oldFolderName, newFolderName, itemIds) => {
       const idSet = new Set(itemIds);
@@ -100,6 +116,8 @@ export function useVaultData() {
     refetch: fetchVault,
     addItem,
     removeItem,
+    removeFolder,
+    removeSubjectVault,
     renameFolder,
   };
 }

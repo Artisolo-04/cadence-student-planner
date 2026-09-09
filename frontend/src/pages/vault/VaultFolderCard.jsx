@@ -1,4 +1,4 @@
-import { Folder } from "lucide-react";
+import { Folder, Trash2 } from "lucide-react";
 
 const EXTENSION_LABELS = {
   pdf: "PDF",
@@ -72,7 +72,16 @@ function CountBadge({ count, accent, className = "" }) {
   );
 }
 
-export default function VaultFolderCard({ title, itemCount, items, accent, layout = "grid", onOpen }) {
+export default function VaultFolderCard({
+  title,
+  itemCount,
+  items,
+  accent,
+  layout = "grid",
+  onOpen,
+  onDeleteFolder,
+  deletable = false,
+}) {
   const breakdown = buildBreakdown(items);
 
   if (layout === "list") {
@@ -104,6 +113,20 @@ export default function VaultFolderCard({ title, itemCount, items, accent, layou
               </Chip>
             ))}
             <CountBadge count={itemCount} accent={accent} />
+            {deletable && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteFolder?.({ title, items });
+                }}
+                className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                aria-label={`Delete ${title}`}
+                title="Delete folder"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
           </div>
         </div>
       </article>
@@ -165,11 +188,27 @@ export default function VaultFolderCard({ title, itemCount, items, accent, layou
             </span>
           </div>
 
-          <CountBadge
-            count={itemCount}
-            accent={accent}
-            className="h-auto px-2.5 py-1 text-xs"
-          />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <CountBadge
+              count={itemCount}
+              accent={accent}
+              className="h-auto px-2.5 py-1 text-xs"
+            />
+            {deletable && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteFolder?.({ title, items });
+                }}
+                className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                aria-label={`Delete ${title}`}
+                title="Delete folder"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
         </div>
 
         {breakdown.length > 0 && (
