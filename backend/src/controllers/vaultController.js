@@ -7,6 +7,8 @@ const {
   findResourceById,
   updateResource,
   deleteResource,
+  findResourcesByFolder,
+  deleteResourcesByFolder,
 } = require("../models/Vault");
 
 const pool = require("../config/db");
@@ -175,6 +177,45 @@ async function removeVaultItem(req, res) {
   }
 }
 
+async function removeVaultFolder(req, res) {
+  try {
+    const folderName = (req.params.name || "").trim();
+    if (!folderName) {
+      return res.status(400).json({ error: "Invalid folder name" });
+    }
+
+    const resources = await findResourcesByFolder(req.userId, folderName);
+    if (resources.length === 0) {
+      return res.status(404).json({ error: "Folder not found or already empty" });
+    }
+
+    await deleteResourcesByFolder(req.userId, folderName);
+
+    const unlinkTargets = resources.filter(
+      (r) =>
+        VAULT_FILE_TYPES.includes(r.resource_type) &&
+        r.url_path &&
+        !/^https?:\/\//i.test(r.url_path)
+    );
+
+    await Promise.all(
+      unlinkTargets.map((r) =>
+        safeUnlink(path.join(VAULT_UPLOADS_DIR, path.basename(r.url_path)))
+      )
+    );
+
+    res.json({
+      deleted: true,
+      folderName,
+      rowsDeleted: resources.length,
+      filesUnlinked: unlinkTargets.length,
+    });
+  } catch (err) {
+    console.error("REMOVE VAULT FOLDER ERROR:", err);
+    res.status(500).json({ error: "Failed to delete folder" });
+  }
+}
+
 async function safeUnlink(filePath) {
   try {
     await fs.unlink(filePath);
@@ -313,4 +354,4 @@ async function uploadDocument(req, res) {
   }
 }
 
-module.exports = { listVault, addVaultItem, updateVaultItem, removeVaultItem, uploadDocument };
+module.exports = { listVault, addVaultItem, updateVaultItem, removeVaultItem, removeVaultFolder, uploadDocument };

@@ -97,10 +97,30 @@ async function deleteResource(id, userId) {
   return result.rows[0];
 }
 
+async function findResourcesByFolder(userId, folderName) {
+  const result = await pool.query(
+    `SELECT id, resource_type, url_path
+     FROM subject_resources
+     WHERE user_id = $1 AND folder_name = $2`,
+    [userId, folderName]
+  );
+  return result.rows;
+}
+
+async function deleteResourcesByFolder(userId, folderName) {
+  const result = await pool.query(
+    "DELETE FROM subject_resources WHERE user_id = $1 AND folder_name = $2 RETURNING id",
+    [userId, folderName]
+  );
+  return result.rows;
+}
+
 module.exports = {
   createResource,
   findResourcesByUserId,
   findResourceById,
   updateResource,
   deleteResource,
+  findResourcesByFolder,
+  deleteResourcesByFolder,
 };
