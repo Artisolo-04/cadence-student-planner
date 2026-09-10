@@ -1,30 +1,34 @@
 import { useEffect, useState } from "react";
-import { FileText, FileSpreadsheet, Globe2, ExternalLink, Plus, Trash2, File as FileIcon, HardDrive, Layers } from "lucide-react";
+import { FileText, FileSpreadsheet, Globe2, ExternalLink, Plus, Trash2, File as FileIcon, HardDrive, Layers, Image as ImageIcon } from "lucide-react";
 import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
+import ResourcePreviewSidebar from "./ResourcePreviewSidebar";
 
-function getFileMeta(item) {
+export function getFileMeta(item) {
   const type = (item.resource_type || "").toLowerCase();
   const source = item.url_path || item.title || "";
   const extMatch = source.match(/\.([a-z0-9]+)(?:\?.*)?$/i);
   const ext = extMatch ? extMatch[1].toLowerCase() : "";
 
   if (type === "link" || (!ext && /^https?:\/\//i.test(source))) {
-    return { kind: "url", badge: "URL", Icon: Globe2, accentVar: "--color-primary" };
+    return { kind: "url", badge: "URL", Icon: Globe2, accentVar: "--color-primary", ext };
   }
   if (ext === "pdf" || type === "pdf") {
-    return { kind: "pdf", badge: "PDF", Icon: FileText, accentVar: "--color-danger" };
+    return { kind: "pdf", badge: "PDF", Icon: FileText, accentVar: "--color-danger", ext };
+  }
+  if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
+    return { kind: "image", badge: ext.toUpperCase(), Icon: ImageIcon, accentVar: "--color-accent", ext };
   }
   if (["xls", "xlsx", "csv"].includes(ext)) {
-    return { kind: "sheet", badge: ext.toUpperCase(), Icon: FileSpreadsheet, accentVar: "--color-success" };
+    return { kind: "sheet", badge: ext.toUpperCase(), Icon: FileSpreadsheet, accentVar: "--color-success", ext };
   }
   if (["doc", "docx", "txt", "md"].includes(ext)) {
-    return { kind: "doc", badge: ext.toUpperCase(), Icon: FileText, accentVar: "--color-success" };
+    return { kind: "doc", badge: ext.toUpperCase(), Icon: FileText, accentVar: "--color-success", ext };
   }
-  return { kind: "generic", badge: ext ? ext.toUpperCase() : "FILE", Icon: FileIcon, accentVar: "--color-text-muted" };
+  return { kind: "generic", badge: ext ? ext.toUpperCase() : "FILE", Icon: FileIcon, accentVar: "--color-text-muted", ext };
 }
 
-function formatBytes(rawBytes) {
+export function formatBytes(rawBytes) {
   const bytes = typeof rawBytes === "string" ? Number(rawBytes) : rawBytes;
   if (typeof bytes !== "number" || Number.isNaN(bytes) || bytes < 0) return null;
   if (bytes === 0) return "0 KB";
@@ -87,11 +91,11 @@ function ThumbnailBlock({ meta }) {
   );
 }
 
-function FileCard({ item, folderTitle, onRequestDelete }) {
+function FileCard({ item, folderTitle, onRequestDelete, onPreview }) {
   const meta = getFileMeta(item);
 
-  const handleOpen = () => {
-    if (item.url_path) window.open(item.url_path, "_blank", "noopener,noreferrer");
+  const handlePreview = () => {
+    if (item.url_path) onPreview?.(item);
   };
 
   const handleDeleteClick = () => {
@@ -134,7 +138,7 @@ function FileCard({ item, folderTitle, onRequestDelete }) {
       <div className="mt-1 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
         <Button
           variant="secondary"
-          onClick={handleOpen}
+          onClick={handlePreview}
           disabled={!item.url_path}
           className="flex-1 gap-1.5 px-3 py-2 text-xs"
         >
@@ -168,6 +172,7 @@ export default function FolderExplorerModal({
   const open = Boolean(folder);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [previewItem, setPreviewItem] = useState(null);
 
   useEffect(() => {
     let raf1, raf2;
@@ -185,6 +190,10 @@ export default function FolderExplorerModal({
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) setPreviewItem(null);
   }, [open]);
 
   useEffect(() => {
@@ -250,11 +259,18 @@ export default function FolderExplorerModal({
                       item={item}
                       folderTitle={folder.title}
                       onRequestDelete={onRequestDelete}
+                      onPreview={setPreviewItem}
                     />
                   ))}
                 </div>
               )}
             </div>
+
+            <ResourcePreviewSidebar
+              item={previewItem}
+              folderTitle={folder.title}
+              onClose={() => setPreviewItem(null)}
+            />
           </>
         )}
       </div>
