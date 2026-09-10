@@ -83,13 +83,22 @@ export function useVaultData() {
         );
         const oldGroup = prev.find((g) => g.folderName === oldFolderName);
         const targetGroup = prev.find((g) => g.folderName === newFolderName);
-        const movedItems = (oldGroup?.items || []).map((item) =>
-          idSet.has(item.id) ? { ...item, folder_name: newFolderName } : item
-        );
-        return [
-          ...rest,
-          { folderName: newFolderName, items: [...(targetGroup?.items || []), ...movedItems] },
-        ];
+
+        const movedItems = (oldGroup?.items || [])
+          .filter((item) => idSet.has(item.id))
+          .map((item) => ({ ...item, folder_name: newFolderName }));
+        const remainingOldItems = (oldGroup?.items || []).filter((item) => !idSet.has(item.id));
+
+        const mergedById = new Map();
+        for (const item of targetGroup?.items || []) mergedById.set(item.id, item);
+        for (const item of movedItems) mergedById.set(item.id, item);
+
+        const next = [...rest];
+        if (remainingOldItems.length > 0) {
+          next.push({ folderName: oldFolderName, items: remainingOldItems });
+        }
+        next.push({ folderName: newFolderName, items: Array.from(mergedById.values()) });
+        return next;
       });
 
       const persist = async () => {
