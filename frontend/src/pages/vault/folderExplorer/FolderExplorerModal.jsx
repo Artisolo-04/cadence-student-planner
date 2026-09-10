@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { FileText, FileSpreadsheet, Globe2, ExternalLink, Plus, Trash2, File as FileIcon, HardDrive, Layers, Image as ImageIcon } from "lucide-react";
+import { FileText, FileSpreadsheet, Globe2, ExternalLink, Download, Plus, Trash2, File as FileIcon, HardDrive, Layers, Image as ImageIcon } from "lucide-react";
 import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
 import ResourcePreviewSidebar from "./ResourcePreviewSidebar";
+import { downloadFile } from "./ResourcePreviewSidebar/downloadFile";
 
 export function getFileMeta(item) {
   const type = (item.resource_type || "").toLowerCase();
@@ -102,6 +103,13 @@ function FileCard({ item, folderTitle, onRequestDelete, onPreview }) {
     onRequestDelete?.({ ...item, folderTitle });
   };
 
+  const canDownload = meta.kind !== "url";
+
+  const handleDownloadClick = (e) => {
+    e.stopPropagation();
+    downloadFile(item);
+  };
+
   return (
     <div className="group relative flex flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--color-border))]">
       <ThumbnailBlock meta={meta} />
@@ -145,6 +153,18 @@ function FileCard({ item, folderTitle, onRequestDelete, onPreview }) {
           <ExternalLink size={13} />
           Open
         </Button>
+        {canDownload && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleDownloadClick}
+            disabled={!item.url_path}
+            aria-label={`Download ${item.title}`}
+            className="h-9 w-9 text-[var(--color-text-muted)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)]"
+          >
+            <Download size={13} />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"

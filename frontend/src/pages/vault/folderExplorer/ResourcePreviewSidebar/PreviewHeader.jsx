@@ -1,11 +1,14 @@
-import { X, ExternalLink, HardDrive, Layers } from "lucide-react";
+import { X, ExternalLink, Download, HardDrive, Layers } from "lucide-react";
 import Button from "../../../../components/ui/Button";
 import { formatBytes } from "../FolderExplorerModal";
 import { resolveAssetUrl } from "./resolveAssetUrl";
+import { isDownloadKind, downloadFile } from "./downloadFile";
 
 export default function PreviewHeader({ item, meta, onClose }) {
   const { Icon, accentVar, badge } = meta;
   const sizeLabel = formatBytes(item.file_size_bytes);
+
+  const showDownload = isDownloadKind(meta);
 
   return (
     <div className="flex items-start justify-between gap-3 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-4">
@@ -52,16 +55,30 @@ export default function PreviewHeader({ item, meta, onClose }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => item.url_path && window.open(resolveAssetUrl(item.url_path), "_blank", "noopener,noreferrer")}
-          disabled={!item.url_path}
-          aria-label="Open in new tab"
-          className="h-8 w-8 text-[var(--color-text-muted)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)]"
-        >
-          <ExternalLink size={14} />
-        </Button>
+        {!showDownload && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => item.url_path && window.open(resolveAssetUrl(item.url_path), "_blank", "noopener,noreferrer")}
+            disabled={!item.url_path}
+            aria-label="Open in new tab"
+            className="h-8 w-8 text-[var(--color-text-muted)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)]"
+          >
+            <ExternalLink size={14} />
+          </Button>
+        )}
+        {meta.kind !== "url" && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => downloadFile(item)}
+            disabled={!item.url_path}
+            aria-label="Download file"
+            className="h-8 w-8 text-[var(--color-text-muted)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)]"
+          >
+            <Download size={14} />
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
