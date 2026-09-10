@@ -3,7 +3,7 @@ import { FolderOpen, FolderPlus, Landmark, LayoutGrid, List } from "lucide-react
 import api from "../../lib/api";
 import { useVaultData } from "./useVaultData";
 import VaultFolderCard from "./VaultFolderCard";
-import AddVaultItemForm from "./AddVaultItemForm";
+import AddVaultItemForm from "./components/AddVaultItemForm";
 import CreateWorkspaceForm from "./CreateWorkspaceForm";
 import Button from "../../components/ui/Button";
 import SegmentedControl from "../../components/ui/SegmentedControl";
