@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, FileSpreadsheet, Globe2, ExternalLink, Plus, Trash2, File as FileIcon } from "lucide-react";
+import { FileText, FileSpreadsheet, Globe2, ExternalLink, Plus, Trash2, File as FileIcon, HardDrive, Layers } from "lucide-react";
 import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
 
@@ -22,6 +22,26 @@ function getFileMeta(item) {
     return { kind: "doc", badge: ext.toUpperCase(), Icon: FileText, accentVar: "--color-success" };
   }
   return { kind: "generic", badge: ext ? ext.toUpperCase() : "FILE", Icon: FileIcon, accentVar: "--color-text-muted" };
+}
+
+function formatBytes(rawBytes) {
+  const bytes = typeof rawBytes === "string" ? Number(rawBytes) : rawBytes;
+  if (typeof bytes !== "number" || Number.isNaN(bytes) || bytes < 0) return null;
+  if (bytes === 0) return "0 KB";
+  const units = ["B", "KB", "MB", "GB"];
+  const exponent = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const value = bytes / Math.pow(1024, exponent);
+  const formatted = exponent === 0 ? Math.round(value) : value.toFixed(1);
+  return `${formatted} ${units[exponent]}`;
+}
+
+function MetaBadge({ icon: Icon, children }) {
+  return (
+    <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-1.5 text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
+      {Icon && <Icon size={10} className="shrink-0" />}
+      <span className="truncate">{children}</span>
+    </span>
+  );
 }
 
 function ThumbnailBlock({ meta }) {
@@ -97,6 +117,19 @@ function FileCard({ item, folderTitle, onRequestDelete }) {
           {meta.badge}
         </span>
       </div>
+
+      {(meta.kind !== "url" || item.file_size_bytes != null) && (
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          {meta.kind !== "url" && formatBytes(item.file_size_bytes) && (
+            <MetaBadge icon={HardDrive}>{formatBytes(item.file_size_bytes)}</MetaBadge>
+          )}
+          {meta.kind === "pdf" && Number.isInteger(item.page_count) && item.page_count > 0 && (
+            <MetaBadge icon={Layers}>
+              {item.page_count} {item.page_count === 1 ? "page" : "pages"}
+            </MetaBadge>
+          )}
+        </div>
+      )}
 
       <div className="mt-1 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
         <Button
@@ -210,7 +243,7 @@ export default function FolderExplorerModal({
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                   {items.map((item) => (
                     <FileCard
                       key={item.id}
