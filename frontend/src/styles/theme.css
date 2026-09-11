@@ -50,6 +50,30 @@
   --color-success-strong: #059669;
 }
 
+:root {
+
+  /* --- File types --- */
+  --color-file-pdf: var(--color-danger);          /* PDF */
+  --color-file-sheet: var(--color-success);       /* XLSX/CSV */
+  --color-file-doc: #2563eb;                    /* DOC/DOCX */
+  --color-file-txt: var(--color-text-muted);      /* TXT/MD */
+  --color-file-image: var(--color-accent);        /* PNG/JPG... */
+  --color-file-generic: var(--color-text-muted);  /* unknown */
+
+  /* --- Link types --- */
+  --color-link-youtube: var(--color-danger);      /* YouTube */
+  --color-link-classroom: var(--color-success);   /* Classroom */
+  --color-link-meet: var(--color-success);        /* Meet */
+  --color-link-drive: var(--color-warning);       /* Drive */
+  --color-link-github: var(--color-text-muted);   /* GitHub */
+  --color-link-default: var(--color-primary);     /* fallback */
+
+}
+
+.dark {
+  --color-file-doc: #60a5fa;
+}
+
 @theme inline {
   --color-bg: var(--color-bg);
   --color-surface: var(--color-surface);
@@ -67,6 +91,19 @@
   --color-ring: var(--color-ring);
   --color-success: var(--color-success);
   --color-success-strong: var(--color-success-strong);
+
+  --color-file-pdf: var(--color-file-pdf);
+  --color-file-sheet: var(--color-file-sheet);
+  --color-file-doc: var(--color-file-doc);
+  --color-file-txt: var(--color-file-txt);
+  --color-file-image: var(--color-file-image);
+  --color-file-generic: var(--color-file-generic);
+  --color-link-youtube: var(--color-link-youtube);
+  --color-link-classroom: var(--color-link-classroom);
+  --color-link-meet: var(--color-link-meet);
+  --color-link-drive: var(--color-link-drive);
+  --color-link-github: var(--color-link-github);
+  --color-link-default: var(--color-link-default);
 }
 
 .scrollbar-cadence {

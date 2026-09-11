@@ -32,44 +32,27 @@ function MetaBadge({ icon: Icon, children }) {
 }
 
 function ThumbnailBlock({ meta }) {
-  const { kind, Icon, accentVar } = meta;
+  const { kind, Icon, accentVar, badge } = meta;
 
   return (
     <div className="relative flex h-28 w-full items-center justify-center overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))]">
-      {kind === "pdf" && (
-        <div className="relative flex h-16 w-12 flex-col justify-end gap-1 rounded-[3px] border-2 p-1.5" style={{ borderColor: `var(${accentVar})` }}>
-          <span className="absolute -top-px -right-px h-3 w-3 border-b-2 border-l-2 rounded-bl-[3px]" style={{ borderColor: `var(${accentVar})` }} />
-          <span className="h-[3px] w-full rounded-full" style={{ backgroundColor: `var(${accentVar})`, opacity: 0.85 }} />
-          <span className="h-[3px] w-3/4 rounded-full" style={{ backgroundColor: `var(${accentVar})`, opacity: 0.6 }} />
-          <span className="h-[3px] w-full rounded-full" style={{ backgroundColor: `var(${accentVar})`, opacity: 0.4 }} />
-        </div>
-      )}
-
-      {(kind === "sheet" || kind === "doc") && (
-        <div className="grid h-16 w-14 grid-cols-3 grid-rows-4 gap-[2px] rounded-[3px] border border-[var(--color-border)] p-1">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <span
-              key={i}
-              className="rounded-[1px]"
-              style={{
-                backgroundColor: i % 4 === 0 ? `var(${accentVar})` : "var(--color-border)",
-                opacity: i % 4 === 0 ? 0.85 : 0.5,
-              }}
-            />
-          ))}
-        </div>
+      {(kind === "pdf" || kind === "sheet" || kind === "doc" || kind === "txt" || kind === "generic") && (
+        <span
+          className="select-none text-2xl font-extrabold tracking-tight"
+          style={{ color: `var(${accentVar})` }}
+        >
+          {badge}
+        </span>
       )}
 
       {kind === "url" && (
         <span
-          className="flex h-14 w-14 items-center justify-center rounded-full border"
-          style={{ borderColor: `var(${accentVar})`, backgroundColor: `color-mix(in srgb, var(${accentVar}) 12%, transparent)` }}
+          className="flex h-12 w-12 items-center justify-center rounded-lg"
+          style={{ backgroundColor: `color-mix(in srgb, var(${accentVar}) 16%, transparent)` }}
         >
-          <Icon size={26} style={{ color: `var(${accentVar})` }} />
+          <Icon size={26} strokeWidth={2} style={{ color: `var(${accentVar})` }} />
         </span>
       )}
-
-      {kind === "generic" && <Icon size={28} style={{ color: `var(${accentVar})` }} />}
     </div>
   );
 }
