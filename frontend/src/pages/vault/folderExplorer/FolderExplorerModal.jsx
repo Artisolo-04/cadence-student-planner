@@ -4,7 +4,7 @@ import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
 import ResourcePreviewSidebar from "./ResourcePreviewSidebar";
 import { downloadFile } from "./ResourcePreviewSidebar/downloadFile";
-import { stripExtension } from "../components/AddVaultItemForm/utils";
+import { stripExtension, getLinkBrand } from "../components/AddVaultItemForm/utils";
 
 export function getFileMeta(item) {
   const type = (item.resource_type || "").toLowerCase();
@@ -13,7 +13,11 @@ export function getFileMeta(item) {
   const ext = extMatch ? extMatch[1].toLowerCase() : "";
 
   if (type === "link" || (!ext && /^https?:\/\//i.test(source))) {
-    return { kind: "url", badge: "URL", Icon: Globe2, accentVar: "--color-primary", ext };
+    const brand = getLinkBrand(source);
+    if (brand) {
+      return { kind: "url", badge: brand.badge, Icon: brand.Icon, accentVar: brand.accentVar, ext };
+    }
+    return { kind: "url", badge: "LINK", Icon: Globe2, accentVar: "--color-primary", ext };
   }
   if (ext === "pdf" || type === "pdf") {
     return { kind: "pdf", badge: "PDF", Icon: FileText, accentVar: "--color-danger", ext };
@@ -144,7 +148,7 @@ function FileCard({ item, folderTitle, onRequestDelete, onPreview }) {
         </div>
       )}
 
-      <div className="mt-1 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
+      <div className="mt-auto flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
         <Button
           variant="secondary"
           onClick={handlePreview}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../../../lib/api";
 import { ACCEPTED_EXTENSIONS } from "./constants";
+import { getLinkBrand, deriveResourceType } from "./utils";
 
 export default function useAddVaultItemForm({
   subjects,
@@ -13,7 +14,6 @@ export default function useAddVaultItemForm({
 }) {
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? "");
   const [folderName, setFolderName] = useState("");
-  const [resourceType, setResourceType] = useState("link");
   const [title, setTitle] = useState("");
   const [urlPath, setUrlPath] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -26,6 +26,12 @@ export default function useAddVaultItemForm({
 
   const isLocked = Boolean(lockedTarget);
   const effectiveDestination = isLocked ? lockedTarget.type : destination;
+
+  const isLinkMode = !selectedFile && /^https?:\/\//i.test(urlPath.trim());
+  const linkBrand = useMemo(
+    () => (isLinkMode ? getLinkBrand(urlPath.trim()) : null),
+    [isLinkMode, urlPath]
+  );
 
   const folderOptions = useMemo(() => {
     const unique = new Set((existingFolders || []).filter(Boolean));
@@ -41,7 +47,6 @@ export default function useAddVaultItemForm({
 
   function resetAndClose() {
     setFolderName("");
-    setResourceType("link");
     setTitle("");
     setUrlPath("");
     setError(null);
@@ -130,7 +135,7 @@ export default function useAddVaultItemForm({
       await onSubmit({
         subjectId: effectiveDestination === "subject" ? targetSubjectId : null,
         folderName: effectiveDestination === "folder" ? targetFolderName : null,
-        resourceType,
+        resourceType: deriveResourceType(urlPath.trim()),
         title: title.trim(),
         urlPath: urlPath.trim(),
       });
@@ -182,18 +187,12 @@ export default function useAddVaultItemForm({
   }
 
   const subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
-  const resourceTypeOptions = [
-    { value: "link", label: "Link" },
-    { value: "pdf", label: "PDF (URL to hosted file)" },
-  ];
 
   return {
     subjectId,
     setSubjectId,
     folderName,
     setFolderName,
-    resourceType,
-    setResourceType,
     title,
     setTitle,
     urlPath,
@@ -205,11 +204,13 @@ export default function useAddVaultItemForm({
     selectedFile,
     fileInputRef,
 
+    isLinkMode,
+    linkBrand,
+
     isLocked,
     effectiveDestination,
     folderOptions,
     subjectOptions,
-    resourceTypeOptions,
 
     resetAndClose,
     handleSubmit,

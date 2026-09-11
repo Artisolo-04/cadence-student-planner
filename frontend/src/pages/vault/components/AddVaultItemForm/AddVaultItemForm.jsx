@@ -1,10 +1,9 @@
 import Modal from "../../../../components/ui/Modal";
 import Input from "../../../../components/ui/Input";
-import Dropdown from "../../../../components/ui/Dropdown";
 import Button from "../../../../components/ui/Button";
 import DestinationField from "./DestinationField";
 import FileDropzone from "./FileDropzone";
-import { FileText } from "lucide-react";
+import { FileText, Link as LinkIcon } from "lucide-react";
 import useAddVaultItemForm from "./useAddVaultItemForm";
 
 function formatFileSize(bytes) {
@@ -35,8 +34,6 @@ export default function AddVaultItemForm({
     setSubjectId,
     folderName,
     setFolderName,
-    resourceType,
-    setResourceType,
     title,
     setTitle,
     urlPath,
@@ -48,11 +45,13 @@ export default function AddVaultItemForm({
     selectedFile,
     fileInputRef,
 
+    isLinkMode,
+    linkBrand,
+
     isLocked,
     effectiveDestination,
     folderOptions,
     subjectOptions,
-    resourceTypeOptions,
 
     resetAndClose,
     handleSubmit,
@@ -108,14 +107,6 @@ export default function AddVaultItemForm({
           folderOptions={folderOptions}
         />
 
-        {!selectedFile && (
-          <Dropdown
-            value={resourceType}
-            onChange={(e) => setResourceType(e.target.value)}
-            options={resourceTypeOptions}
-          />
-        )}
-
         {selectedFile ? (
           <div className="flex items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-sm text-[var(--color-text-muted)]">
             <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -124,8 +115,31 @@ export default function AddVaultItemForm({
           </div>
         ) : (
           <>
-            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-            <Input placeholder="https://..." value={urlPath} onChange={(e) => setUrlPath(e.target.value)} />
+            <div className="relative">
+              <Input
+                placeholder="Paste a link, or drop a file below"
+                value={urlPath}
+                onChange={(e) => setUrlPath(e.target.value)}
+                className={isLinkMode ? "pr-24" : undefined}
+              />
+              {isLinkMode && (
+                <span
+                  className="pointer-events-none absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide"
+                  style={{
+                    borderColor: `color-mix(in srgb, var(${linkBrand?.accentVar || "--color-primary"}) 45%, transparent)`,
+                    color: `var(${linkBrand?.accentVar || "--color-primary"})`,
+                    backgroundColor: `color-mix(in srgb, var(${linkBrand?.accentVar || "--color-primary"}) 10%, transparent)`,
+                  }}
+                >
+                  {linkBrand ? <linkBrand.Icon size={11} /> : <LinkIcon size={11} />}
+                  {linkBrand ? linkBrand.badge : "LINK"}
+                </span>
+              )}
+            </div>
+
+            {isLinkMode && (
+              <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            )}
           </>
         )}
 
