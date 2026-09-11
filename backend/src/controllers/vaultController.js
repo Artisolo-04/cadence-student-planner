@@ -334,6 +334,11 @@ async function uploadDocument(req, res) {
     return res.status(400).json({ error: "No file provided" });
   }
 
+  if (req.file.size === 0) {
+    await safeUnlink(req.file.path);
+    return res.status(400).json({ error: "Empty files (0 bytes) are not allowed" });
+  }
+
   const writtenPath = req.file.path;
   const ext = path.extname(req.file.originalname).toLowerCase();
   const resourceType = VAULT_EXT_TYPE_MAP[ext];
