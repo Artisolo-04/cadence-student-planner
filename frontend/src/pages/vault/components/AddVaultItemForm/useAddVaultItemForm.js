@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../../../lib/api";
-import { stripExtension } from "./utils";
 import { ACCEPTED_EXTENSIONS } from "./constants";
 
 export default function useAddVaultItemForm({
@@ -61,7 +60,7 @@ export default function useAddVaultItemForm({
     }
     setError(null);
     setSelectedFile(file);
-    setTitle((prev) => (prev.trim() ? prev : stripExtension(file.name)));
+    setTitle(file.name);
   }
 
   const targetSubjectId =
@@ -179,6 +178,7 @@ export default function useAddVaultItemForm({
 
   function clearSelectedFile() {
     setSelectedFile(null);
+    setTitle("");
   }
 
   const subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));

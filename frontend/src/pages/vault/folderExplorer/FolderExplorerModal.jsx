@@ -4,6 +4,7 @@ import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
 import ResourcePreviewSidebar from "./ResourcePreviewSidebar";
 import { downloadFile } from "./ResourcePreviewSidebar/downloadFile";
+import { stripExtension } from "../components/AddVaultItemForm/utils";
 
 export function getFileMeta(item) {
   const type = (item.resource_type || "").toLowerCase();
@@ -116,7 +117,7 @@ function FileCard({ item, folderTitle, onRequestDelete, onPreview }) {
 
       <div className="flex min-w-0 items-center justify-between gap-2">
         <p className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
-          {item.title}
+          {stripExtension(item.title)}
         </p>
         <span
           className="w-fit shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide"

@@ -4,7 +4,21 @@ import Dropdown from "../../../../components/ui/Dropdown";
 import Button from "../../../../components/ui/Button";
 import DestinationField from "./DestinationField";
 import FileDropzone from "./FileDropzone";
+import { FileText } from "lucide-react";
 import useAddVaultItemForm from "./useAddVaultItemForm";
+
+function formatFileSize(bytes) {
+  if (!Number.isFinite(bytes)) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unitIndex = 0;
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024;
+    unitIndex += 1;
+  }
+  return `${value.toFixed(value < 10 ? 1 : 0)} ${units[unitIndex]}`;
+}
 
 export default function AddVaultItemForm({
   open,
@@ -102,10 +116,17 @@ export default function AddVaultItemForm({
           />
         )}
 
-        <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-
-        {!selectedFile && (
-          <Input placeholder="https://..." value={urlPath} onChange={(e) => setUrlPath(e.target.value)} />
+        {selectedFile ? (
+          <div className="flex items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-sm text-[var(--color-text-muted)]">
+            <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">{selectedFile.name}</span>
+            <span className="ml-auto shrink-0 tabular-nums">{formatFileSize(selectedFile.size)}</span>
+          </div>
+        ) : (
+          <>
+            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input placeholder="https://..." value={urlPath} onChange={(e) => setUrlPath(e.target.value)} />
+          </>
         )}
 
         {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
