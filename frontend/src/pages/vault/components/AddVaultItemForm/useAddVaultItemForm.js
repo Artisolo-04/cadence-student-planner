@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../../../lib/api";
 import { stripExtension } from "./utils";
+import { ACCEPTED_EXTENSIONS } from "./constants";
 
 export default function useAddVaultItemForm({
   subjects,
@@ -53,6 +54,11 @@ export default function useAddVaultItemForm({
 
   function captureFile(file) {
     if (!file) return;
+    const ext = `.${file.name.split(".").pop()?.toLowerCase() ?? ""}`;
+    if (!ACCEPTED_EXTENSIONS.includes(ext)) {
+      setError("Only .pdf, .docx, .xlsx, or .txt files are allowed");
+      return;
+    }
     setError(null);
     setSelectedFile(file);
     setTitle((prev) => (prev.trim() ? prev : stripExtension(file.name)));
@@ -101,7 +107,7 @@ export default function useAddVaultItemForm({
         }
       } catch (err) {
         console.error("Vault modal upload error:", err);
-        setError(err?.response?.data?.message || "Upload failed. Please try again.");
+        setError(err?.response?.data?.error || "Upload failed. Please try again.");
       } finally {
         setSubmitting(false);
       }
