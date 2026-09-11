@@ -414,8 +414,13 @@ async function uploadDocument(req, res) {
     } catch (rollbackErr) {
       console.error("VAULT UPLOAD ROLLBACK FAILED:", rollbackErr);
     }
-    console.error("UPLOAD VAULT DOC ERROR:", err);
     await safeUnlink(writtenPath);
+
+    if (err.code === "23505") {
+      return res.status(400).json({ error: "A file with this name already exists in this folder" });
+    }
+
+    console.error("UPLOAD VAULT DOC ERROR:", err);
     res.status(500).json({ error: "Failed to save document" });
   } finally {
     client.release();
