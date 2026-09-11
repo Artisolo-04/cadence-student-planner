@@ -4,34 +4,11 @@ import ExplorerHeader from "./ExplorerHeader";
 import Button from "../../../components/ui/Button";
 import ResourcePreviewSidebar from "./ResourcePreviewSidebar";
 import { downloadFile } from "./ResourcePreviewSidebar/downloadFile";
-import { stripExtension, getLinkBrand } from "../components/AddVaultItemForm/utils";
+import { stripExtension } from "../components/AddVaultItemForm/utils";
+import { getResourceMeta } from "../resourceMeta";
 
 export function getFileMeta(item) {
-  const type = (item.resource_type || "").toLowerCase();
-  const source = item.url_path || item.title || "";
-  const extMatch = source.match(/\.([a-z0-9]+)(?:\?.*)?$/i);
-  const ext = extMatch ? extMatch[1].toLowerCase() : "";
-
-  if (type === "link" || (!ext && /^https?:\/\//i.test(source))) {
-    const brand = getLinkBrand(source);
-    if (brand) {
-      return { kind: "url", badge: brand.badge, Icon: brand.Icon, accentVar: brand.accentVar, ext };
-    }
-    return { kind: "url", badge: "LINK", Icon: Globe2, accentVar: "--color-primary", ext };
-  }
-  if (ext === "pdf" || type === "pdf") {
-    return { kind: "pdf", badge: "PDF", Icon: FileText, accentVar: "--color-danger", ext };
-  }
-  if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
-    return { kind: "image", badge: ext.toUpperCase(), Icon: ImageIcon, accentVar: "--color-accent", ext };
-  }
-  if (["xls", "xlsx", "csv"].includes(ext)) {
-    return { kind: "sheet", badge: ext.toUpperCase(), Icon: FileSpreadsheet, accentVar: "--color-success", ext };
-  }
-  if (["doc", "docx", "txt", "md"].includes(ext)) {
-    return { kind: "doc", badge: ext.toUpperCase(), Icon: FileText, accentVar: "--color-success", ext };
-  }
-  return { kind: "generic", badge: ext ? ext.toUpperCase() : "FILE", Icon: FileIcon, accentVar: "--color-text-muted", ext };
+  return getResourceMeta(item);
 }
 
 export function formatBytes(rawBytes) {

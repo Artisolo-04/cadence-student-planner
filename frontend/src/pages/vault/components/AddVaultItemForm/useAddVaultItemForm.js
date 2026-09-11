@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../../../../lib/api";
 import { ACCEPTED_EXTENSIONS } from "./constants";
-import { getLinkBrand, deriveResourceType } from "./utils";
+import { getLinkBrand, deriveResourceType } from "../../resourceMeta";
 
 export default function useAddVaultItemForm({
   subjects,
