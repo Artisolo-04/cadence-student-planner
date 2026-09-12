@@ -1,6 +1,7 @@
-import { Folder, Plus, X } from "lucide-react";
+import { Folder, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Button from "../../../components/ui/Button";
+import { AccentHeaderShell, AccentIconBox, HeaderCloseButton } from "../../../components/ui/AccentHeader";
 
 export default function ExplorerHeader({
   title,
@@ -78,41 +79,28 @@ export default function ExplorerHeader({
   };
 
   return (
-    <div className="relative z-10 flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl"
-        style={{ backgroundColor: accent }}
-      />
-
+    <AccentHeaderShell accent={accent}>
       <div className="relative z-10 flex min-w-0 items-center gap-4">
-        <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)]"
-          style={{
-            backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accent} 40%, black 20%) 0%, color-mix(in srgb, ${accent} 15%, black 45%) 100%)`,
-          }}
-        >
-          <Folder size={18} style={{ color: accent }} />
-        </span>
+        <AccentIconBox accent={accent} icon={Folder} />
 
         <div className="relative flex min-w-0 flex-1 items-center gap-4">
           {isCustomWorkspace && isEditing ? (
             <input
-                ref={inputRef}
-                type="text"
-                value={draftTitle}
-                onChange={handleChange}
-                onBlur={commitRename}
-                onKeyDown={handleKeyDown}
-                aria-label="Rename workspace"
-                aria-invalid={Boolean(duplicateName)}
-                title={draftTitle}
-                className={`-mx-2 -my-1 w-full truncate rounded-md bg-[var(--color-surface-alt)] px-2 py-1 text-sm font-semibold text-[var(--color-text)] outline-none ring-1 transition-shadow duration-150 ${
-                  duplicateName
-                    ? "ring-[var(--color-danger)]"
-                    : "ring-[var(--color-border)] focus:ring-[var(--color-ring)]"
-                }${flash ? " animate-cadence-flash" : ""}`}
-              />
+              ref={inputRef}
+              type="text"
+              value={draftTitle}
+              onChange={handleChange}
+              onBlur={commitRename}
+              onKeyDown={handleKeyDown}
+              aria-label="Rename workspace"
+              aria-invalid={Boolean(duplicateName)}
+              title={draftTitle}
+              className={`-mx-2 -my-1 w-full truncate rounded-md bg-[var(--color-surface-alt)] px-2 py-1 text-sm font-semibold text-[var(--color-text)] outline-none ring-1 transition-shadow duration-150 ${
+                duplicateName
+                  ? "ring-[var(--color-danger)]"
+                  : "ring-[var(--color-border)] focus:ring-[var(--color-ring)]"
+              }${flash ? " animate-cadence-flash" : ""}`}
+            />
           ) : (
             <h3
               onClick={() => isCustomWorkspace && setIsEditing(true)}
@@ -148,15 +136,8 @@ export default function ExplorerHeader({
           </Button>
         )}
 
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
-        >
-          <X size={18} />
-        </button>
+        <HeaderCloseButton onClose={onClose} />
       </div>
-    </div>
+    </AccentHeaderShell>
   );
 }

@@ -1,4 +1,5 @@
-import { X, BookOpen, Calendar, ListChecks, CalendarDays } from "lucide-react";
+import { BookOpen, Calendar, ListChecks, CalendarDays } from "lucide-react";
+import { AccentHeaderShell, AccentIconBox, HeaderCloseButton } from "../../../components/ui/AccentHeader";
 
 function MetricBadge({ icon: Icon, label }) {
   return (
@@ -17,22 +18,9 @@ export default function DrawerHeader({
   daysPerWeek,
 }) {
   return (
-    <div className="relative z-10 flex shrink-0 items-center justify-between gap-4 overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full opacity-25 blur-3xl"
-        style={{ backgroundColor: subject.color }}
-      />
-
+    <AccentHeaderShell accent={subject.color}>
       <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3">
-        <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)]"
-          style={{
-            backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${subject.color} 40%, black 20%) 0%, color-mix(in srgb, ${subject.color} 15%, black 45%) 100%)`,
-          }}
-        >
-          <BookOpen size={18} style={{ color: subject.color }} />
-        </span>
+        <AccentIconBox accent={subject.color} icon={BookOpen} />
         <div className="min-w-0 flex-1">
           <h3
             title={subject.name}
@@ -57,14 +45,7 @@ export default function DrawerHeader({
         <MetricBadge icon={CalendarDays} label={`${daysPerWeek} Day${daysPerWeek === 1 ? "" : "s"}/Week`} />
       </div>
 
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close"
-        className="relative z-10 shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
-      >
-        <X size={18} />
-      </button>
-    </div>
+      <HeaderCloseButton onClose={onClose} />
+    </AccentHeaderShell>
   );
 }
