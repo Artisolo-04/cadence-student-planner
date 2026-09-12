@@ -59,7 +59,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
 
   return (
     <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
-      <header className="flex shrink-0 items-center justify-between gap-4">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your subjects</h2>
           <p className="mt-1 text-sm text-[var(--color-text-muted)]">
@@ -67,19 +67,19 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
           </p>
         </div>
 
-        <Button type="button" onClick={onAddNew} className="shrink-0">
+        <Button type="button" onClick={onAddNew} className="h-9 w-full justify-center px-2.5 shrink-0 sm:w-auto sm:px-4">
           <Plus size={16} />
-          New subject
+          <span className="text-xs sm:text-sm">New subject</span>
         </Button>
       </header>
 
-      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl p-3 pr-4 scrollbar-cadence sm:p-5 sm:pr-6"
+          className="h-full overflow-y-auto rounded-xl p-0 pr-0 scrollbar-cadence sm:p-0 sm:pr-2"
         >
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {subjects.map((subject) => {
               const hoursLabel = formatWeeklyHours(subject.weekly_hours);
               return (
@@ -99,7 +99,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     backgroundImage:
                       "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
                   }}
-                  className="group relative flex min-h-[160px] cursor-pointer flex-col justify-between overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                  className="group relative flex h-auto cursor-pointer flex-col justify-between gap-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-2 md:p-4 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                 >
                   <div
                     aria-hidden="true"
@@ -157,8 +157,8 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     </div>
                   </div>
 
-                  <div className="relative z-10 mt-5 flex min-w-0 flex-1 flex-col justify-between">
-                    <div className="min-w-0">
+                  <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-2">
                       <span
                         title={subject.name}
                         className="block w-full truncate text-base font-semibold leading-snug text-[var(--color-text)]"
@@ -168,7 +168,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                       {subject.teacher && (
                         <span
                           title={subject.teacher}
-                          className="mt-1 block w-full truncate text-sm text-[var(--color-text-muted)]"
+                          className="block w-full truncate text-sm text-[var(--color-text-muted)]"
                         >
                           {subject.teacher}
                         </span>
@@ -176,7 +176,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     </div>
                     {hoursLabel && (
                       <span
-                        className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium"
+                        className="inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium"
                         style={{
                           borderColor: `color-mix(in srgb, ${subject.color} 35%, transparent)`,
                           backgroundColor: `color-mix(in srgb, ${subject.color} 14%, transparent)`,

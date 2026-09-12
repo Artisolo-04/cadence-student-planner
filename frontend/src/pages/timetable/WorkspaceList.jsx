@@ -51,7 +51,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
 
   return (
     <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
-      <header className="flex shrink-0 items-center justify-between gap-4">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your timetables</h2>
           <p className="mt-1 text-sm text-[var(--color-text-muted)]">
@@ -59,19 +59,19 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
           </p>
         </div>
 
-        <Button type="button" onClick={onAddNew} className="shrink-0">
+        <Button type="button" onClick={onAddNew} className="h-9 w-full justify-center px-2.5 shrink-0 sm:w-auto sm:px-4">
           <Plus size={16} />
-          New timetable
+          <span className="text-xs sm:text-sm">New timetable</span>
         </Button>
       </header>
 
-      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl p-3 pr-4 scrollbar-cadence sm:p-5 sm:pr-6"
+          className="h-full overflow-y-auto rounded-xl p-0 pr-0 scrollbar-cadence sm:p-0 sm:pr-2"
         >
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {timetables.map((timetable) => {
               const isActive = String(timetable.id) === String(activeId);
 
@@ -83,7 +83,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                       ? "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, color-mix(in srgb, var(--color-primary) 14%, transparent) 55%, transparent 100%)"
                       : "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
                   }}
-                  className={`group relative flex min-h-[160px] flex-col justify-between overflow-hidden rounded-xl border bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
+                  className={`group relative flex h-auto flex-col justify-between gap-4 overflow-hidden rounded-xl border bg-white/[0.03] p-2 md:p-4 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
                     isActive ? "border-[var(--color-primary)]/50" : "border-white/10"
                   }`}
                 >
@@ -93,20 +93,20 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                   />
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent"
+                    className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[color-mix(in_srgb,var(--color-text)_4%,transparent)] to-transparent"
                   />
 
                   <button
                     type="button"
                     onClick={() => onOpen(timetable.id)}
-                    className="absolute inset-0 z-10 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                    className="absolute inset-0 z-10 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
                     aria-label={`Open ${timetable.name}`}
                   />
 
                   <div className="relative z-10 flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <span
-                        className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-md border border-white/15 backdrop-blur-md"
+                        className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
                         style={{
                           backgroundImage:
                             "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 40%, black 20%) 0%, color-mix(in srgb, var(--color-primary) 15%, black 45%) 100%)",

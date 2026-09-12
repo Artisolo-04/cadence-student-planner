@@ -149,7 +149,7 @@ export default function VaultFolderCard({
           onOpen?.({ title, items });
         }
       }}
-      className="group relative flex cursor-pointer flex-col overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--folder-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+      className="group relative flex h-auto cursor-pointer flex-col gap-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--folder-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
     >
       <div
         aria-hidden="true"
@@ -161,7 +161,7 @@ export default function VaultFolderCard({
         className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[color-mix(in_srgb,var(--color-text)_4%,transparent)] to-transparent"
       />
 
-      <div className="relative z-10 flex flex-col gap-4 p-5">
+      <div className="relative z-10 flex flex-col gap-4 p-2 md:p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <span

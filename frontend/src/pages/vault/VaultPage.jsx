@@ -191,15 +191,24 @@ export default function VaultPage() {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
-      <header className="flex shrink-0 items-center justify-between gap-4">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
             Your documents and links, organized by subject or custom folder.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-nowrap items-center gap-1.5 sm:w-auto sm:gap-3">
+          <SegmentedControl
+            ariaLabel="Content view"
+            options={CONTENT_VIEWS}
+            value={contentView}
+            onChange={setContentView}
+            variant="icon"
+            size="md"
+            className="sm:hidden"
+          />
           <SegmentedControl
             ariaLabel="Content view"
             options={CONTENT_VIEWS}
@@ -207,8 +216,8 @@ export default function VaultPage() {
             onChange={setContentView}
             variant="labeled"
             size="md"
+            className="hidden sm:flex"
           />
-
           <SegmentedControl
             ariaLabel="Layout"
             options={LAYOUT_MODES}
@@ -217,10 +226,9 @@ export default function VaultPage() {
             variant="icon"
             size="md"
           />
-
-          <Button type="button" onClick={() => setCreateFormOpen(true)} className="h-9 shrink-0">
+          <Button type="button" onClick={() => setCreateFormOpen(true)} className="h-9 flex-1 justify-center px-2.5 sm:flex-none sm:px-4">
             <FolderPlus size={16} />
-            New workspace
+            <span className="text-xs sm:text-sm">New workspace</span>
           </Button>
         </div>
       </header>
@@ -231,11 +239,11 @@ export default function VaultPage() {
         </div>
       )}
 
-      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl p-3 pr-4 scrollbar-cadence sm:p-5 sm:pr-6"
+          className="h-full overflow-y-auto rounded-xl p-0 pr-0 scrollbar-cadence sm:p-0 sm:pr-2"
         >
           {loading ? (
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
@@ -244,7 +252,7 @@ export default function VaultPage() {
               {activeGroups.length === 0 ? (
                 <p className="text-sm text-[var(--color-text-muted)]">{emptyMessage}</p>
               ) : layoutMode === "grid" ? (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {activeGroups.map((group) => (
                     <VaultFolderCard
                       key={isUniversity ? group.subjectId : group.folderName}
