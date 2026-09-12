@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "../../../components/ui/Modal";
 import ScheduleDetails from "./ScheduleDetails";
 import { hoursToLabel } from "./chartTokens";
-import useScrollFade from "./useScrollFade";
+import useScrollFade from "../../../hooks/useScrollFade";
 
 export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] }) {
   const [selected, setSelected] = useState(null);

@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import mammoth from "mammoth";
 import { Loader2, FileWarning } from "lucide-react";
 import { resolveAssetUrl } from "../resolveAssetUrl";
+import useScrollFade from "../../../../../hooks/useScrollFade";
+import { TopFade, BottomFade } from "../../../../../components/ui/ScrollFadeOverlay";
 
 export default function DocxViewer({ item }) {
   const [html, setHtml] = useState("");
   const [status, setStatus] = useState("loading");
+  const { scrollRef, showTopFade, showBottomFade, updateScrollFades } = useScrollFade([html]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,10 +75,16 @@ export default function DocxViewer({ item }) {
         .docx-preview a { color: var(--color-primary); }
         .docx-preview ul, .docx-preview ol { padding-left: 1.25em; margin: 0.5em 0; }
       `}</style>
-      <div
-        className="docx-preview scrollbar-cadence min-h-0 flex-1 overflow-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-5 text-sm leading-relaxed text-[var(--color-text)]"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-[var(--color-border)]">
+        <div
+          ref={scrollRef}
+          onScroll={updateScrollFades}
+          className="docx-preview scrollbar-cadence h-full overflow-auto bg-[var(--color-surface-alt)] p-5 text-sm leading-relaxed text-[var(--color-text)]"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+        <TopFade show={showTopFade} fromColor="var(--color-surface-alt)" />
+        <BottomFade show={showBottomFade} fromColor="var(--color-surface-alt)" />
+      </div>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import HomeworkRow from "./HomeworkRow";
-import useScrollFade from "./useScrollFade";
+import useScrollFade from "../../../hooks/useScrollFade";
 
 const ROW_GRID = "grid-cols-[25px_85px_minmax(0,320px)_1fr_250px_180px_130px_64px]";
 

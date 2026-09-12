@@ -5,7 +5,7 @@ import DrawerHeader from "./subjectDetail/DrawerHeader";
 import ScheduleSection from "./subjectDetail/ScheduleSection";
 import HomeworkSection from "./subjectDetail/HomeworkSection";
 import SummaryHud from "./subjectDetail/SummaryHud";
-import { useScrollFade } from "./subjectDetail/useScrollFade";
+import useScrollFade from "../../hooks/useScrollFade";
 import CalendarWorkspaceEngine from "./subjectDetail/CalendarWorkspaceEngine";
 import {
   groupEntriesByDay,
@@ -37,8 +37,21 @@ export default function SubjectDetailDrawer({
   const [activeTab, setActiveTab] = useState("schedule");
   const [viewMode, setViewMode] = useState("default");
 
-  const scheduleFade = useScrollFade([detail?.entries]);
-  const homeworkFade = useScrollFade([detail?.homework]);
+  const scheduleFadeRaw = useScrollFade(detail?.entries);
+  const homeworkFadeRaw = useScrollFade(detail?.homework);
+
+  const scheduleFade = {
+    ref: scheduleFadeRaw.scrollRef,
+    onScroll: scheduleFadeRaw.updateScrollFades,
+    showTop: scheduleFadeRaw.showTopFade,
+    showBottom: scheduleFadeRaw.showBottomFade,
+  };
+  const homeworkFade = {
+    ref: homeworkFadeRaw.scrollRef,
+    onScroll: homeworkFadeRaw.updateScrollFades,
+    showTop: homeworkFadeRaw.showTopFade,
+    showBottom: homeworkFadeRaw.showBottomFade,
+  };
 
   const scheduleDays = useMemo(
     () => (detail?.entries ? groupEntriesByDay(detail.entries) : []),
@@ -301,19 +314,19 @@ export default function SubjectDetailDrawer({
                       </div>
                     </div>
 
-<div
-  className={`absolute inset-0 px-5 py-5 transition-opacity duration-200 ${
-    viewMode === "grid"
-      ? "pointer-events-auto opacity-100"
-      : "pointer-events-none opacity-0"
-  }`}
->
-                        <CalendarWorkspaceEngine
-                          subject={subject}
-                          timetableId={timetableId}
-                          enabled={viewMode === "grid"}
-                        />
-                      </div>
+                    <div
+                      className={`absolute inset-0 px-5 py-5 transition-opacity duration-200 ${
+                        viewMode === "grid"
+                          ? "pointer-events-auto opacity-100"
+                          : "pointer-events-none opacity-0"
+                      }`}
+                    >
+                      <CalendarWorkspaceEngine
+                        subject={subject}
+                        timetableId={timetableId}
+                        enabled={viewMode === "grid"}
+                      />
+                    </div>
                   </div>
                 </div>
               )}

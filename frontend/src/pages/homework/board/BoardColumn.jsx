@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BoardCard from "./BoardCard";
-import useScrollFade from "./useScrollFade";
+import useScrollFade from "../../../hooks/useScrollFade";
 import { isElementVisible, smoothScrollTo } from "./scrollUtils";
 
 const GLOW_WINDOW = 900;
