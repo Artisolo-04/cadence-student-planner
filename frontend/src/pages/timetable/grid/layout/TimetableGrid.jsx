@@ -14,6 +14,7 @@ import { useDragOverlayGeometry } from "../dragdrop/useDragOverlayGeometry";
 import { WEEKDAY_FULL } from "./weekdayConstants";
 import { slotIndexToGridRow } from "../overlay/overlayGeometry";
 import { GridHeaderRow } from "./GridHeaderRow";
+import { CustomScrollbar } from "../../../../components/ui/CustomScrollbar";
 import { TimeSlotRow } from "./TimeSlotRow";
 
 const magneticModifier = createMagneticModifier();
@@ -158,7 +159,7 @@ export default function TimetableGrid({
     >
       <div
         className={`flex h-full min-h-0 w-full transition-all duration-500 ${
-          isEditMode ? "gap-3" : "gap-0"
+          "gap-0"
         }`}
       >
         <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
@@ -179,7 +180,7 @@ export default function TimetableGrid({
             ref={scrollRef}
             onScroll={updateScrollFades}
             data-timetable-grid-root
-            className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence"
+            className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden"
             style={{ scrollbarGutter: "auto" }}
           >
             <div
@@ -295,8 +296,12 @@ export default function TimetableGrid({
           />
         </div>
 
+        <CustomScrollbar scrollRef={scrollRef} />
+
         <div
-          className={`shrink-0 overflow-hidden transition-[width,opacity] duration-500 ease-in-out ${
+          className={`shrink-0 overflow-hidden transition-[width,opacity,margin] duration-500 ease-in-out ${
+            isEditMode ? "ml-2" : "ml-0"
+          } ${
             isEditMode ? "opacity-100" : "opacity-0"
           }`}
           style={{ width: isEditMode ? "16rem" : "0rem" }}
