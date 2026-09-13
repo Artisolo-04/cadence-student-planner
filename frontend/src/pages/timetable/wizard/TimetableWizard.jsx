@@ -131,6 +131,17 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
         ? "Saving..."
         : "Continue";
 
+  const nextLabelShort =
+    step === 4
+      ? saving
+        ? "Saving..."
+        : isEdit
+          ? "Finish"
+          : "Generate"
+      : saving
+        ? "Saving..."
+        : "Continue";
+
   return (
     <section className="mx-auto flex h-full w-full max-w-6xl">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
@@ -180,7 +191,7 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
               {step === 1 ? "Cancel" : "Back"}
             </Button>
             <Button type="button" onClick={handleFooterNext} disabled={saving} className="flex-1 sm:flex-none sm:w-auto">
-              {nextLabel}
+              <span className="sm:hidden">{nextLabelShort}</span><span className="hidden sm:inline">{nextLabel}</span>
             </Button>
           </div>
         </footer>
