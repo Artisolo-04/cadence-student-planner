@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
 import { sortDaysByWeekOrder } from "../../../../lib/days";
 import SubjectPickerModal from "../subjects/SubjectPickerModal";
@@ -39,6 +39,36 @@ export default function TimetableGrid({
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
+  }, []);
+
+  const scrollRef = useRef(null);
+  const headerCellRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [showTopFade, setShowTopFade] = useState(false);
+  const [showBottomFade, setShowBottomFade] = useState(false);
+
+  function updateScrollFades() {
+    const element = scrollRef.current;
+    if (!element) return;
+    setShowTopFade(element.scrollTop > 4);
+    setShowBottomFade(
+      element.scrollTop + element.clientHeight < element.scrollHeight - 4
+    );
+  }
+
+  useLayoutEffect(() => {
+    if (headerCellRef.current) {
+      setHeaderHeight(headerCellRef.current.offsetHeight);
+    }
+  });
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(updateScrollFades);
+    window.addEventListener("resize", updateScrollFades);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", updateScrollFades);
+    };
   }, []);
 
   const nowDow = now.getDay();
@@ -131,7 +161,7 @@ export default function TimetableGrid({
           isEditMode ? "gap-3" : "gap-0"
         }`}
       >
-        <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
+        <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
           {saveError && (
             <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-2 text-sm text-[var(--color-danger)]">
               <span>{saveError.message}</span>
@@ -146,6 +176,8 @@ export default function TimetableGrid({
           )}
 
           <div
+            ref={scrollRef}
+            onScroll={updateScrollFades}
             data-timetable-grid-root
             className="min-h-0 flex-1 overflow-y-auto scrollbar-cadence"
             style={{ scrollbarGutter: "auto" }}
@@ -159,7 +191,7 @@ export default function TimetableGrid({
                 gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,
               }}
             >
-              <GridHeaderRow orderedDays={orderedDays} nowDow={nowDow} />
+              <GridHeaderRow orderedDays={orderedDays} nowDow={nowDow} headerCellRef={headerCellRef} />
 
               {orderedSlots.map((slot, rowIdx) => {
                 const isLastRow = rowIdx === orderedSlots.length - 1;
@@ -208,6 +240,20 @@ export default function TimetableGrid({
               )}
             </div>
           </div>
+
+          <div
+            aria-hidden="true"
+            style={{ top: headerHeight }}
+            className={`pointer-events-none absolute inset-x-0 z-20 h-12 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+              showTopFade ? "opacity-100" : "opacity-0"
+            }`}
+          />
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 h-12 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+              showBottomFade ? "opacity-100" : "opacity-0"
+            }`}
+          />
 
           <SubjectPickerModal
             open={Boolean(activeCell)}

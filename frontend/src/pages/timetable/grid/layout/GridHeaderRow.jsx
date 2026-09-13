@@ -1,11 +1,12 @@
 import { WEEKDAY_FULL } from "./weekdayConstants";
 import { dayIndexToColumns } from "../overlay/overlayGeometry";
 
-export function GridHeaderRow({ orderedDays, nowDow }) {
+export function GridHeaderRow({ orderedDays, nowDow, headerCellRef }) {
   return (
     <>
       <div
-        className="border-b border-r border-[var(--color-border)] bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
+        className="sticky top-0 z-30 border-b border-r border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
+        ref={headerCellRef}
         style={{ gridColumn: 1, gridRow: 1 }}
       >
         Time
@@ -18,9 +19,9 @@ export function GridHeaderRow({ orderedDays, nowDow }) {
           <div
             key={day.id}
             style={{ gridColumn: `${g1Column} / span 2`, gridRow: 1 }}
-            className={`relative border-b border-[var(--color-border)] ${
+            className={`sticky top-0 z-30 relative border-b border-[var(--color-border)] ${
               isLastCol ? "" : "border-r"
-            } bg-black/20 backdrop-blur-2xl px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+            } bg-[var(--color-surface)] px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
               isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
             }`}
           >
