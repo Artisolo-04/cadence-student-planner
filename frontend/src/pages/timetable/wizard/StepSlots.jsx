@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState }
 import { Clock3, Plus, Sparkles, Trash2 } from "lucide-react";
 import api from "../../../lib/api";
 import Button from "../../../components/ui/Button";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 import ClearSlotsModal from "./ClearSlotsModal";
 import PresetGeneratorModal from "./PresetGeneratorModal";
 
@@ -279,11 +280,11 @@ const StepSlots = forwardRef(function StepSlots(
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-1 p-2 lg:px-4">
+          <div className="relative flex min-h-0 flex-1 p-2 lg:px-4">
             <div
               ref={scrollRef}
               onScroll={updateScrollFades}
-              className="h-full overflow-y-auto scrollbar-cadence py-3 pr-4"
+              className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden py-3"
             >
               {orderedSlots.length > 0 ? (
                 <table className="w-full border-collapse text-sm">
@@ -329,6 +330,8 @@ const StepSlots = forwardRef(function StepSlots(
                 </div>
               )}
             </div>
+
+            <CustomScrollbar scrollRef={scrollRef} />
 
             <div
               aria-hidden="true"

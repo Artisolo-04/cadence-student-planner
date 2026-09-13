@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "../../../components/ui/Modal";
 import ScheduleDetails from "./ScheduleDetails";
 import { hoursToLabel } from "./chartTokens";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 import useScrollFade from "../../../hooks/useScrollFade";
 
 export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] }) {
@@ -33,10 +34,11 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
   return (
     <>
       <section className="flex h-full min-h-0 flex-col">
+        <div className="flex min-h-0 flex-1">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="scrollbar-cadence overflow-visible rounded-md lg:h-full lg:overflow-y-scroll lg:pr-2"
+          className="scrollbar-hidden min-w-0 flex-1 overflow-visible rounded-md lg:h-full lg:overflow-y-scroll"
           style={{ WebkitMaskImage: fadeMask, maskImage: fadeMask }}
         >
           <div className="flex flex-col gap-2">
@@ -83,6 +85,11 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
               );
             })}
           </div>
+        </div>
+
+        <div className="hidden lg:block">
+          <CustomScrollbar scrollRef={scrollRef} />
+        </div>
         </div>
       </section>
 

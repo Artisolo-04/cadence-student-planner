@@ -3,6 +3,7 @@ import { Search, X, Check } from "lucide-react";
 import Modal from "../../../../components/ui/Modal";
 import Button from "../../../../components/ui/Button";
 import Input from "../../../../components/ui/Input";
+import { CustomScrollbar } from "../../../../components/ui/CustomScrollbar";
 import SubjectPickerRow from "./SubjectPickerRow";
 
 const GROUP_OPTIONS = [
@@ -136,7 +137,7 @@ export default function SubjectPickerModal({
               />
             </div>
 
-            <div className="relative w-full h-full">
+            <div className="relative flex w-full h-full">
               {filteredSubjects.length === 0 ? (
                 <p className="py-4 text-center text-sm text-[var(--color-text-muted)]">
                   No subjects match "{search}".
@@ -145,7 +146,7 @@ export default function SubjectPickerModal({
                 <div
                   ref={scrollRef}
                   onScroll={handleScroll}
-                  className="flex max-h-72 flex-col gap-1.5 overflow-y-auto scrollbar-cadence pr-2"
+                  className="flex max-h-72 min-w-0 flex-1 flex-col gap-1.5 overflow-y-auto scrollbar-hidden"
                 >
                   {filteredSubjects.map((subject) => (
                     <SubjectPickerRow
@@ -157,6 +158,8 @@ export default function SubjectPickerModal({
                   ))}
                 </div>
               )}
+
+              <CustomScrollbar scrollRef={scrollRef} />
 
               <div
                 aria-hidden="true"

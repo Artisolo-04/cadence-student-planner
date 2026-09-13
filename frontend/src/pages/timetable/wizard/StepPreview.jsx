@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, CheckCircle2, Clock3, LayoutGrid } from "lucide-react";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
 const DAY_LABELS = {
   0: "Sunday",
@@ -26,27 +27,46 @@ export default function StepPreview({ name, days = [], slots = [] }) {
     (first, second) => first.sort_order - second.sort_order
   );
 
-  const scrollRef = useRef(null);
-  const [showTopFade, setShowTopFade] = useState(false);
-  const [showBottomFade, setShowBottomFade] = useState(false);
+  const outerScrollRef = useRef(null);
+  const [showOuterTopFade, setShowOuterTopFade] = useState(false);
+  const [showOuterBottomFade, setShowOuterBottomFade] = useState(false);
 
-  function updateScrollFades() {
-    const element = scrollRef.current;
+  const slotsScrollRef = useRef(null);
+  const [showSlotsTopFade, setShowSlotsTopFade] = useState(false);
+  const [showSlotsBottomFade, setShowSlotsBottomFade] = useState(false);
+
+  function updateOuterScrollFades() {
+    const element = outerScrollRef.current;
     if (!element) return;
 
-    setShowTopFade(element.scrollTop > 4);
-    setShowBottomFade(
+    setShowOuterTopFade(element.scrollTop > 4);
+    setShowOuterBottomFade(
+      element.scrollTop + element.clientHeight < element.scrollHeight - 4
+    );
+  }
+
+  function updateSlotsScrollFades() {
+    const element = slotsScrollRef.current;
+    if (!element) return;
+
+    setShowSlotsTopFade(element.scrollTop > 4);
+    setShowSlotsBottomFade(
       element.scrollTop + element.clientHeight < element.scrollHeight - 4
     );
   }
 
   useEffect(() => {
-    const frame = requestAnimationFrame(updateScrollFades);
-    window.addEventListener("resize", updateScrollFades);
+    const frame = requestAnimationFrame(() => {
+      updateOuterScrollFades();
+      updateSlotsScrollFades();
+    });
+    window.addEventListener("resize", updateOuterScrollFades);
+    window.addEventListener("resize", updateSlotsScrollFades);
 
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("resize", updateScrollFades);
+      window.removeEventListener("resize", updateOuterScrollFades);
+      window.removeEventListener("resize", updateSlotsScrollFades);
     };
   }, [orderedDays.length, orderedSlots.length]);
 
@@ -72,11 +92,11 @@ export default function StepPreview({ name, days = [], slots = [] }) {
         </span>
       </div>
 
-      <div className="relative min-h-0 flex-1 lg:flex-none lg:overflow-visible">
+      <div className="relative flex min-h-0 flex-1">
         <div
-          ref={scrollRef}
-          onScroll={updateScrollFades}
-          className="grid h-full gap-4 overflow-y-auto lg:h-auto lg:overflow-visible lg:grid-cols-[minmax(240px,0.85fr)_minmax(0,1.15fr)]"
+          ref={outerScrollRef}
+          onScroll={updateOuterScrollFades}
+          className="scrollbar-hidden grid min-w-0 flex-1 gap-4 overflow-y-auto lg:overflow-visible lg:grid-rows-1 lg:grid-cols-[minmax(240px,0.85fr)_minmax(0,1.15fr)]"
         >
           <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
             <div className="flex items-center gap-2">
@@ -110,15 +130,15 @@ export default function StepPreview({ name, days = [], slots = [] }) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 lg:h-full lg:min-h-0">
+            <div className="flex shrink-0 items-center gap-2">
               <Clock3 size={16} className="text-[var(--color-primary)]" />
               <p className="text-sm font-semibold text-[var(--color-text)]">
                 Time slots
               </p>
             </div>
 
-            <div className="mt-2 flex items-baseline gap-2">
+            <div className="mt-2 flex shrink-0 items-baseline gap-2">
               <p className="text-2xl font-semibold text-[var(--color-text)]">
                 {orderedSlots.length}
               </p>
@@ -128,31 +148,59 @@ export default function StepPreview({ name, days = [], slots = [] }) {
             </div>
 
             {orderedSlots.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {orderedSlots.map((slot) => (
-                  <span
-                    key={slot.id}
-                    className="rounded-lg bg-[var(--color-surface-alt)] px-2.5 py-1.5 text-center text-xs font-medium text-[var(--color-text)]"
-                  >
-                    {timeValue(slot.start_time)}–{timeValue(slot.end_time)}
-                  </span>
-                ))}
+              <div className="relative mt-4 flex min-h-0 lg:flex-1">
+                <div
+                  ref={slotsScrollRef}
+                  onScroll={updateSlotsScrollFades}
+                  className="scrollbar-hidden grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 lg:h-full lg:overflow-y-auto"
+                >
+                  {orderedSlots.map((slot) => (
+                    <span
+                      key={slot.id}
+                      className="rounded-lg bg-[var(--color-surface-alt)] px-2.5 py-1.5 text-center text-xs font-medium text-[var(--color-text)]"
+                    >
+                      {timeValue(slot.start_time)}–{timeValue(slot.end_time)}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="hidden lg:block">
+                  <CustomScrollbar scrollRef={slotsScrollRef} />
+                </div>
+
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-10 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 lg:block ${
+                    showSlotsTopFade ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden h-10 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 lg:block ${
+                    showSlotsBottomFade ? "opacity-100" : "opacity-0"
+                  }`}
+                />
               </div>
             )}
           </div>
         </div>
 
+        <div className="lg:hidden">
+          <CustomScrollbar scrollRef={outerScrollRef} />
+        </div>
+
         <div
           aria-hidden="true"
           className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 lg:hidden ${
-            showTopFade ? "opacity-100" : "opacity-0"
+            showOuterTopFade ? "opacity-100" : "opacity-0"
           }`}
         />
 
         <div
           aria-hidden="true"
           className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 lg:hidden ${
-            showBottomFade ? "opacity-100" : "opacity-0"
+            showOuterBottomFade ? "opacity-100" : "opacity-0"
           }`}
         />
       </div>

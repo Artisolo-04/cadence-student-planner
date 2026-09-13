@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export function useCustomScrollbar(scrollRef) {
   const trackRef = useRef(null);
@@ -24,17 +24,23 @@ export function useCustomScrollbar(scrollRef) {
     setThumb({ height: thumbHeight, top, visible: true });
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     updateThumb();
     el.addEventListener("scroll", updateThumb);
-    window.addEventListener("resize", updateThumb);
+
+    const resizeObserver = new ResizeObserver(updateThumb);
+    resizeObserver.observe(el);
+
+    const mutationObserver = new MutationObserver(updateThumb);
+    mutationObserver.observe(el, { childList: true, subtree: true });
 
     return () => {
       el.removeEventListener("scroll", updateThumb);
-      window.removeEventListener("resize", updateThumb);
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
     };
   }, [scrollRef]);
 

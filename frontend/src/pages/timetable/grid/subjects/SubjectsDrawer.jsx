@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PanelRightClose } from "lucide-react";
 import SubjectChip from "./SubjectChip";
+import { CustomScrollbar } from "../../../../components/ui/CustomScrollbar";
 
 export default function SubjectsDrawer({ subjects, onClose }) {
   const scrollRef = useRef(null);
@@ -47,11 +48,11 @@ export default function SubjectsDrawer({ subjects, onClose }) {
         )}
       </div>
 
-      <div className="relative min-h-0 flex-1 overflow-hidden p-2">
+      <div className="relative flex min-h-0 flex-1 overflow-hidden p-2">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl p-1 pr-2 scrollbar-cadence"
+          className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl px-1 scrollbar-hidden"
         >
           <div className="flex flex-col gap-2">
             {subjects.map((subject) => (
@@ -64,6 +65,8 @@ export default function SubjectsDrawer({ subjects, onClose }) {
             )}
           </div>
         </div>
+
+        <CustomScrollbar scrollRef={scrollRef} />
 
         <div
           aria-hidden="true"
