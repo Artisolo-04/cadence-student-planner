@@ -214,8 +214,8 @@ const StepSlots = forwardRef(function StepSlots(
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-4">
-      <div className="grid h-full grid-rows-[minmax(0,1fr)] items-stretch gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+    <div className="flex h-full w-full flex-col p-2 lg:p-4">
+      <div className="grid h-full grid-rows-[auto_minmax(0,1fr)] grid-cols-1 items-stretch gap-2 lg:grid-rows-[minmax(0,1fr)] lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-10">
         <section className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
@@ -224,12 +224,12 @@ const StepSlots = forwardRef(function StepSlots(
             <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">
               Build your time slots
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+            <p className="mt-2 hidden lg:block text-sm leading-6 text-[var(--color-text-muted)]">
               Generate a schedule, then fine-tune each slot below.
             </p>
           </div>
 
-          <p className="text-xs leading-5 text-[var(--color-text-muted)]">
+          <p className="hidden lg:block text-xs leading-5 text-[var(--color-text-muted)]">
             Each slot defines a recurring time block across your active days. Use the
             preset generator for an evenly spaced schedule, or add slots one by one
             and adjust the label and times to match your routine.
@@ -243,24 +243,24 @@ const StepSlots = forwardRef(function StepSlots(
         </section>
 
         <aside className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] p-4">
-            <div>
+          <div className="flex shrink-0 items-center justify-between gap-2 lg:gap-3 border-b border-[var(--color-border)] p-2 lg:p-4">
+            <div className="hidden lg:block">
               <h3 className="text-sm font-semibold text-[var(--color-text)]">Your slots</h3>
               <p className="text-xs text-[var(--color-text-muted)]">
                 {slots.length === 0 ? "No slots yet" : `${slots.length} ${slots.length === 1 ? "slot" : "slots"} ready`}
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center gap-2 sm:ml-auto sm:flex-none lg:ml-0">
               {slots.length > 0 && (
                 <button type="button" onClick={() => setClearModalOpen(true)} disabled={clearing}
                   className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 disabled:opacity-50">
                   <Trash2 size={14} />
-                  {clearing ? "Clearing..." : "Clear all"}
+                  <span className="hidden sm:inline">{clearing ? "Clearing..." : "Clear all"}</span>
                 </button>
               )}
 
-              <Button type="button" variant="secondary" className="h-8 shrink-0 rounded-md !transition-colors"
+              <Button type="button" variant="secondary" className="h-8 w-full flex-1 sm:w-auto sm:flex-none shrink-0 rounded-md !transition-colors"
                 onClick={() => setPresetModalOpen(true)} disabled={adding || clearing}>
                 <Sparkles size={16} />
                 Generate slots
@@ -274,12 +274,12 @@ const StepSlots = forwardRef(function StepSlots(
                 disabled={adding || clearing}
               >
                 <Plus size={16} />
-                Add slot
+                <span className="hidden sm:inline">Add slot</span>
               </Button>
             </div>
           </div>
 
-          <div className="relative min-h-0 flex-1 p-2 px-4">
+          <div className="relative min-h-0 flex-1 p-2 lg:px-4">
             <div
               ref={scrollRef}
               onScroll={updateScrollFades}

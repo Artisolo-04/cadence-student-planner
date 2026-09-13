@@ -57,8 +57,8 @@ const StepDays = forwardRef(function StepDays(
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="h-full w-full p-4">
-      <div className="grid h-full grid-rows-[minmax(0,1fr)] items-stretch gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+    <form ref={formRef} onSubmit={handleSubmit} className="h-full w-full p-2 lg:p-4">
+      <div className="grid h-full grid-rows-[minmax(0,1fr)] grid-cols-1 items-stretch gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <section className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
@@ -98,7 +98,7 @@ const StepDays = forwardRef(function StepDays(
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
             {DAYS.map((day) => (
               <Checkbox
                 key={day.value}
@@ -117,7 +117,7 @@ const StepDays = forwardRef(function StepDays(
           )}
         </section>
 
-        <aside className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <aside className="hidden h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm lg:flex">
           <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
             <div className="min-w-0">
               <p className="text-xs font-medium text-[var(--color-text-muted)]">

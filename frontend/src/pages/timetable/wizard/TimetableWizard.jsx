@@ -134,7 +134,7 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
   return (
     <section className="mx-auto flex h-full w-full max-w-6xl">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <header className="shrink-0 border-b border-[var(--color-border)] px-5 py-5 sm:px-8">
+        <header className="shrink-0 border-b border-[var(--color-border)] px-4 py-4 sm:px-8 sm:py-5">
           <div className="mx-auto max-w-5xl">
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
               {isEdit ? "Edit timetable" : "New timetable"}
@@ -148,7 +148,7 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
           </div>
         </header>
 
-        <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-5 py-7 sm:px-12">
+        <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-2 py-2 sm:px-12 sm:py-7">
           <div className={`flex h-full w-full items-center justify-center transition-opacity duration-150 ${
             contentVisible ? "opacity-100" : "opacity-0"
           }`}>
@@ -174,12 +174,12 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
           </div>
         </main>
 
-        <footer className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4 sm:px-8">
-          <div className="mx-auto flex max-w-5xl items-center justify-between">
-            <Button type="button" variant="secondary" onClick={handleFooterBack} disabled={saving}>
+        <footer className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 sm:px-8 sm:py-4">
+          <div className="mx-auto flex max-w-5xl items-center gap-3 sm:justify-between sm:gap-0">
+            <Button type="button" variant="secondary" onClick={handleFooterBack} disabled={saving} className="flex-1 sm:flex-none sm:w-auto">
               {step === 1 ? "Cancel" : "Back"}
             </Button>
-            <Button type="button" onClick={handleFooterNext} disabled={saving}>
+            <Button type="button" onClick={handleFooterNext} disabled={saving} className="flex-1 sm:flex-none sm:w-auto">
               {nextLabel}
             </Button>
           </div>
