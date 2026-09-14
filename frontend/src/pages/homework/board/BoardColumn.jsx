@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BoardCard from "./BoardCard";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 import useScrollFade from "../../../hooks/useScrollFade";
 import { isElementVisible, smoothScrollTo } from "./scrollUtils";
 
@@ -57,7 +58,7 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
 
   return (
     <div className="flex h-full min-w-[280px] flex-1 flex-col gap-3 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3" style={{ contain: "paint" }}>
-      <div className="flex shrink-0 items-center justify-between px-1">
+      <div className="flex shrink-0 items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
           {column.label}
         </h3>
@@ -66,12 +67,12 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
         </span>
       </div>
 
-      <div className="relative min-h-0 flex-1">
+      <div className="relative min-h-0 flex flex-1">
         <motion.div
           layoutScroll
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl scrollbar-cadence pr-1"
+          className="h-full overflow-y-auto rounded-xl scrollbar-hidden min-w-0 flex-1"
         >
           <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-3 pb-2">
             <AnimatePresence mode="popLayout">
@@ -102,6 +103,8 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
             </AnimatePresence>
           </motion.div>
         </motion.div>
+
+        <CustomScrollbar scrollRef={scrollRef} />
 
         <div
           aria-hidden="true"

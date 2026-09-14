@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "../../components/ui/Modal";
+import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 import Dropdown from "../../components/ui/Dropdown";
@@ -26,6 +27,7 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (open) {
@@ -90,63 +92,68 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
         </>
       }
     >
-      <form
-        id="homework-form"
-        onSubmit={handleSubmit}
-        className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto scrollbar-cadence pr-1"
-      >
-        <Input
-          id="homework-title"
-          label="Title"
-          placeholder="e.g. Chapter 4 exercises"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <Dropdown
-          id="homework-subject"
-          label="Subject"
-          value={subjectId}
-          onChange={(e) => setSubjectId(e.target.value)}
-          options={subjectOptions}
-          placeholder="No subject"
-        />
-
-        <Input
-          id="homework-due-date"
-          label="Due date"
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <Dropdown
-            id="homework-priority"
-            label="Priority"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            options={PRIORITY_OPTIONS}
+      <div className="relative flex max-h-[60vh]">
+        <form
+          id="homework-form"
+          ref={scrollRef}
+          onSubmit={handleSubmit}
+          className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-hidden"
+        >
+          <Input
+            id="homework-title"
+            label="Title"
+            placeholder="e.g. Chapter 4 exercises"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
           />
+
           <Dropdown
-            id="homework-status"
-            label="Status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            options={STATUS_OPTIONS}
+            id="homework-subject"
+            label="Subject"
+            value={subjectId}
+            onChange={(e) => setSubjectId(e.target.value)}
+            options={subjectOptions}
+            placeholder="No subject"
           />
-        </div>
 
-        <Textarea
-          id="homework-notes"
-          label="Notes (optional)"
-          placeholder="Any extra details..."
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
+          <Input
+            id="homework-due-date"
+            label="Due date"
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
 
-        {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
-      </form>
+          <div className="grid grid-cols-2 gap-4">
+            <Dropdown
+              id="homework-priority"
+              label="Priority"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              options={PRIORITY_OPTIONS}
+            />
+            <Dropdown
+              id="homework-status"
+              label="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              options={STATUS_OPTIONS}
+            />
+          </div>
+
+          <Textarea
+            id="homework-notes"
+            label="Notes (optional)"
+            placeholder="Any extra details..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+
+            {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
+        </form>
+
+        <CustomScrollbar scrollRef={scrollRef} />
+      </div>
     </Modal>
   );
 }

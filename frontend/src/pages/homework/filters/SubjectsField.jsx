@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ChevronDown, Search } from "lucide-react";
 import Checkbox from "../../../components/ui/Checkbox";
 import SectionLabel from "./SectionLabel";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
 const ITEM_HEIGHT = 36;
 const LIST_PADDING = 8;
@@ -167,12 +168,12 @@ export default function SubjectsField({ subjects, selectedIds, onToggle }) {
               />
             </div>
 
-            <div className="relative p-1">
+            <div className="relative flex p-1">
               <div
                 ref={scrollRef}
                 onScroll={updateScrollFades}
                 style={{ maxHeight: listHeight }}
-                className="scrollbar-cadence overflow-y-auto p-1"
+                className="scrollbar-hidden overflow-y-auto p-1 min-w-0 flex-1"
               >
                 {filtered.length === 0 ? (
                   <p className="px-2 py-2 text-xs text-[var(--color-text-muted)]">No subjects found.</p>
@@ -193,6 +194,8 @@ export default function SubjectsField({ subjects, selectedIds, onToggle }) {
                   ))
                 )}
               </div>
+
+              <CustomScrollbar scrollRef={scrollRef} />
 
               <div
                 aria-hidden="true"
