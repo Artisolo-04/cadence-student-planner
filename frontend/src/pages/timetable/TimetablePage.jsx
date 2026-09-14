@@ -9,6 +9,7 @@ import TimetableWizard from "./wizard/TimetableWizard";
 import TimetableGrid from "./grid/layout/TimetableGrid";
 import AnalyticsPanel from "./analytics/AnalyticsPanel";
 import ViewOptionsPanel from "./ViewOptionsPanel";
+import SegmentedControl from "../../components/ui/SegmentedControl";
 import useTimetableViewOptions from "../../hooks/useTimetableViewOptions";
 import { publishWorkspaceGroupChange } from "../../lib/workspaceGroupSync";
 import { useWorkspace } from "../../hooks/useWorkspace";
@@ -43,7 +44,7 @@ export default function TimetablePage() {
     if (workspacesLoading) return;
     if (view !== "loading") return;
     setView(timetables.length === 0 ? "empty" : "list");
-    
+
   }, [workspacesLoading]);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function TimetablePage() {
     if (viewRef.current !== "grid") return;
 
     openWorkspaceById(activeId);
-    
+
   }, [activeId]);
 
   async function openWorkspaceById(id) {
@@ -140,16 +141,11 @@ export default function TimetablePage() {
     setIsEditMode((current) => !current);
   }
 
-  function toggleAnalyticsPanel() {
-    setActivePanel((current) => {
-      const next = current === "analytics" ? "grid" : "analytics";
-
-      if (next === "analytics") {
-        setIsEditMode(false);
-      }
-
-      return next;
-    });
+  function handlePanelChange(id) {
+    setActivePanel(id);
+    if (id === "analytics") {
+      setIsEditMode(false);
+    }
   }
 
   function handleWizardCancel() {
@@ -211,7 +207,7 @@ export default function TimetablePage() {
               <Button
                 variant="secondary"
                 onClick={handleBackToList}
-                className="whitespace-nowrap transition-all duration-200 ease-in-out"
+                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out"
               >
                 <ArrowLeft size={15} />
                 <span className="hidden sm:inline">All timetables</span>
@@ -222,7 +218,7 @@ export default function TimetablePage() {
                 onClick={startEditSetup}
                 title="Edit timetable setup"
                 aria-label="Edit timetable setup"
-                className="!px-2.5 !py-2.5 transition-all duration-200 ease-in-out"
+                className="!h-9 !w-9 !p-0 transition-all duration-200 ease-in-out"
               >
                 <Settings2 size={15} />
               </Button>
@@ -232,33 +228,30 @@ export default function TimetablePage() {
                 style={{ background: "var(--color-border)" }}
               />
 
-        <Button
-          variant={!isAnalytics ? "secondary" : "ghost"}
-          onClick={() => setActivePanel("grid")}
-          aria-pressed={!isAnalytics}
-          className={`whitespace-nowrap transition-all duration-200 ease-in-out ${
-            !isAnalytics
-              ? "border border-transparent"
-              : "border border-[var(--color-border)]"
-          }`}
-        >
-          <Calendar size={15} />
-          <span className="hidden sm:inline">Grid View</span>
-        </Button>
-
-        <Button
-          variant={isAnalytics ? "secondary" : "ghost"}
-          onClick={toggleAnalyticsPanel}
-          aria-pressed={isAnalytics}
-          className={`whitespace-nowrap transition-all duration-200 ease-in-out ${
-            isAnalytics
-              ? "border border-transparent"
-              : "border border-[var(--color-border)]"
-          }`}
-        >
-          <BarChart3 size={15} />
-          <span className="hidden sm:inline">Analytics</span>
-        </Button>
+              <div className="sm:hidden">
+                <SegmentedControl
+                  ariaLabel="Timetable panel"
+                  variant="icon"
+                  options={[
+                    { id: "grid", label: "Grid View", Icon: Calendar },
+                    { id: "analytics", label: "Analytics", Icon: BarChart3 },
+                  ]}
+                  value={activePanel}
+                  onChange={handlePanelChange}
+                />
+              </div>
+              <div className="hidden sm:flex">
+                <SegmentedControl
+                  ariaLabel="Timetable panel"
+                  variant="labeled"
+                  options={[
+                    { id: "grid", label: "Grid View", Icon: Calendar },
+                    { id: "analytics", label: "Analytics", Icon: BarChart3 },
+                  ]}
+                  value={activePanel}
+                  onChange={handlePanelChange}
+                />
+              </div>
 
               <div
                 className={`transition-all duration-200 ease-in-out ${
@@ -300,7 +293,7 @@ export default function TimetablePage() {
               <Button
                 variant="primary"
                 onClick={toggleEditMode}
-                className="whitespace-nowrap transition-all duration-200 ease-in-out"
+                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out"
               >
                 <Pencil size={15} />
                 <span className="hidden sm:inline">Edit</span>
@@ -316,7 +309,7 @@ export default function TimetablePage() {
                 onClick={() => editActionsRef.current.undo()}
                 disabled={!editState.canUndo}
                 title="Undo last change"
-                className="!px-2.5 !py-2.5"
+                className="!h-9 !w-9 !p-0"
               >
                 <Undo2 size={15} />
               </Button>
@@ -326,7 +319,7 @@ export default function TimetablePage() {
                 onClick={() => editActionsRef.current.redo()}
                 disabled={!editState.canRedo}
                 title="Redo last change"
-                className="!px-2.5 !py-2.5"
+                className="!h-9 !w-9 !p-0"
               >
                 <Redo2 size={15} />
               </Button>
@@ -334,10 +327,10 @@ export default function TimetablePage() {
               <Button
                 variant="primary"
                 onClick={toggleEditMode}
-                className="whitespace-nowrap"
+                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap"
               >
                 <Check size={16} />
-                Save Changes
+                <span className="hidden sm:inline">Save Changes</span>
               </Button>
             </div>
           </div>

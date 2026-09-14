@@ -111,15 +111,15 @@ export default function ViewOptionsPanel({
       <Button
         variant="secondary"
         onClick={() => setOpen((current) => !current)}
-        className={
+        className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 ${
           open
-            ? "border-[var(--color-primary)]/60 bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+            ? "!bg-[var(--color-primary)] !text-[var(--color-primary-fg)] shadow-sm !border-transparent"
             : ""
-        }
+        }`}
         aria-expanded={open}
       >
         <Eye size={16} />
-        View
+        <span className="hidden sm:inline">View</span>
       </Button>
 
       {mounted && (
