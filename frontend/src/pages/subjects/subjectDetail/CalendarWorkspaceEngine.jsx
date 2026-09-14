@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import api from "../../../lib/api";
 import { sortDaysByWeekOrder } from "../../../lib/days";
@@ -7,6 +7,7 @@ import { buildOverlayMatrix } from "../../timetable/grid/overlay/overlayMatrixBu
 import { dayIndexToColumns, slotIndexToGridRow } from "../../timetable/grid/overlay/overlayGeometry";
 import { WEEKDAY_FULL } from "../../timetable/grid/layout/weekdayConstants";
 import SubjectLabel from "../../timetable/grid/subjects/SubjectLabel";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
 const ROW_HEIGHT = 56;
 const HEADER_HEIGHT = 40;
@@ -59,6 +60,7 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
   const [error, setError] = useState("");
   const [focusLevel, setFocusLevel] = useState(DEFAULT_FOCUS_LEVEL);
   const dimOpacity = 1 - focusLevel;
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (!enabled || !timetableId) return;
@@ -134,7 +136,9 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
       )}
 
       {!loading && !error && orderedDays.length > 0 && (
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] scrollbar-cadence">
+        <div className="flex min-h-0 flex-1">
+          <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div ref={scrollRef} className="min-h-0 flex-1 min-w-0 overflow-y-auto scrollbar-hidden">
           <div
             className="grid h-full text-sm"
             style={{
@@ -311,6 +315,9 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
               );
             })}
           </div>
+          </div>
+        </div>
+        <CustomScrollbar scrollRef={scrollRef} />
         </div>
       )}
     </div>

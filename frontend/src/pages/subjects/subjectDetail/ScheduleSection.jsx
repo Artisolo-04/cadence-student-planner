@@ -1,5 +1,6 @@
 import { Clock, MapPin, Users } from "lucide-react";
 import { formatDuration, formatTime } from "./subjectDetailUtils";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
 export default function ScheduleSection({ entries, timetableId, scheduleDays, fade }) {
   return (
@@ -7,11 +8,11 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
       <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
         Weekly schedule
       </h4>
-      <div className="relative min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
         <div
           ref={fade.ref}
           onScroll={fade.onScroll}
-          className="h-full overflow-y-auto scrollbar-cadence pr-1"
+          className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
           {entries.length === 0 ? (
             <p className="text-sm text-[var(--color-text-muted)]">
@@ -84,6 +85,8 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
             </div>
           )}
         </div>
+
+        <CustomScrollbar scrollRef={fade.ref} />
 
         <div
           aria-hidden="true"

@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import Checkbox from "../../../components/ui/Checkbox";
 import Input from "../../../components/ui/Input";
 import { PRIORITY_STYLES } from "../../homework/homeworkUtils";
+import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
 export default function HomeworkSection({
   homework,
@@ -43,11 +44,11 @@ export default function HomeworkSection({
         <p className="mb-2 shrink-0 text-xs text-[var(--color-danger)]">{addError}</p>
       )}
 
-      <div className="relative min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1">
         <div
           ref={fade.ref}
           onScroll={fade.onScroll}
-          className="h-full overflow-y-auto scrollbar-cadence pr-1"
+          className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
           {homework.length === 0 ? (
             <p className="text-sm text-[var(--color-text-muted)]">No homework linked yet.</p>
@@ -100,6 +101,8 @@ export default function HomeworkSection({
             </ul>
           )}
         </div>
+
+        <CustomScrollbar scrollRef={fade.ref} />
 
         <div
           aria-hidden="true"

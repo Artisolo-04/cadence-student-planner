@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, BookOpen, Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
+import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
 
 function formatWeeklyHours(hours) {
   if (!hours) return null;
@@ -73,11 +74,11 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
         </Button>
       </header>
 
-      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
+      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl p-0 pr-0 scrollbar-cadence sm:p-0 sm:pr-2"
+          className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl p-0 scrollbar-hidden sm:p-0"
         >
           <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {subjects.map((subject) => {
@@ -193,6 +194,8 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
             })}
           </div>
         </div>
+
+        <CustomScrollbar scrollRef={scrollRef} />
 
         <div
           aria-hidden="true"
