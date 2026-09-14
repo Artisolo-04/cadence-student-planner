@@ -7,6 +7,7 @@ import HomeworkSection from "./subjectDetail/HomeworkSection";
 import SummaryHud from "./subjectDetail/SummaryHud";
 import useScrollFade from "../../hooks/useScrollFade";
 import CalendarWorkspaceEngine from "./subjectDetail/CalendarWorkspaceEngine";
+import SegmentedControl from "../../components/ui/SegmentedControl";
 import {
   groupEntriesByDay,
   todayISO,
@@ -315,7 +316,7 @@ export default function SubjectDetailDrawer({
                     </div>
 
                     <div
-                      className={`absolute inset-0 px-5 py-5 transition-opacity duration-200 ${
+                      className={` hidden absolute inset-0 px-5 py-5 transition-opacity duration-200 md:block ${
                         viewMode === "grid"
                           ? "pointer-events-auto opacity-100"
                           : "pointer-events-none opacity-0"
@@ -334,31 +335,17 @@ export default function SubjectDetailDrawer({
 
             {!loading && !error && detail && viewMode === "default" && (
               <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center md:hidden">
-                <div className="pointer-events-auto flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_75%,transparent)] p-1 shadow-[0_8px_30px_-8px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("schedule")}
-                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                      activeTab === "schedule"
-                        ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
-                        : "text-[var(--color-text-muted)]"
-                    }`}
-                  >
-                    <Calendar size={14} />
-                    Schedule
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("tasks")}
-                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium transition-colors ${
-                      activeTab === "tasks"
-                        ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
-                        : "text-[var(--color-text-muted)]"
-                    }`}
-                  >
-                    <ClipboardList size={14} />
-                    Tasks
-                  </button>
+                <div className="pointer-events-auto rounded-lg shadow-[0_8px_30px_-8px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                    <SegmentedControl
+                      ariaLabel="Drawer section"
+                      variant="labeled"
+                      value={activeTab}
+                      onChange={setActiveTab}
+                      options={[
+                        { id: "schedule", label: "Schedule", Icon: Calendar },
+                        { id: "tasks", label: "Tasks", Icon: ClipboardList },
+                      ]}
+                    />
                 </div>
               </div>
             )}

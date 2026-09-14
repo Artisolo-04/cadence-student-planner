@@ -13,7 +13,7 @@ export default function SegmentedControl({
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className={`flex ${heightClass} items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-1 ${className}`}
+      className={`flex ${heightClass} items-center gap-1 ${variant === "pill" ? "rounded-full" : "rounded-lg"} border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-1 ${className}`}
     >
       {options.map(({ id, label, Icon }) => {
         const active = value === id;
@@ -26,7 +26,7 @@ export default function SegmentedControl({
             aria-label={variant === "icon" ? label : undefined}
             title={variant === "icon" ? label : undefined}
             onClick={() => onChange(id)}
-            className={`flex h-full items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors duration-150 ${
+            className={`flex h-full items-center justify-center gap-1.5 ${variant === "pill" ? "rounded-full" : "rounded-md"} text-xs font-medium transition-colors duration-150 ${
               variant === "icon" ? "aspect-square px-0" : "px-3"
             } ${
               active

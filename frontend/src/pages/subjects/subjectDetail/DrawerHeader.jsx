@@ -39,7 +39,7 @@ export default function DrawerHeader({
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-1 items-center justify-end gap-2 overflow-x-auto scrollbar-hidden">
+      <div className="relative z-10 hidden flex-1 items-center justify-end gap-2 overflow-x-auto scrollbar-hidden md:flex">
         <MetricBadge icon={Calendar} label={`${weeklySlots} Weekly Slot${weeklySlots === 1 ? "" : "s"}`} />
         <MetricBadge icon={ListChecks} label={`${activeTasks} Active Task${activeTasks === 1 ? "" : "s"}`} />
         <MetricBadge icon={CalendarDays} label={`${daysPerWeek} Day${daysPerWeek === 1 ? "" : "s"}/Week`} />
