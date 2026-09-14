@@ -124,7 +124,7 @@ export default function ViewOptionsPanel({
 
       {mounted && (
         <div
-          className={`absolute right-0 z-30 mt-2 w-72 origin-top-right rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl transition-all duration-150 ease-out ${
+          className={`absolute right-0 z-40 mt-2 w-72 origin-top-right rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl transition-all duration-150 ease-out ${
             visible
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0"

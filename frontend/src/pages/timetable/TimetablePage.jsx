@@ -292,8 +292,8 @@ export default function TimetablePage() {
             >
               <Button
                 variant="primary"
-                onClick={toggleEditMode}
-                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out"
+                onClick={() => { if (!isAnalytics) toggleEditMode(); }}
+                className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out ${isAnalytics ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"}`}
               >
                 <Pencil size={15} />
                 <span className="hidden sm:inline">Edit</span>
