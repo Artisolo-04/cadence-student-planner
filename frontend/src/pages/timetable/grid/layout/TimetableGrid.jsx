@@ -299,7 +299,7 @@ export default function TimetableGrid({
         <CustomScrollbar scrollRef={scrollRef} />
 
         <div
-          className={`shrink-0 overflow-hidden transition-[width,opacity,margin] duration-500 ease-in-out ${
+          className={`hidden shrink-0 overflow-hidden transition-[width,opacity,margin] duration-500 ease-in-out sm:block ${
             isEditMode ? "ml-2" : "ml-0"
           } ${
             isEditMode ? "opacity-100" : "opacity-0"
