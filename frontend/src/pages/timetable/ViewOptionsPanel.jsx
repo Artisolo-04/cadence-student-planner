@@ -1,7 +1,9 @@
 import { Eye, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Checkbox from "../../components/ui/Checkbox";
 import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
 
 const MY_GROUP_OPTIONS = [
   { value: "g1", label: "G1" },
@@ -65,6 +67,7 @@ export default function ViewOptionsPanel({
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const rootRef = useRef(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
     let raf1;
@@ -89,7 +92,11 @@ export default function ViewOptionsPanel({
 
   useEffect(() => {
     function onClickOutside(event) {
-      if (rootRef.current && !rootRef.current.contains(event.target)) {
+      if (
+        rootRef.current &&
+        !rootRef.current.contains(event.target) &&
+        !(modalRef.current && modalRef.current.contains(event.target))
+      ) {
         setOpen(false);
       }
     }
@@ -104,6 +111,72 @@ export default function ViewOptionsPanel({
     if (nextGroup === null) {
       onViewOptionChange("groupVisibility", "both");
     }
+  }
+
+  function renderPanelBody() {
+    return (
+      <>
+        <div className="border-t border-[var(--color-border)] py-3 first:border-t-0 first:pt-0">
+          <p className="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+            My group
+          </p>
+          <div className="mt-2">
+            <SegmentedControl
+              options={MY_GROUP_OPTIONS}
+              value={myGroup}
+              onChange={handleMyGroupChange}
+            />
+          </div>
+        </div>
+
+        <div className="border-t border-[var(--color-border)] py-3">
+          <div className="flex items-center gap-2 px-1">
+            <Users size={15} className="text-[var(--color-text-muted)]" />
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+              Show groups
+            </p>
+          </div>
+          <div className="mt-2">
+            <SegmentedControl
+              options={GROUP_OPTIONS}
+              value={viewOptions.groupVisibility}
+              onChange={(value) =>
+                onViewOptionChange("groupVisibility", value)
+              }
+              disabledOption={(option) =>
+                !myGroup && option.value !== "both"
+              }
+            />
+          </div>
+          {!myGroup && (
+            <p className="mt-2 px-1 text-xs text-[var(--color-text-muted)]">
+              Choose G1 or G2 to filter the timetable.
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-[var(--color-border)] px-1 pt-4">
+          <Checkbox
+            id="view-options-show-teacher"
+            label="Show teacher"
+            checked={viewOptions.showTeacher}
+            onChange={(event) =>
+              onViewOptionChange("showTeacher", event.target.checked)
+            }
+            className="w-full flex-row-reverse justify-between"
+          />
+          <Checkbox
+            id="view-options-show-room"
+            label="Show room"
+            checked={viewOptions.showRoom}
+            onChange={(event) =>
+              onViewOptionChange("showRoom", event.target.checked)
+            }
+            className="w-full flex-row-reverse justify-between"
+          />
+        </div>
+      </>
+    );
   }
 
   return (
@@ -122,9 +195,10 @@ export default function ViewOptionsPanel({
         <span className="hidden sm:inline">View</span>
       </Button>
 
+      {/* Desktop: anchored popover */}
       {mounted && (
         <div
-          className={`absolute right-0 z-40 mt-2 w-72 origin-top-right rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl transition-all duration-150 ease-out ${
+          className={`absolute right-0 z-40 mt-2 hidden w-72 origin-top-right rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl transition-all duration-150 ease-out sm:block ${
             visible
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0"
@@ -136,68 +210,20 @@ export default function ViewOptionsPanel({
               View options
             </h3>
           </div>
-
-          <div className="border-t border-[var(--color-border)] py-3">
-            <p className="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-              My group
-            </p>
-            <div className="mt-2">
-              <SegmentedControl
-                options={MY_GROUP_OPTIONS}
-                value={myGroup}
-                onChange={handleMyGroupChange}
-              />
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--color-border)] py-3">
-            <div className="flex items-center gap-2 px-1">
-              <Users size={15} className="text-[var(--color-text-muted)]" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                Show groups
-              </p>
-            </div>
-            <div className="mt-2">
-              <SegmentedControl
-                options={GROUP_OPTIONS}
-                value={viewOptions.groupVisibility}
-                onChange={(value) =>
-                  onViewOptionChange("groupVisibility", value)
-                }
-                disabledOption={(option) =>
-                  !myGroup && option.value !== "both"
-                }
-              />
-            </div>
-            {!myGroup && (
-              <p className="mt-2 px-1 text-xs text-[var(--color-text-muted)]">
-                Choose G1 or G2 to filter the timetable.
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-3 border-t border-[var(--color-border)] px-1 pt-4">
-            <Checkbox
-              id="view-options-show-teacher"
-              label="Show teacher"
-              checked={viewOptions.showTeacher}
-              onChange={(event) =>
-                onViewOptionChange("showTeacher", event.target.checked)
-              }
-              className="w-full flex-row-reverse justify-between"
-            />
-            <Checkbox
-              id="view-options-show-room"
-              label="Show room"
-              checked={viewOptions.showRoom}
-              onChange={(event) =>
-                onViewOptionChange("showRoom", event.target.checked)
-              }
-              className="w-full flex-row-reverse justify-between"
-            />
-          </div>
+          {renderPanelBody()}
         </div>
       )}
+
+      {/* Mobile: full modal, portaled so it isn't clipped by this button's wrapper */}
+      {mounted &&
+        createPortal(
+          <div className="sm:hidden" ref={modalRef}>
+            <Modal open={open} onClose={() => setOpen(false)} title="View options">
+              {renderPanelBody()}
+            </Modal>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

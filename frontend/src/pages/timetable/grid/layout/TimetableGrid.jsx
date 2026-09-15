@@ -184,9 +184,9 @@ export default function TimetableGrid({
             style={{ scrollbarGutter: "auto" }}
           >
             <div
-              className="grid h-full w-full text-sm"
+              className="grid h-full w-full text-sm [--time-col-w:60px] sm:[--time-col-w:150px]"
               style={{
-                gridTemplateColumns: `150px repeat(${
+                gridTemplateColumns: `var(--time-col-w) repeat(${
                   orderedDays.length * 2
                 }, minmax(0, 1fr))`,
                 gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,

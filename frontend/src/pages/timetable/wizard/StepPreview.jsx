@@ -157,9 +157,9 @@ export default function StepPreview({ name, days = [], slots = [] }) {
                   {orderedSlots.map((slot) => (
                     <span
                       key={slot.id}
-                      className="rounded-lg bg-[var(--color-surface-alt)] px-2.5 py-1.5 text-center text-xs font-medium text-[var(--color-text)]"
+                      className="rounded-lg bg-[var(--color-surface-alt)] px-2.5 py-1.5 text-center text-xs font-medium text-[var(--color-text)] flex items-center justify-center"
                     >
-                      {timeValue(slot.start_time)}–{timeValue(slot.end_time)}
+                      {timeValue(slot.start_time)} – {timeValue(slot.end_time)}
                     </span>
                   ))}
                 </div>

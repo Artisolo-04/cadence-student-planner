@@ -1,4 +1,5 @@
 import { WEEKDAY_FULL } from "./weekdayConstants";
+import { dayShortLabel } from "../../../../lib/days";
 import { dayIndexToColumns } from "../overlay/overlayGeometry";
 
 export function GridHeaderRow({ orderedDays, nowDow, headerCellRef }) {
@@ -25,7 +26,8 @@ export function GridHeaderRow({ orderedDays, nowDow, headerCellRef }) {
               isToday ? "text-[var(--color-accent)]" : "text-[var(--color-text-muted)]"
             }`}
           >
-            {WEEKDAY_FULL[day.day_of_week]}
+            <span className="hidden sm:inline">{WEEKDAY_FULL[day.day_of_week]}</span>
+              <span className="sm:hidden">{dayShortLabel(day.day_of_week)}</span>
             {isToday && (
               <span className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full bg-[var(--color-accent)]" />
             )}

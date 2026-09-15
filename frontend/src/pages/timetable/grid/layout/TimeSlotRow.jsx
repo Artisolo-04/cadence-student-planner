@@ -26,13 +26,13 @@ export function TimeSlotRow({
       <div
         data-row-height-ref={rowIdx === 0 ? "true" : undefined}
         style={{ gridColumn: 1, gridRow }}
-        className={`flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] ${
+        className={`flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] px-1 sm:px-3 ${
           isLastRow ? "" : "border-b"
-        } px-3 bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
+        } bg-black/20 backdrop-blur-2xl transition-all duration-500 ease-in-out`}
       >
         <div className="flex items-center justify-center gap-2 py-1">
           {slot.label && (
-            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
+            <span className="relative hidden h-8 w-8 sm:flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
               <span
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
