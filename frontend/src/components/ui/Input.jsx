@@ -4,10 +4,11 @@ export default function Input({
   type = "text",
   error,
   className = "",
+  containerClassName = "",
   ...rest
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={`flex flex-col gap-1.5 ${containerClassName}`}>
       {label && (
         <label htmlFor={id} className="text-sm font-medium text-[var(--color-text)]">
           {label}
@@ -16,7 +17,7 @@ export default function Input({
       <input
         id={id}
         type={type}
-        className={`rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]
+        className={`w-full min-w-0 rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]
           placeholder:text-[var(--color-text-muted)]
           border-[var(--color-border)] transition-shadow duration-150
           focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] focus-visible:border-[var(--color-ring)]

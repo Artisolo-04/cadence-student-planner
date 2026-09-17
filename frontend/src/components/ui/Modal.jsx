@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-export default function Modal({ open, onClose, title, children, footer, elevated = false }) {
+export default function Modal({ open, onClose, title, children, footer, elevated = false, mobileFullscreen = false }) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
   }, [open, onClose]);
   if (!mounted) return null;
   return (
-    <div className={`absolute inset-0 flex items-center justify-center p-4 ${elevated ? "z-[60]" : "z-50"}`}>
+    <div className={`absolute inset-0 flex items-center justify-center ${mobileFullscreen ? "p-0 sm:p-4" : "p-4"} ${elevated ? "z-[60]" : "z-50"}`}>
       <div
         className={`absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
@@ -39,9 +39,14 @@ export default function Modal({ open, onClose, title, children, footer, elevated
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full max-w-md rounded-xl border border-[var(--color-border)]
+        className={`relative flex flex-col ${mobileFullscreen ? "border-0 sm:border" : "border"} border-[var(--color-border)]
           bg-[var(--color-surface)] text-[var(--color-text)] shadow-xl
           transition-[opacity,transform] duration-200 ease-out
+          ${
+            mobileFullscreen
+              ? "w-full h-full max-w-none rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-md sm:rounded-xl"
+              : "w-full max-w-md rounded-xl"
+          }
           ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
       >
         <div className="flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
@@ -57,7 +62,13 @@ export default function Modal({ open, onClose, title, children, footer, elevated
             <X size={18} />
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-hidden px-5 py-4">
+        <div
+            className={`px-5 py-4 ${
+              mobileFullscreen
+                ? "flex flex-1 min-h-0 flex-col overflow-hidden sm:max-h-[70vh]"
+                : "max-h-[70vh] overflow-hidden"
+            }`}
+          >
           {children}
         </div>
         {footer && (

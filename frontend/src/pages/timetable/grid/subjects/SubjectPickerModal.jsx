@@ -4,12 +4,18 @@ import Modal from "../../../../components/ui/Modal";
 import Button from "../../../../components/ui/Button";
 import Input from "../../../../components/ui/Input";
 import { CustomScrollbar } from "../../../../components/ui/CustomScrollbar";
+import SegmentedControl from "../../../../components/ui/SegmentedControl";
 import SubjectPickerRow from "./SubjectPickerRow";
 
+const ITEM_HEIGHT = 52;
+const ITEM_GAP = 6;
+const VISIBLE_ITEMS = 4;
+const LIST_MAX_HEIGHT = VISIBLE_ITEMS * ITEM_HEIGHT + (VISIBLE_ITEMS - 1) * ITEM_GAP;
+
 const GROUP_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "g1", label: "G1" },
-  { value: "g2", label: "G2" },
+  { id: "all", label: "All" },
+  { id: "g1", label: "G1" },
+  { id: "g2", label: "G2" },
 ];
 
 export default function SubjectPickerModal({
@@ -88,33 +94,52 @@ export default function SubjectPickerModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={cellLabel || "Assign subject"}>
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          {GROUP_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={cellLabel || "Assign subject"}
+      mobileFullscreen
+      footer={
+        <>
+          {currentSubjectId != null && (
+            <Button
               type="button"
-              onClick={() => setGroupTag(opt.value)}
-              className={`flex-1 rounded-lg border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors duration-150
-                focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
-                ${
-                  groupTag === opt.value
-                    ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
-                    : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]"
-                }`}
+              variant="secondary"
+              onClick={onClear}
+              className="flex-1 justify-center"
             >
-              {opt.label}
-            </button>
-          ))}
+              <X size={16} />
+              Clear this cell
+            </Button>
+          )}
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={selectedSubjectId == null}
+            className="flex-1 justify-center"
+          >
+            <Check size={16} />
+            Save
+          </Button>
+        </>
+      }
+    >
+      <div className="flex h-full min-h-0 flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <SegmentedControl
+            ariaLabel="Filter by group"
+            options={GROUP_OPTIONS}
+            value={groupTag}
+            onChange={setGroupTag}
+          />
+          <Input
+            id="subject-picker-room"
+            placeholder="Room"
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            containerClassName="flex-1"
+          />
         </div>
-
-        <Input
-          id="subject-picker-room"
-          placeholder="Room (optional)"
-          value={room}
-          onChange={(e) => setRoom(e.target.value)}
-        />
 
         {subjects.length === 0 ? (
           <p className="text-sm text-[var(--color-text-muted)]">
@@ -137,7 +162,7 @@ export default function SubjectPickerModal({
               />
             </div>
 
-            <div className="relative flex w-full h-full">
+            <div className="relative flex min-h-0 w-full flex-1">
               {filteredSubjects.length === 0 ? (
                 <p className="py-4 text-center text-sm text-[var(--color-text-muted)]">
                   No subjects match "{search}".
@@ -146,7 +171,8 @@ export default function SubjectPickerModal({
                 <div
                   ref={scrollRef}
                   onScroll={handleScroll}
-                  className="flex max-h-72 min-w-0 flex-1 flex-col gap-1.5 overflow-y-auto scrollbar-hidden"
+                  style={{ "--list-max-height": `${LIST_MAX_HEIGHT}px` }}
+                  className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-y-auto scrollbar-hidden sm:max-h-[var(--list-max-height)]"
                 >
                   {filteredSubjects.map((subject) => (
                     <SubjectPickerRow
@@ -177,29 +203,6 @@ export default function SubjectPickerModal({
             </div>
           </>
         )}
-
-        <div className="flex items-center gap-2">
-          {currentSubjectId != null && (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={onClear}
-              className="flex-1 justify-center"
-            >
-              <X size={16} />
-              Clear this cell
-            </Button>
-          )}
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={selectedSubjectId == null}
-            className="flex-1 justify-center"
-          >
-            <Check size={16} />
-            Save
-          </Button>
-        </div>
       </div>
     </Modal>
   );
