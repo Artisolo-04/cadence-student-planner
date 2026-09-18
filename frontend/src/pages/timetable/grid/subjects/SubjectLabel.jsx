@@ -121,18 +121,18 @@ function SubjectLabel({
       {roomText && (
         <span
           title={roomText}
-          className="absolute right-1 top-1 z-20 max-w-[45%] truncate rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90"
+          className="absolute right-1 top-1 z-20 max-w-[70%] sm:max-w-[45%] truncate rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90"
         >
           {roomText}
         </span>
       )}
 
-      <span className="relative z-10 flex-1 flex items-center justify-center px-1 text-center text-[12px] font-bold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
-        <span className="max-w-full truncate">{entry.subject_name}</span>
+      <span className="relative z-10 flex-1 flex items-center justify-center px-1 text-center text-[10px] sm:text-[12px] font-bold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+        <span className="max-w-full line-clamp-2 sm:line-clamp-1 sm:truncate">{entry.subject_name}</span>
       </span>
 
       {teacherText && (
-        <span className="relative z-10 truncate text-left text-[9px] font-semibold leading-tight text-white/85">
+        <span className="relative z-10 w-full truncate text-left text-[9px] font-semibold leading-tight text-white/85">
           {teacherText}
         </span>
       )}

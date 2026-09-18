@@ -6,7 +6,7 @@ export function GridHeaderRow({ orderedDays, nowDow, headerCellRef }) {
   return (
     <>
       <div
-        className="sticky top-0 z-30 border-b border-r border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
+        className="sticky top-0 left-0 z-40 border-b border-r border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]"
         ref={headerCellRef}
         style={{ gridColumn: 1, gridRow: 1 }}
       >

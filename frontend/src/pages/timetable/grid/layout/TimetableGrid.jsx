@@ -19,6 +19,10 @@ import { TimeSlotRow } from "./TimeSlotRow";
 
 const magneticModifier = createMagneticModifier();
 
+const VISIBLE_DAYS_MOBILE = 3;
+
+const MOBILE_TIME_COL_W = 60;
+
 export default function TimetableGrid({
   workspace,
   onWorkspaceChange,
@@ -47,6 +51,37 @@ export default function TimetableGrid({
   const [headerHeight, setHeaderHeight] = useState(0);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
+  const [dayColWidth, setDayColWidth] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    if (window.matchMedia("(min-width: 640px)").matches) return 0;
+    const estimatedAvailable = window.innerWidth - MOBILE_TIME_COL_W;
+    return Math.max(0, estimatedAvailable / VISIBLE_DAYS_MOBILE);
+  });
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    function recomputeDayWidth() {
+      const isDesktop = window.matchMedia("(min-width: 640px)").matches;
+      if (isDesktop) {
+        setDayColWidth(0);
+        return;
+      }
+      const timeColW = MOBILE_TIME_COL_W;
+      const available = el.clientWidth - timeColW;
+      setDayColWidth(Math.max(0, available / VISIBLE_DAYS_MOBILE));
+    }
+
+    recomputeDayWidth();
+    const observer = new ResizeObserver(recomputeDayWidth);
+    observer.observe(el);
+    window.addEventListener("resize", recomputeDayWidth);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", recomputeDayWidth);
+    };
+  }, []);
 
   function updateScrollFades() {
     const element = scrollRef.current;
@@ -180,15 +215,15 @@ export default function TimetableGrid({
             ref={scrollRef}
             onScroll={updateScrollFades}
             data-timetable-grid-root
-            className="min-h-0 flex-1 overflow-y-auto scrollbar-hidden"
+            className="min-h-0 flex-1 overflow-y-auto overflow-x-auto sm:overflow-x-visible scrollbar-hidden"
             style={{ scrollbarGutter: "auto" }}
           >
             <div
-              className="grid h-full w-full text-sm [--time-col-w:60px] sm:[--time-col-w:150px]"
+              className="grid h-full w-max sm:w-full text-sm [--time-col-w:60px] sm:[--time-col-w:150px]" // 60px here must match MOBILE_TIME_COL_W above
               style={{
                 gridTemplateColumns: `var(--time-col-w) repeat(${
                   orderedDays.length * 2
-                }, minmax(0, 1fr))`,
+                }, minmax(${dayColWidth > 0 ? `${dayColWidth / 2}px` : "0px"}, 1fr))`,
                 gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,
               }}
             >
