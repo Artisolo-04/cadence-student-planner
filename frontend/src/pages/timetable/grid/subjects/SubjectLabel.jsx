@@ -91,7 +91,7 @@ function SubjectLabel({
       style={{
         "--subject-color": entry.subject_color,
         backgroundImage:
-          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 26%, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface) 92%)) 0%, color-mix(in srgb, var(--subject-color) 14%, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface) 94%)) 55%, color-mix(in srgb, var(--subject-color) 7%, var(--color-surface) 93%) 100%)",
+          "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 68%, color-mix(in srgb, var(--color-primary) 16%, black 16%)) 0%, color-mix(in srgb, var(--subject-color) 64%, color-mix(in srgb, var(--color-primary) 16%, black 20%)) 55%, color-mix(in srgb, var(--subject-color) 60%, color-mix(in srgb, var(--color-primary) 16%, black 24%)) 100%)",
         opacity: isDragging ? 0.3 : dimmed ? 0.15 : popped ? 1 : 0,
         transform: popped ? "scale(1)" : "scale(0.65)",
         transitionProperty: dimmed ? "transform" : "transform, opacity",
@@ -99,7 +99,7 @@ function SubjectLabel({
         transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         transitionDelay: pulseColor ? "40ms" : "0ms",
       }}
-      className={`group/label absolute inset-0 flex flex-col justify-center overflow-hidden border-t border-white/15 px-2 py-1.5 ${
+      className={`group/label absolute inset-0.5 flex flex-col justify-center overflow-hidden rounded-md border-t border-white/15 px-2 py-1.5 ${
         dimmed ? "" : "transition-opacity duration-150 hover:opacity-90"
       } ${isEditMode ? "touch-none cursor-grab active:cursor-grabbing" : ""} ${
         isRejected ? "animate-cadence-shake" : ""
