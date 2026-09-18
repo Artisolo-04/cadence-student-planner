@@ -3,6 +3,7 @@ import { AlertCircle } from "lucide-react";
 import { resolveAssetUrl } from "../resolveAssetUrl";
 import useScrollFade from "../../../../../hooks/useScrollFade";
 import { TopFade, BottomFade } from "../../../../../components/ui/ScrollFadeOverlay";
+import { CustomScrollbar } from "../../../../../components/ui/CustomScrollbar";
 
 const TEXT_BG = "color-mix(in srgb, var(--color-text) 3%, var(--color-surface))";
 
@@ -53,17 +54,20 @@ export default function TextViewer({ item }) {
   }
 
   return (
-    <div className="relative min-h-0 flex-1 overflow-hidden rounded-lg border border-[var(--color-border)]">
-      <pre
-        ref={scrollRef}
-        onScroll={updateScrollFades}
-        className="h-full overflow-auto whitespace-pre-wrap break-words p-3 text-xs leading-relaxed text-[var(--color-text)] scrollbar-cadence"
-        style={{ backgroundColor: TEXT_BG }}
-      >
-        {state.content}
-      </pre>
-      <TopFade show={showTopFade} fromColor={TEXT_BG} />
-      <BottomFade show={showBottomFade} fromColor={TEXT_BG} />
+    <div className="flex min-h-0 flex-1 overflow-hidden border-[var(--color-border)]">
+      <div className="relative min-w-0 flex-1 overflow-hidden rounded-lg">
+        <pre
+          ref={scrollRef}
+          onScroll={updateScrollFades}
+          className="h-full w-full overflow-auto whitespace-pre-wrap break-words p-3 text-xs leading-relaxed text-[var(--color-text)] scrollbar-hidden"
+          style={{ backgroundColor: TEXT_BG }}
+        >
+          {state.content}
+        </pre>
+        <TopFade show={showTopFade} fromColor={TEXT_BG} />
+        <BottomFade show={showBottomFade} fromColor={TEXT_BG} />
+      </div>
+      <CustomScrollbar scrollRef={scrollRef} />
     </div>
   );
 }

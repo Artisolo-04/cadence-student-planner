@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ExplorerHeader from "../../ExplorerHeader";
 import ResourcePreviewSidebar from "../../ResourcePreviewSidebar";
 import useModalTransition from "./useModalTransition";
 import EmptyFolderState from "./EmptyState";
 import ResourceGrid from "./ResourceGrid";
+import { CustomScrollbar } from "../../../../../components/ui/CustomScrollbar";
 
 export default function FolderExplorerModal({
   folder,
@@ -18,6 +19,7 @@ export default function FolderExplorerModal({
   const open = Boolean(folder);
   const { mounted, visible } = useModalTransition(open, onClose);
   const [previewItem, setPreviewItem] = useState(null);
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     if (!open) setPreviewItem(null);
@@ -54,18 +56,24 @@ export default function FolderExplorerModal({
               existingFolderNames={existingFolderNames}
             />
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto p-5 scrollbar-cadence">
-            {items.length === 0 ? (
-              <EmptyFolderState onAddResource={onAddResource} folderTarget={folder.target} />
-            ) : (
-              <ResourceGrid
-                items={items}
-                folderTitle={folder.title}
-                onRequestDelete={onRequestDelete}
-                onPreview={setPreviewItem}
-              />
-            )}
-          </div>
+            <div className="relative z-10 flex min-h-0 flex-1 p-5">
+              <div
+                ref={scrollRef}
+                className="flex min-w-0 flex-1 flex-col overflow-y-auto scrollbar-hidden"
+              >
+                {items.length === 0 ? (
+                  <EmptyFolderState onAddResource={onAddResource} folderTarget={folder.target} />
+                ) : (
+                  <ResourceGrid
+                    items={items}
+                    folderTitle={folder.title}
+                    onRequestDelete={onRequestDelete}
+                    onPreview={setPreviewItem}
+                  />
+                )}
+              </div>
+              <CustomScrollbar scrollRef={scrollRef} />
+            </div>
             <ResourcePreviewSidebar
               item={previewItem}
               folderTitle={folder.title}

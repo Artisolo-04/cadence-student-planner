@@ -9,6 +9,7 @@ import Button from "../../components/ui/Button";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import FolderExplorerModal from "./folderExplorer/FolderExplorerModal";
+import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
 
 const CONTENT_VIEWS = [
   { id: "university", label: "University Tracks", Icon: Landmark },
@@ -239,11 +240,11 @@ export default function VaultPage() {
         </div>
       )}
 
-      <section className="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
+      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full overflow-y-auto rounded-xl p-0 pr-0 scrollbar-cadence sm:p-0 sm:pr-2"
+          className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl p-0 scrollbar-hidden sm:p-0"
         >
           {loading ? (
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
@@ -313,6 +314,8 @@ export default function VaultPage() {
             </div>
           )}
         </div>
+
+        <CustomScrollbar scrollRef={scrollRef} />
 
         <div
           aria-hidden="true"

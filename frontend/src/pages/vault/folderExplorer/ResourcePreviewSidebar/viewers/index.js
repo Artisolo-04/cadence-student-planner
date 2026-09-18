@@ -17,6 +17,8 @@ export function getViewerForKind(meta) {
     case "doc":
       if (["docx", "doc"].includes(meta.ext)) return DocxViewer;
       return ["txt", "md"].includes(meta.ext) ? TextViewer : UnsupportedViewer;
+    case "txt":
+      return TextViewer;
     case "sheet":
       return meta.ext === "csv" ? TextViewer : UnsupportedViewer;
     default:
