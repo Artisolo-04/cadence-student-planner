@@ -99,7 +99,7 @@ export default function VaultFolderCard({
         }}
         className="cursor-pointer overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
       >
-        <div className="flex w-full flex-nowrap items-center justify-between gap-3 px-4 py-3">
+        <div className="flex w-full flex-nowrap items-center justify-between gap-3 px-2 py-2 md:px-4 md:py-3">
           <div className="flex min-w-0 flex-1 items-center gap-2.5">
             <Folder size={15} style={{ color: accent }} className="shrink-0" />
             <span className="min-w-0 w-full truncate text-sm font-medium text-[var(--color-text)]">
@@ -107,11 +107,13 @@ export default function VaultFolderCard({
             </span>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-            {breakdown.map(({ label, count }) => (
-              <Chip key={label}>
-                {count} {label}
-              </Chip>
-            ))}
+            <div className="hidden items-center gap-1.5 md:flex">
+              {breakdown.map(({ label, count }) => (
+                <Chip key={label}>
+                  {count} {label}
+                </Chip>
+              ))}
+            </div>
             <CountBadge count={itemCount} accent={accent} />
             {deletable && (
               <button

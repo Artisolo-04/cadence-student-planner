@@ -244,7 +244,7 @@ export default function VaultPage() {
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl p-0 scrollbar-hidden sm:p-0"
+          className="h-full min-w-0 flex-1 overflow-y-auto rounded-lg p-0 scrollbar-hidden sm:p-0"
         >
           {loading ? (
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
