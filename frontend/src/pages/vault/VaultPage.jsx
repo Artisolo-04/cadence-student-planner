@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FolderOpen, FolderPlus, Landmark, LayoutGrid, List } from "lucide-react";
 import api from "../../lib/api";
 import { useVaultData } from "./useVaultData";
@@ -10,6 +10,8 @@ import SegmentedControl from "../../components/ui/SegmentedControl";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import FolderExplorerModal from "./folderExplorer/FolderExplorerModal";
 import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
+import VaultFilterBar from "./VaultFilterBar";
+import { DEFAULT_VAULT_FILTERS, applyVaultFilters, isFilterActive } from "./vaultFilters";
 
 const CONTENT_VIEWS = [
   { id: "university", label: "University Tracks", Icon: Landmark },
@@ -40,6 +42,7 @@ export default function VaultPage() {
   const [allSubjects, setAllSubjects] = useState([]);
   const [contentView, setContentView] = useState("university");
   const [layoutMode, setLayoutMode] = useState("grid");
+  const [filters, setFilters] = useState(DEFAULT_VAULT_FILTERS);
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
@@ -124,7 +127,7 @@ export default function VaultPage() {
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", updateScrollFades);
     };
-  }, [bySubject, byFolder, loading, contentView, layoutMode]);
+  }, [bySubject, byFolder, filters, loading, contentView, layoutMode]);
 
   useEffect(() => {
     setOpenFolderKey(null);
@@ -132,6 +135,8 @@ export default function VaultPage() {
 
   const isUniversity = contentView === "university";
   const activeGroups = isUniversity ? bySubject : byFolder;
+  const visibleGroups = useMemo(() => applyVaultFilters(activeGroups, filters), [activeGroups, filters]);
+  const isFiltering = isFilterActive(filters);
   const activeAccent = "var(--color-primary)";
   const emptyMessage = isUniversity
     ? "No subject-linked resources yet. Click \"New workspace\" to start one."
@@ -191,7 +196,7 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
+    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
@@ -234,6 +239,8 @@ export default function VaultPage() {
         </div>
       </header>
 
+      <VaultFilterBar value={filters} onChange={setFilters} />
+
       {error && (
         <div className="shrink-0 rounded-md border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
           {error}
@@ -250,11 +257,11 @@ export default function VaultPage() {
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
           ) : (
             <div className="flex flex-col gap-4">
-              {activeGroups.length === 0 ? (
-                <p className="text-sm text-[var(--color-text-muted)]">{emptyMessage}</p>
+              {visibleGroups.length === 0 ? (
+                <p className="text-sm text-[var(--color-text-muted)]">{isFiltering ? "No workspaces match your search or filters." : emptyMessage}</p>
               ) : layoutMode === "grid" ? (
                 <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {activeGroups.map((group) => (
+                  {visibleGroups.map((group) => (
                     <VaultFolderCard
                       key={isUniversity ? group.subjectId : group.folderName}
                       title={isUniversity ? group.subjectName : group.folderName}
@@ -283,7 +290,7 @@ export default function VaultPage() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {activeGroups.map((group) => (
+                  {visibleGroups.map((group) => (
                     <VaultFolderCard
                       key={isUniversity ? group.subjectId : group.folderName}
                       title={isUniversity ? group.subjectName : group.folderName}
