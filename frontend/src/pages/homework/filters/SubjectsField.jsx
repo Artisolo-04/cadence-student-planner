@@ -128,7 +128,7 @@ export default function SubjectsField({ subjects, selectedIds, onToggle }) {
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-left text-sm text-[var(--color-text)] transition-shadow duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+        className="flex w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-input-x py-input-y text-left text-sm text-[var(--color-text)] transition-shadow duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
       >
         <span className={selectedNames.length ? "" : "text-[var(--color-text-muted)]"}>
           {summary}

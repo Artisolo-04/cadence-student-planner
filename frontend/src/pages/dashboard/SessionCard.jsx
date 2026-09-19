@@ -46,7 +46,7 @@ export default function SessionCard({ session, isCurrent }) {
 
       {isCurrent && (
         <span
-          className="absolute right-3 top-1/2 inline-flex shrink-0 -translate-y-1/2 items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+          className="absolute right-3 top-1/2 inline-flex shrink-0 -translate-y-1/2 items-center rounded-md border px-chip-sm-x py-chip-sm-y text-[9px] font-bold uppercase tracking-wide"
           style={{
             borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
             backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,

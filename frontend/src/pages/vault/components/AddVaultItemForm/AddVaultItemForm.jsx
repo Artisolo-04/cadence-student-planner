@@ -124,7 +124,7 @@ export default function AddVaultItemForm({
               />
               {isLinkMode && (
                 <span
-                  className="pointer-events-none absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide"
+                  className="pointer-events-none absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-md border px-chip-sm-x py-chip-sm-y text-[10px] font-semibold tracking-wide"
                   style={{
                     borderColor: `color-mix(in srgb, var(${linkBrand?.accentVar || "--color-primary"}) 45%, transparent)`,
                     color: `var(${linkBrand?.accentVar || "--color-primary"})`,

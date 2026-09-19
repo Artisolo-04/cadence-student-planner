@@ -62,7 +62,7 @@ export default function FileCard({ item, folderTitle, onRequestDelete, onPreview
           variant="secondary"
           onClick={handlePreview}
           disabled={!item.url_path}
-          className="flex-1 gap-1.5 px-3 py-2 text-xs"
+          className="flex-1 gap-1.5 px-btn-sm-x py-btn-sm-y text-xs"
         >
           <ExternalLink size={13} />
           Open

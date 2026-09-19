@@ -216,3 +216,84 @@
 .animate-cadence-flash {
   animation: cadence-flash-ring 320ms ease-out;
 }
+
+
+:root {
+  --spacing-page-x-raw: 1rem;
+  --spacing-page-y-raw: 1.5rem;
+  --spacing-card-p: 1rem;
+  --spacing-card-p-sm: 0.75rem;
+  --spacing-grid-gap: 1rem;
+  --spacing-stack-gap: 0.5rem;
+  --spacing-section-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --spacing-page-x-raw: 1.5rem;
+    --spacing-card-p: 1.25rem;
+    --spacing-grid-gap: 1.25rem;
+  }
+}
+
+@theme inline {
+  --spacing-page-x: var(--spacing-page-x-raw);
+  --spacing-page-y: var(--spacing-page-y-raw);
+  --spacing-card: var(--spacing-card-p);
+  --spacing-card-sm: var(--spacing-card-p-sm);
+  --spacing-grid: var(--spacing-grid-gap);
+  --spacing-stack: var(--spacing-stack-gap);
+  --spacing-section: var(--spacing-section-gap);
+}
+
+:root {
+  --sp-btn-x: 1rem;
+  --sp-btn-y: 0.5rem;
+  --sp-input-x: 0.75rem;
+  --sp-input-y: 0.5rem;
+  --sp-modal-x: 1.25rem;
+  --sp-modal-y: 1rem;
+  --sp-field-gap: 1rem;
+  --sp-label-gap: 0.375rem;
+  --sp-inline-gap: 0.5rem;
+  --sp-chip-x: 0.5rem;
+  --sp-chip-y: 0.25rem;
+  --sp-row-x: 0.875rem;
+  --sp-row-y: 0.75rem;
+}
+
+@theme inline {
+  --spacing-btn-x: var(--sp-btn-x);
+  --spacing-btn-y: var(--sp-btn-y);
+  --spacing-input-x: var(--sp-input-x);
+  --spacing-input-y: var(--sp-input-y);
+  --spacing-modal-x: var(--sp-modal-x);
+  --spacing-modal-y: var(--sp-modal-y);
+  --spacing-field: var(--sp-field-gap);
+  --spacing-label: var(--sp-label-gap);
+  --spacing-inline: var(--sp-inline-gap);
+  --spacing-chip-x: var(--sp-chip-x);
+  --spacing-chip-y: var(--sp-chip-y);
+  --spacing-row-x: var(--sp-row-x);
+  --spacing-row-y: var(--sp-row-y);
+}
+
+:root {
+  --sp-chip-sm-x: 0.375rem;
+  --sp-chip-sm-y: 0.125rem;
+}
+
+@theme inline {
+  --spacing-chip-sm-x: var(--sp-chip-sm-x);
+  --spacing-chip-sm-y: var(--sp-chip-sm-y);
+}
+
+:root {
+  --sp-btn-sm-x: 0.75rem;
+  --sp-btn-sm-y: 0.5rem;
+}
+
+@theme inline {
+  --spacing-btn-sm-x: var(--sp-btn-sm-x);
+  --spacing-btn-sm-y: var(--sp-btn-sm-y);
+}

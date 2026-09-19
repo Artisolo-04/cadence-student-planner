@@ -59,7 +59,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
+    <div className="flex h-full w-full min-h-0 flex-col gap-grid">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your subjects</h2>
@@ -80,7 +80,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
           onScroll={updateScrollFades}
           className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl p-0 scrollbar-hidden sm:p-0"
         >
-          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-grid sm:grid-cols-2 lg:grid-cols-3">
             {subjects.map((subject) => {
               const hoursLabel = formatWeeklyHours(subject.weekly_hours);
               return (
@@ -100,7 +100,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     backgroundImage:
                       "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
                   }}
-                  className="group relative flex h-auto cursor-pointer flex-col justify-between gap-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-2 md:p-4 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                  className="group relative flex h-auto cursor-pointer flex-col justify-between gap-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-card backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                 >
                   <div
                     aria-hidden="true"

@@ -51,7 +51,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
+    <div className="flex h-full w-full min-h-0 flex-col gap-grid">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your timetables</h2>
@@ -72,7 +72,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
           onScroll={updateScrollFades}
           className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl p-0 scrollbar-hidden sm:p-0"
         >
-          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-grid sm:grid-cols-2 lg:grid-cols-3">
             {timetables.map((timetable) => {
               const isActive = String(timetable.id) === String(activeId);
 
@@ -84,7 +84,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                       ? "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, color-mix(in srgb, var(--color-primary) 14%, transparent) 55%, transparent 100%)"
                       : "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
                   }}
-                  className={`group relative flex h-auto flex-col justify-between gap-4 overflow-hidden rounded-xl border bg-white/[0.03] p-2 md:p-4 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
+                  className={`group relative flex h-auto flex-col justify-between gap-4 overflow-hidden rounded-xl border bg-white/[0.03] p-card backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
                     isActive ? "border-[var(--color-primary)]/50" : "border-white/10"
                   }`}
                 >

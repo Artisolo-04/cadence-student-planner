@@ -196,7 +196,7 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-4">
+    <div className="flex h-full w-full min-h-0 flex-col gap-grid">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
@@ -260,7 +260,7 @@ export default function VaultPage() {
               {visibleGroups.length === 0 ? (
                 <p className="text-sm text-[var(--color-text-muted)]">{isFiltering ? "No workspaces match your search or filters." : emptyMessage}</p>
               ) : layoutMode === "grid" ? (
-                <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-grid sm:grid-cols-2 lg:grid-cols-3">
                   {visibleGroups.map((group) => (
                     <VaultFolderCard
                       key={isUniversity ? group.subjectId : group.folderName}

@@ -27,7 +27,7 @@ export default function DueSoonCard({ homework, loading }) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative overflow-hidden rounded-2xl border border-white/10 p-card backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",
@@ -92,7 +92,7 @@ export default function DueSoonCard({ homework, loading }) {
                   </div>
 
                   <span
-                    className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold ${
+                    className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-chip-x py-chip-y text-[11px] font-bold ${
                       overdue
                         ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
                         : isToday

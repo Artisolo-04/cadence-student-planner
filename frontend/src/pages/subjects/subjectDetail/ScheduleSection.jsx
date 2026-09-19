@@ -58,18 +58,18 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
 
                             <div className="flex flex-wrap items-center justify-end gap-1.5">
                               {duration && (
-                                <span className="shrink-0 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)]">
+                                <span className="shrink-0 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] px-chip-sm-x py-chip-sm-y text-[10px] font-medium text-[var(--color-text-muted)]">
                                   {duration}
                                 </span>
                               )}
 
-                              <span className="flex shrink-0 items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-text)] backdrop-blur-md">
+                              <span className="flex shrink-0 items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-chip-sm-x py-chip-sm-y text-[10px] font-medium text-[var(--color-text)] backdrop-blur-md">
                                 <Users size={10} />
                                 {groupLabel}
                               </span>
 
                               {entry.room && (
-                                <span className="flex max-w-[100px] items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--color-text)] backdrop-blur-md">
+                                <span className="flex max-w-[100px] items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-chip-sm-x py-chip-sm-y text-[10px] font-medium text-[var(--color-text)] backdrop-blur-md">
                                   <MapPin size={10} className="shrink-0" />
                                   <span className="truncate">{entry.room}</span>
                                 </span>

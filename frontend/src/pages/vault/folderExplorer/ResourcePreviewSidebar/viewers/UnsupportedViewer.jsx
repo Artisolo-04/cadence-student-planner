@@ -18,7 +18,7 @@ export default function UnsupportedViewer({ item, meta }) {
         variant="secondary"
         onClick={showDownload ? () => downloadFile(item) : () => item.url_path && window.open(resolveAssetUrl(item.url_path), "_blank", "noopener,noreferrer")}
         disabled={!item.url_path}
-        className="gap-1.5 px-3 py-2 text-xs"
+        className="gap-1.5 px-btn-sm-x py-btn-sm-y text-xs"
       >
         {showDownload ? <Download size={13} /> : <ExternalLink size={13} />}
         {showDownload ? "Download" : "Open in new tab"}

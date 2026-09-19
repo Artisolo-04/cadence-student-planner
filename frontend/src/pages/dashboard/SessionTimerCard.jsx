@@ -59,7 +59,7 @@ export default function SessionTimerCard({ sessions = [], currentKey }) {
 
   return (
     <div
-      className="relative h-full w-full overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative h-full w-full overflow-hidden rounded-2xl border border-white/10 p-card backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",

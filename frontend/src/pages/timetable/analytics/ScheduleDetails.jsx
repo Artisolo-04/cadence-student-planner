@@ -35,7 +35,7 @@ export default function ScheduleDetails({ entries = [], slots = [] }) {
           </div>
 
           <span
-            className="shrink-0 rounded-md border border-[var(--color-border)] px-2 py-1 text-[11px] text-[var(--color-text-muted)]"
+            className="shrink-0 rounded-md border border-[var(--color-border)] px-chip-x py-chip-y text-[11px] text-[var(--color-text-muted)]"
             title={entry.room || "No room assigned"}
           >
             {entry.room || "No room"}

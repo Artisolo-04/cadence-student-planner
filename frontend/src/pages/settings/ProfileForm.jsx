@@ -72,7 +72,7 @@ export default function ProfileForm() {
   }
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
       <div className="flex items-center gap-4 mb-6">
         <button
           type="button"

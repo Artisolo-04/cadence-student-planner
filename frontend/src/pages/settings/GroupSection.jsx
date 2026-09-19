@@ -22,7 +22,7 @@ export default function GroupSection() {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
         <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
         <p className="text-sm text-[var(--color-text-muted)]">Loading your workspaces...</p>
       </div>
@@ -31,7 +31,7 @@ export default function GroupSection() {
 
   if (workspaces.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
         <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
         <p className="text-sm text-[var(--color-text-muted)]">
           You don't have any timetables yet. Create one first, then come back to set your group.
@@ -52,7 +52,7 @@ export default function GroupSection() {
   }));
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
       <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
       <p className="text-sm text-[var(--color-text-muted)] mb-4">
         Pick which group's sessions show up for you in each workspace.
