@@ -80,7 +80,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
           onScroll={updateScrollFades}
           className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl p-0 scrollbar-hidden sm:p-0"
         >
-          <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-grid sm:grid-cols-2 lg:grid-cols-3">
             {subjects.map((subject) => {
               const hoursLabel = formatWeeklyHours(subject.weekly_hours);
               return (
