@@ -216,3 +216,32 @@
 .animate-cadence-flash {
   animation: cadence-flash-ring 320ms ease-out;
 }
+
+
+:root {
+  --spacing-page-x-raw: 1rem;
+  --spacing-page-y-raw: 1.5rem;
+  --spacing-card-p: 1rem;
+  --spacing-card-p-sm: 0.75rem;
+  --spacing-grid-gap: 1rem;
+  --spacing-stack-gap: 0.5rem;
+  --spacing-section-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --spacing-page-x-raw: 1.5rem;
+    --spacing-card-p: 1.25rem;
+    --spacing-grid-gap: 1.25rem;
+  }
+}
+
+@theme inline {
+  --spacing-page-x: var(--spacing-page-x-raw);
+  --spacing-page-y: var(--spacing-page-y-raw);
+  --spacing-card: var(--spacing-card-p);
+  --spacing-card-sm: var(--spacing-card-p-sm);
+  --spacing-grid: var(--spacing-grid-gap);
+  --spacing-stack: var(--spacing-stack-gap);
+  --spacing-section: var(--spacing-section-gap);
+}
