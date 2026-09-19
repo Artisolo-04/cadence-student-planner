@@ -9,7 +9,7 @@ export default function HomeworkTable({ items, onEdit, onDelete, onToggleDone, o
 
   return (
     <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 backdrop-blur-xl">
-      <div className="relative min-h-0 flex flex-1 p-2">
+      <div className="relative min-h-0 flex flex-1 p-0 sm:p-2">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
@@ -40,14 +40,14 @@ export default function HomeworkTable({ items, onEdit, onDelete, onToggleDone, o
 
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
-            showTopFade ? "opacity-70" : "opacity-0"
+          className={`pointer-events-none absolute inset-x-0 top-0 z-10 h-12 sm:h-16 bg-gradient-to-b from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+            showTopFade ? "opacity-100 sm:opacity-70" : "opacity-0"
           }`}
         />
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
-            showBottomFade ? "opacity-70" : "opacity-0"
+          className={`pointer-events-none absolute inset-x-0 bottom-0 z-10 h-12 sm:h-16 bg-gradient-to-t from-[var(--color-surface)] to-transparent transition-opacity duration-200 ${
+            showBottomFade ? "opacity-100 sm:opacity-70" : "opacity-0"
           }`}
         />
       </div>

@@ -23,15 +23,6 @@ export default function ListHeader({ view, onViewChange, onAddNew }) {
           options={VIEWS}
           value={view}
           onChange={onViewChange}
-          variant="icon"
-          size="md"
-          className="sm:hidden"
-        />
-        <SegmentedControl
-          ariaLabel="View"
-          options={VIEWS}
-          value={view}
-          onChange={onViewChange}
           variant="labeled"
           size="md"
           className="hidden sm:flex"
