@@ -9,7 +9,7 @@ const TIPS = [
 
 export function AppearanceCard() {
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
       <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">Appearance</h2>
       <p className="text-sm text-[var(--color-text-muted)] mb-4">
         Switch between light and dark mode.
@@ -21,12 +21,12 @@ export function AppearanceCard() {
 
 export function TipsCard() {
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
       <div className="flex items-center gap-2 mb-3">
         <Info size={16} className="text-[var(--color-primary)]" />
         <h2 className="text-base font-semibold text-[var(--color-text)]">Tips</h2>
       </div>
-      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-grid">
         {TIPS.map((tip, i) => (
           <li key={i} className="text-sm text-[var(--color-text-muted)] leading-relaxed">
             {tip}

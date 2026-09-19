@@ -20,8 +20,8 @@ export default function DashboardPage() {
   const groupTag = workspace?.my_group ?? workspace?.myGroup ?? null;
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:h-full lg:min-h-0 lg:grid-cols-[440px_minmax(0,1fr)_320px] lg:overflow-hidden">
-      <aside className="flex flex-col gap-4 lg:min-h-0 lg:overflow-hidden">
+    <div className="grid grid-cols-1 gap-grid lg:h-full lg:min-h-0 lg:grid-cols-[440px_minmax(0,1fr)_320px] lg:overflow-hidden">
+      <aside className="flex flex-col gap-grid lg:min-h-0 lg:overflow-hidden">
         <div className="shrink-0">
           <StudentCard user={user} profile={profile} groupTag={groupTag} />
         </div>

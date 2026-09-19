@@ -59,7 +59,7 @@ export default function StudentCard({ user, profile, groupTag }) {
         }}
       />
 
-      <div className="relative z-10 flex w-full flex-col p-5">
+      <div className="relative z-10 flex w-full flex-col p-card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
             Cadence
