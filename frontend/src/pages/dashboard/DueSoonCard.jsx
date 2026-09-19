@@ -92,7 +92,7 @@ export default function DueSoonCard({ homework, loading }) {
                   </div>
 
                   <span
-                    className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold ${
+                    className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-chip-x py-chip-y text-[11px] font-bold ${
                       overdue
                         ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
                         : isToday

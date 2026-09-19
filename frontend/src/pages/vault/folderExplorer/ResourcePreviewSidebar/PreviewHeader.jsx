@@ -24,7 +24,7 @@ export default function PreviewHeader({ item, meta, onClose }) {
           </h3>
 
           <span
-            className="w-fit shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide"
+            className="w-fit shrink-0 rounded-md border px-chip-sm-x py-chip-sm-y text-[10px] font-semibold tracking-wide"
             style={{
               borderColor: `color-mix(in srgb, ${accent} 45%, transparent)`,
               color: accent,
