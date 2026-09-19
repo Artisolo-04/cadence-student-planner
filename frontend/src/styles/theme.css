@@ -245,3 +245,35 @@
   --spacing-stack: var(--spacing-stack-gap);
   --spacing-section: var(--spacing-section-gap);
 }
+
+:root {
+  --sp-btn-x: 1rem;
+  --sp-btn-y: 0.5rem;
+  --sp-input-x: 0.75rem;
+  --sp-input-y: 0.5rem;
+  --sp-modal-x: 1.25rem;
+  --sp-modal-y: 1rem;
+  --sp-field-gap: 1rem;
+  --sp-label-gap: 0.375rem;
+  --sp-inline-gap: 0.5rem;
+  --sp-chip-x: 0.5rem;
+  --sp-chip-y: 0.25rem;
+  --sp-row-x: 0.875rem;
+  --sp-row-y: 0.75rem;
+}
+
+@theme inline {
+  --spacing-btn-x: var(--sp-btn-x);
+  --spacing-btn-y: var(--sp-btn-y);
+  --spacing-input-x: var(--sp-input-x);
+  --spacing-input-y: var(--sp-input-y);
+  --spacing-modal-x: var(--sp-modal-x);
+  --spacing-modal-y: var(--sp-modal-y);
+  --spacing-field: var(--sp-field-gap);
+  --spacing-label: var(--sp-label-gap);
+  --spacing-inline: var(--sp-inline-gap);
+  --spacing-chip-x: var(--sp-chip-x);
+  --spacing-chip-y: var(--sp-chip-y);
+  --spacing-row-x: var(--sp-row-x);
+  --spacing-row-y: var(--sp-row-y);
+}
