@@ -287,3 +287,13 @@
   --spacing-chip-sm-x: var(--sp-chip-sm-x);
   --spacing-chip-sm-y: var(--sp-chip-sm-y);
 }
+
+:root {
+  --sp-btn-sm-x: 0.75rem;
+  --sp-btn-sm-y: 0.5rem;
+}
+
+@theme inline {
+  --spacing-btn-sm-x: var(--sp-btn-sm-x);
+  --spacing-btn-sm-y: var(--sp-btn-sm-y);
+}

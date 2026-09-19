@@ -9,7 +9,7 @@ export default function Textarea({ label, id, error, className = "", ...rest }) 
       <textarea
         id={id}
         rows={3}
-        className={`rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]
+        className={`rounded-lg border bg-[var(--color-surface)] px-input-x py-input-y text-sm text-[var(--color-text)]
           placeholder:text-[var(--color-text-muted)] resize-none
           border-[var(--color-border)] transition-shadow duration-150
           focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] focus-visible:border-[var(--color-ring)]

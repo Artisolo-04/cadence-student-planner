@@ -129,7 +129,7 @@ export default function ExplorerHeader({
           <Button
             variant="secondary"
             onClick={onAddResource}
-            className="gap-1.5 px-3 py-2 text-xs"
+            className="gap-1.5 px-btn-sm-x py-btn-sm-y text-xs"
           >
             <Plus size={14} />
             Add resource
