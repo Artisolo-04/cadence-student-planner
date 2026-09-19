@@ -13,7 +13,7 @@ export default function ListHeader({ view, onViewChange, onAddNew }) {
     <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
       <div>
         <h2 className="text-lg font-semibold text-[var(--color-text)]">Your homework</h2>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+        <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
           Track what's due and mark it off as you go.
         </p>
       </div>

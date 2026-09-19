@@ -55,7 +55,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your timetables</h2>
-          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
             Pick a workspace to open, or create a new one.
           </p>
         </div>
