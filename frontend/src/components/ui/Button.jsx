@@ -8,7 +8,7 @@ const variants = {
 };
 
 const sizes = {
-  md: "gap-2 rounded-lg px-4 py-2 text-sm",
+  md: "gap-inline rounded-lg px-btn-x py-btn-y text-sm",
   icon: "h-9 w-9 rounded-lg p-0",
 };
 

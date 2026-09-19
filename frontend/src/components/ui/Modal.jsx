@@ -49,7 +49,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           }
           ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
       >
-        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
+        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-modal-x py-modal-y">
           <h2 title={title} className="min-w-0 flex-1 truncate text-base font-semibold">
             {title}
           </h2>
@@ -63,7 +63,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           </button>
         </div>
         <div
-            className={`px-5 py-4 ${
+            className={`px-modal-x py-modal-y ${
               mobileFullscreen
                 ? "flex flex-1 min-h-0 flex-col overflow-hidden sm:max-h-[70vh]"
                 : "max-h-[70vh] overflow-hidden"
@@ -72,7 +72,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           {children}
         </div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-5 py-4">
+          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-modal-x py-modal-y">
             {footer}
           </div>
         )}
