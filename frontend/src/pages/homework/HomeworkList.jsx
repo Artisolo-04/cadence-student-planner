@@ -40,7 +40,7 @@ export default function HomeworkList({
     setSelectedItem(item);
   }
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-4">
+    <div className="flex h-full w-full min-h-0 flex-col gap-grid">
       <ListHeader view={view} onViewChange={setView} onAddNew={onAddNew} />
       <FilterBar
         filters={filters}

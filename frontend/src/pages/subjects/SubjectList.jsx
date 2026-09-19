@@ -59,7 +59,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-6xl min-h-0 flex-col gap-5">
+    <div className="flex h-full w-full min-h-0 flex-col gap-grid">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your subjects</h2>
