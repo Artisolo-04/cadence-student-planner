@@ -163,7 +163,7 @@ export default function VaultFolderCard({
         className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[color-mix(in_srgb,var(--color-text)_4%,transparent)] to-transparent"
       />
 
-      <div className="relative z-10 flex flex-col gap-4 p-2 md:p-4">
+      <div className="relative z-10 flex flex-col gap-4 p-card">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <span
