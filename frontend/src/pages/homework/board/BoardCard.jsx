@@ -70,7 +70,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
         pointerEvents: isLeaving ? "none" : "auto",
         willChange: "transform, filter, opacity",
       }}
-      className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
+      className="group relative flex flex-col gap-comfy overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
     >
       <div
         aria-hidden="true"
@@ -87,11 +87,11 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
         />
       )}
 
-      <div className="relative z-10 flex items-start justify-between gap-2">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+      <div className="relative z-10 flex items-start justify-between gap-inline">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-snug">
           {item.subject_name ? (
             <span
-              className="inline-flex h-[26px] max-w-[150px] items-center gap-1.5 rounded-lg border px-2 text-[11px] font-medium"
+              className="inline-flex h-[26px] max-w-[150px] items-center gap-snug rounded-lg border px-base text-[11px] font-medium"
               style={{
                 borderColor: `color-mix(in srgb, ${accentColor} 45%, transparent)`,
                 backgroundColor: `color-mix(in srgb, ${accentColor} 20%, transparent)`,
@@ -106,7 +106,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
               <span className="truncate">{item.subject_name}</span>
             </span>
           ) : (
-            <span className="inline-flex h-[26px] w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-2 text-[11px] font-medium text-[var(--color-text-muted)]/70">
+            <span className="inline-flex h-[26px] w-fit items-center gap-snug whitespace-nowrap rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-base text-[11px] font-medium text-[var(--color-text-muted)]/70">
               <span
                 className="h-1.5 w-1.5 shrink-0 rounded-full border border-dashed border-current opacity-60"
                 aria-hidden="true"
@@ -115,14 +115,14 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
             </span>
           )}
           <span
-            className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium"
+            className="inline-flex h-[26px] w-fit items-center gap-tight whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-base text-[11px] font-medium"
             style={{ color: priority.color }}
           >
             <Flag size={11} />
             {priority.label}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-snug">
           <Button
           variant="ghost"
           size="icon"
@@ -158,15 +158,15 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
         <p className="relative z-10 text-xs text-[var(--color-text-muted)] line-clamp-2">{item.notes}</p>
       )}
 
-      <div className="relative z-10 flex items-center justify-between gap-2">
+      <div className="relative z-10 flex items-center justify-between gap-inline">
         <span
-          className={`inline-flex h-[26px] w-fit items-center whitespace-nowrap rounded-lg border px-2 text-[11px] font-medium ${
+          className={`inline-flex h-[26px] w-fit items-center whitespace-nowrap rounded-lg border px-base text-[11px] font-medium ${
             overdue
               ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
               : "border-white/10 bg-white/[0.03] text-[var(--color-text-muted)]"
           }`}
         >
-          {overdue && <AlertTriangle size={11} className="mr-1" />}
+          {overdue && <AlertTriangle size={11} className="mr-tight" />}
           {formatDueDate(item.due_date)}
         </span>
         <div

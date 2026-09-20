@@ -60,7 +60,7 @@ export default function HomeworkList({
           />
         )}
         {view === "board" && (
-          <div className="h-full min-h-0 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+          <div className="h-full min-h-0 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-comfy">
             <HomeworkBoard
               homework={filtered}
               onEdit={onEdit}

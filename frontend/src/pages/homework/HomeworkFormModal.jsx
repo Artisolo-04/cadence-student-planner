@@ -97,7 +97,7 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
           id="homework-form"
           ref={scrollRef}
           onSubmit={handleSubmit}
-          className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-hidden"
+          className="flex min-w-0 flex-1 flex-col gap-roomy overflow-y-auto scrollbar-hidden"
         >
           <Input
             id="homework-title"
@@ -124,7 +124,7 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
             onChange={(e) => setDueDate(e.target.value)}
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-roomy">
             <Dropdown
               id="homework-priority"
               label="Priority"

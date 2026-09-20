@@ -17,7 +17,7 @@ export default function DeleteHomeworkModal({ item, deleting, error, onCancel, o
             type="button"
             onClick={onConfirm}
             disabled={deleting}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-danger)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-inline rounded-lg bg-[var(--color-danger)] px-roomy py-base text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Trash2 size={16} />
             {deleting ? "Deleting..." : "Delete homework"}
@@ -25,7 +25,7 @@ export default function DeleteHomeworkModal({ item, deleting, error, onCancel, o
         </>
       }
     >
-      <div className="flex gap-3">
+      <div className="flex gap-comfy">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
           <AlertTriangle size={18} />
         </span>
@@ -33,7 +33,7 @@ export default function DeleteHomeworkModal({ item, deleting, error, onCancel, o
           <p className="text-sm leading-6 text-[var(--color-text-muted)]">
             Delete <strong className="font-semibold text-[var(--color-text)]">{item?.title}</strong>?
           </p>
-          {error && <p className="mt-3 text-sm text-[var(--color-danger)]">{error}</p>}
+          {error && <p className="mt-comfy text-sm text-[var(--color-danger)]">{error}</p>}
         </div>
       </div>
     </Modal>

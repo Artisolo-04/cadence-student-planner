@@ -8,14 +8,14 @@ export default function HomeworkTable({ items, onEdit, onDelete, onToggleDone, o
   const { scrollRef, showTopFade, showBottomFade, updateScrollFades } = useScrollFade(items);
 
   return (
-    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 backdrop-blur-xl">
-      <div className="relative min-h-0 flex flex-1 p-0 sm:p-2">
+    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-base backdrop-blur-xl">
+      <div className="relative min-h-0 flex flex-1 p-0 sm:p-base">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
           className="scrollbar-hidden h-full overflow-y-scroll rounded-xl min-w-0 flex-1"
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-inline">
             {items.map((item) => (
               <HomeworkRow
                 key={item.id}
@@ -29,7 +29,7 @@ export default function HomeworkTable({ items, onEdit, onDelete, onToggleDone, o
             ))}
 
             {items.length === 0 && (
-              <p className="px-2.5 py-6 text-center text-sm text-[var(--color-text-muted)]">
+              <p className="px-cozy py-airy text-center text-sm text-[var(--color-text-muted)]">
                 No homework matches your filters.
               </p>
             )}

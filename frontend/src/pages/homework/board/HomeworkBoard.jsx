@@ -12,7 +12,7 @@ export default function HomeworkBoard({ homework, onEdit, onDelete, onStatusChan
   }));
 
   return (
-    <motion.div layoutScroll className="flex h-full min-h-0 gap-3 overflow-x-auto scrollbar-cadence pb-1">
+    <motion.div layoutScroll className="flex h-full min-h-0 gap-comfy overflow-x-auto scrollbar-cadence pb-tight">
       {columns.map((col) => (
         <BoardColumn key={col.key} column={col} items={col.items} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
       ))}

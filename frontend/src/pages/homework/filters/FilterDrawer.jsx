@@ -45,21 +45,21 @@ export default function FilterDrawer({
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
           <div className="relative flex h-full flex-col overflow-hidden rounded-l-2xl border-l border-white/10 bg-[var(--color-surface)] shadow-2xl shadow-black/50">
-          <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-white/10 px-5 pb-4 pt-5">
-            <div className="flex items-center gap-2">
+          <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-white/10 px-plush pb-roomy pt-plush">
+            <div className="flex items-center gap-inline">
               <Sparkles size={14} className="text-[var(--color-primary)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
                 Refine your homework
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-inline">
               <button
                 type="button"
                 onClick={reset}
                 tabIndex={activeCount > 0 ? 0 : -1}
                 aria-hidden={activeCount === 0}
-                className={`whitespace-nowrap rounded-lg border border-[var(--color-primary)] px-2.5 py-1 text-xs font-medium text-[var(--color-primary)] transition-opacity duration-200 ease-out hover:bg-[var(--color-primary)]/10 ${
+                className={`whitespace-nowrap rounded-lg border border-[var(--color-primary)] px-cozy py-tight text-xs font-medium text-[var(--color-primary)] transition-opacity duration-200 ease-out hover:bg-[var(--color-primary)]/10 ${
                   activeCount > 0 ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
               >
@@ -69,16 +69,16 @@ export default function FilterDrawer({
                 type="button"
                 onClick={onClose}
                 aria-label="Close filters"
-                className="rounded-md p-1 text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)]"
+                className="rounded-md p-tight text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)]"
               >
                 <X size={14} />
               </button>
             </div>
           </div>
 
-          <div className="relative z-10 flex-1 overflow-y-auto px-5 py-5 ">
+          <div className="relative z-10 flex-1 overflow-y-auto px-plush py-plush ">
             <div className="flex flex-col divide-y divide-white/[0.06] w-full h-full items-center justify-between">
-              <div className="pb-4 w-full">
+              <div className="pb-roomy w-full">
                 <SubjectsField
                   subjects={subjects}
                   selectedIds={filters.subjectIds}
@@ -86,9 +86,9 @@ export default function FilterDrawer({
                 />
               </div>
 
-              <div className="py-4 w-full">
+              <div className="py-roomy w-full">
                 <SectionLabel>Priority</SectionLabel>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-inline">
                   {PRIORITY_OPTIONS.map((p) => (
                     <FilterChip
                       key={p.value}
@@ -101,9 +101,9 @@ export default function FilterDrawer({
                 </div>
               </div>
 
-              <div className="py-4 w-full">
+              <div className="py-roomy w-full">
                 <SectionLabel>Status</SectionLabel>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-inline">
                   {STATUS_OPTIONS_FILTER.map((s) => (
                     <FilterChip
                       key={s.value}
@@ -116,7 +116,7 @@ export default function FilterDrawer({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 pt-4 w-full">
+              <div className="grid grid-cols-1 gap-roomy pt-roomy w-full">
                 <div>
                   <SectionLabel>Due date</SectionLabel>
                   <Dropdown

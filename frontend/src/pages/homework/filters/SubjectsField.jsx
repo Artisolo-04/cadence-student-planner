@@ -121,7 +121,7 @@ export default function SubjectsField({ subjects, selectedIds, onToggle }) {
   }, []);
 
   return (
-    <div className="flex w-full flex-col gap-2">
+    <div className="flex w-full flex-col gap-inline">
       <SectionLabel>Subjects</SectionLabel>
 
       <button
@@ -153,7 +153,7 @@ export default function SubjectsField({ subjects, selectedIds, onToggle }) {
                   : `opacity-0 scale-95 ${coords.openUp ? "translate-y-1" : "-translate-y-1"}`
               }`}
           >
-            <div className="relative shrink-0 border-b border-[var(--color-border)] p-1.5">
+            <div className="relative shrink-0 border-b border-[var(--color-border)] p-snug">
               <Search
                 size={13}
                 className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
@@ -164,25 +164,25 @@ export default function SubjectsField({ subjects, selectedIds, onToggle }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search subjects..."
-                className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)] py-1.5 pl-7 pr-2 text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none"
+                className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)] py-snug pl-ample pr-base text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none"
               />
             </div>
 
-            <div className="relative flex p-1">
+            <div className="relative flex p-tight">
               <div
                 ref={scrollRef}
                 onScroll={updateScrollFades}
                 style={{ maxHeight: listHeight }}
-                className="scrollbar-hidden overflow-y-auto p-1 min-w-0 flex-1"
+                className="scrollbar-hidden overflow-y-auto p-tight min-w-0 flex-1"
               >
                 {filtered.length === 0 ? (
-                  <p className="px-2 py-2 text-xs text-[var(--color-text-muted)]">No subjects found.</p>
+                  <p className="px-base py-base text-xs text-[var(--color-text-muted)]">No subjects found.</p>
                 ) : (
                   filtered.map((s) => (
                     <div
                       key={s.id}
                       style={{ height: ITEM_HEIGHT }}
-                      className="flex items-center rounded-md px-2 hover:bg-[var(--color-surface-alt)]"
+                      className="flex items-center rounded-md px-base hover:bg-[var(--color-surface-alt)]"
                     >
                       <Checkbox
                         id={`filter-subject-${s.id}`}

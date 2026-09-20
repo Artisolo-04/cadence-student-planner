@@ -57,12 +57,12 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
   }, [items, shouldReduceMotion]);
 
   return (
-    <div className="flex h-full min-w-[280px] flex-1 flex-col gap-3 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3" style={{ contain: "paint" }}>
+    <div className="flex h-full min-w-[280px] flex-1 flex-col gap-comfy overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-comfy" style={{ contain: "paint" }}>
       <div className="flex shrink-0 items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
           {column.label}
         </h3>
-        <span className="rounded-md bg-[var(--color-surface-alt)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text-muted)]">
+        <span className="rounded-md bg-[var(--color-surface-alt)] px-base py-hair text-[11px] font-medium text-[var(--color-text-muted)]">
           {items.length}
         </span>
       </div>
@@ -74,7 +74,7 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
           onScroll={updateScrollFades}
           className="h-full overflow-y-auto rounded-xl scrollbar-hidden min-w-0 flex-1"
         >
-          <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-3 pb-2">
+          <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-comfy pb-base">
             <AnimatePresence mode="popLayout">
               {items.length === 0 ? (
                 <motion.p
@@ -82,7 +82,7 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="px-1 py-6 text-center text-xs text-[var(--color-text-muted)]"
+                  className="px-tight py-airy text-center text-xs text-[var(--color-text-muted)]"
                 >
                   Nothing here.
                 </motion.p>

@@ -10,14 +10,14 @@ const VIEWS = [
 
 export default function ListHeader({ view, onViewChange, onAddNew }) {
   return (
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
+    <header className="flex flex-col gap-comfy sm:flex-row sm:items-center sm:justify-between sm:gap-roomy shrink-0">
       <div>
         <h2 className="text-lg font-semibold text-[var(--color-text)]">Your homework</h2>
-        <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
+        <p className="mt-tight hidden text-sm text-[var(--color-text-muted)] sm:block">
           Track what's due and mark it off as you go.
         </p>
       </div>
-      <div className="flex w-full flex-nowrap items-center gap-2 sm:w-auto sm:shrink-0">
+      <div className="flex w-full flex-nowrap items-center gap-inline sm:w-auto sm:shrink-0">
         <SegmentedControl
           ariaLabel="View"
           options={VIEWS}
@@ -27,7 +27,7 @@ export default function ListHeader({ view, onViewChange, onAddNew }) {
           size="md"
           className="hidden sm:flex"
         />
-        <Button type="button" onClick={onAddNew} className="h-9 flex-1 justify-center px-2.5 sm:flex-none sm:px-4">
+        <Button type="button" onClick={onAddNew} className="h-9 flex-1 justify-center px-cozy sm:flex-none sm:px-roomy">
           <Plus size={16} />
           <span className="text-xs sm:text-sm">New homework</span>
         </Button>
