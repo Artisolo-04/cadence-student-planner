@@ -323,3 +323,21 @@
   --spacing-base: var(--sp-base);
   --spacing-roomy: var(--sp-roomy);
 }
+
+:root {
+  --sp-plush: 1.25rem;
+  --sp-airy: 1.5rem;
+  --sp-ample: 1.75rem;
+  --sp-wide: 2rem;
+  --sp-broad: 2.5rem;
+  --sp-vast: 3rem;
+}
+
+@theme inline {
+  --spacing-plush: var(--sp-plush);
+  --spacing-airy: var(--sp-airy);
+  --spacing-ample: var(--sp-ample);
+  --spacing-wide: var(--sp-wide);
+  --spacing-broad: var(--sp-broad);
+  --spacing-vast: var(--sp-vast);
+}
