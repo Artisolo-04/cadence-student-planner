@@ -57,7 +57,7 @@ export default function SubjectFormModal({ open, onClose, subject, onSubmit }) {
         </>
       }
     >
-      <form id="subject-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form id="subject-form" onSubmit={handleSubmit} className="flex flex-col gap-roomy">
         <Input
           id="subject-name"
           label="Subject name"

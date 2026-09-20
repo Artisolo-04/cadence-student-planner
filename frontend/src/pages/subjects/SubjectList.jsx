@@ -60,21 +60,21 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
 
   return (
     <div className="flex h-full w-full min-h-0 flex-col gap-grid">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
+      <header className="flex flex-col gap-comfy sm:flex-row sm:items-center sm:justify-between sm:gap-roomy shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your subjects</h2>
-          <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
+          <p className="mt-tight hidden text-sm text-[var(--color-text-muted)] sm:block">
             Manage the subjects you'll assign into your timetable.
           </p>
         </div>
 
-        <Button type="button" onClick={onAddNew} className="h-9 w-full justify-center px-2.5 shrink-0 sm:w-auto sm:px-4">
+        <Button type="button" onClick={onAddNew} className="h-9 w-full justify-center px-cozy shrink-0 sm:w-auto sm:px-roomy">
           <Plus size={16} />
           <span className="text-xs sm:text-sm">New subject</span>
         </Button>
       </header>
 
-      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
+      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-base sm:p-roomy">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
@@ -100,7 +100,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     backgroundImage:
                       "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
                   }}
-                  className="group relative flex h-auto cursor-pointer flex-col justify-between gap-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-card backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                  className="group relative flex h-auto cursor-pointer flex-col justify-between gap-roomy overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-card backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--subject-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--subject-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                 >
                   <div
                     aria-hidden="true"
@@ -129,14 +129,14 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                       <BookOpen size={16} style={{ color: subject.color }} className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
                     </span>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-tight">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           onEdit(subject);
                         }}
-                        className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                        className="rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                         aria-label={`Edit ${subject.name}`}
                         title="Edit subject"
                       >
@@ -149,7 +149,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                           setError("");
                           setSelectedSubject(subject);
                         }}
-                        className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                        className="rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                         aria-label={`Delete ${subject.name}`}
                         title="Delete subject"
                       >
@@ -158,8 +158,8 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     </div>
                   </div>
 
-                  <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between gap-2">
-                    <div className="flex min-w-0 flex-col gap-2">
+                  <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between gap-inline">
+                    <div className="flex min-w-0 flex-col gap-inline">
                       <span
                         title={subject.name}
                         className="block w-full truncate text-base font-semibold leading-snug text-[var(--color-text)]"
@@ -177,7 +177,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                     </div>
                     {hoursLabel && (
                       <span
-                        className="inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium"
+                        className="inline-flex w-fit items-center gap-snug rounded-md border px-cozy py-tight text-xs font-medium"
                         style={{
                           borderColor: `color-mix(in srgb, ${subject.color} 35%, transparent)`,
                           backgroundColor: `color-mix(in srgb, ${subject.color} 14%, transparent)`,
@@ -230,7 +230,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-danger)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-inline rounded-lg bg-[var(--color-danger)] px-roomy py-base text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={16} />
               {deleting ? "Deleting..." : "Delete subject"}
@@ -238,7 +238,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
           </>
         }
       >
-        <div className="flex gap-3">
+        <div className="flex gap-comfy">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
             <AlertTriangle size={18} />
           </span>
@@ -246,10 +246,10 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
             <p className="text-sm leading-6 text-[var(--color-text-muted)]">
               Delete <strong className="font-semibold text-[var(--color-text)]">{selectedSubject?.name}</strong>?
             </p>
-            <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
+            <p className="mt-tight text-sm leading-6 text-[var(--color-text-muted)]">
               It will be removed from any timetable cells it's assigned to.
             </p>
-            {error && <p className="mt-3 text-sm text-[var(--color-danger)]">{error}</p>}
+            {error && <p className="mt-comfy text-sm text-[var(--color-danger)]">{error}</p>}
           </div>
         </div>
       </Modal>

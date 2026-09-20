@@ -213,7 +213,7 @@ export default function SubjectDetailDrawer({
   if (!mounted) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center md:p-8">
+    <div className="absolute inset-0 z-50 flex items-center justify-center md:p-wide">
       <div
         className={`absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
@@ -239,15 +239,15 @@ export default function SubjectDetailDrawer({
 
             <div className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl">
               {loading && (
-                <p className="p-5 text-sm text-[var(--color-text-muted)]">Loading…</p>
+                <p className="p-plush text-sm text-[var(--color-text-muted)]">Loading…</p>
               )}
               {error && (
-                <p className="p-5 text-sm text-[var(--color-danger)]">{error}</p>
+                <p className="p-plush text-sm text-[var(--color-danger)]">{error}</p>
               )}
 
               {!loading && !error && detail && (
                 <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-                  <div className="hidden shrink-0 flex-col gap-5 px-5 py-5 md:flex md:w-72 md:border-r md:border-[var(--color-border)]">
+                  <div className="hidden shrink-0 flex-col gap-plush px-plush py-plush md:flex md:w-72 md:border-r md:border-[var(--color-border)]">
                     <SummaryHud
                       nextSession={nextSession}
                       footprintPercent={footprintPercent}
@@ -263,7 +263,7 @@ export default function SubjectDetailDrawer({
                           setViewMode((prev) => (prev === "default" ? "grid" : "default"))
                         }
                         aria-pressed={viewMode === "grid"}
-                        className={`flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium backdrop-blur-md transition-colors duration-200 ${
+                        className={`flex w-full items-center justify-center gap-inline rounded-xl border px-comfy py-cozy text-xs font-medium backdrop-blur-md transition-colors duration-200 ${
                           viewMode === "grid"
                             ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] text-[var(--color-primary)]"
                             : "border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] text-[var(--color-text)] hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]"
@@ -284,7 +284,7 @@ export default function SubjectDetailDrawer({
                       }`}
                     >
                       <div
-                        className={`min-h-0 flex-1 flex-col px-5 py-4 pb-24 md:flex md:border-r md:border-[var(--color-border)] md:pb-4 ${
+                        className={`min-h-0 flex-1 flex-col px-plush py-roomy pb-24 md:flex md:border-r md:border-[var(--color-border)] md:pb-roomy ${
                           activeTab === "schedule" ? "flex" : "hidden"
                         }`}
                       >
@@ -297,7 +297,7 @@ export default function SubjectDetailDrawer({
                       </div>
 
                       <div
-                        className={`min-h-0 flex-1 flex-col px-5 py-4 pb-24 md:flex md:pb-4 ${
+                        className={`min-h-0 flex-1 flex-col px-plush py-roomy pb-24 md:flex md:pb-roomy ${
                           activeTab === "tasks" ? "flex" : "hidden"
                         }`}
                       >
@@ -316,7 +316,7 @@ export default function SubjectDetailDrawer({
                     </div>
 
                     <div
-                      className={` hidden absolute inset-0 px-5 py-5 transition-opacity duration-200 md:block ${
+                      className={` hidden absolute inset-0 px-plush py-plush transition-opacity duration-200 md:block ${
                         viewMode === "grid"
                           ? "pointer-events-auto opacity-100"
                           : "pointer-events-none opacity-0"

@@ -3,7 +3,7 @@ import { AccentHeaderShell, AccentIconBox, HeaderCloseButton } from "../../../co
 
 function MetricBadge({ icon: Icon, label }) {
   return (
-    <span className="flex shrink-0 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] backdrop-blur-md">
+    <span className="flex shrink-0 items-center gap-snug rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-comfy py-snug text-xs font-medium text-[var(--color-text)] backdrop-blur-md">
       <Icon size={13} className="text-[var(--color-text-muted)]" />
       {label}
     </span>
@@ -19,7 +19,7 @@ export default function DrawerHeader({
 }) {
   return (
     <AccentHeaderShell accent={subject.color}>
-      <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3">
+      <div className="relative z-10 flex min-w-0 flex-1 items-center gap-comfy">
         <AccentIconBox accent={subject.color} icon={BookOpen} />
         <div className="min-w-0 flex-1">
           <h3
@@ -39,7 +39,7 @@ export default function DrawerHeader({
         </div>
       </div>
 
-      <div className="relative z-10 hidden flex-1 items-center justify-end gap-2 overflow-x-auto scrollbar-hidden md:flex">
+      <div className="relative z-10 hidden flex-1 items-center justify-end gap-inline overflow-x-auto scrollbar-hidden md:flex">
         <MetricBadge icon={Calendar} label={`${weeklySlots} Weekly Slot${weeklySlots === 1 ? "" : "s"}`} />
         <MetricBadge icon={ListChecks} label={`${activeTasks} Active Task${activeTasks === 1 ? "" : "s"}`} />
         <MetricBadge icon={CalendarDays} label={`${daysPerWeek} Day${daysPerWeek === 1 ? "" : "s"}/Week`} />

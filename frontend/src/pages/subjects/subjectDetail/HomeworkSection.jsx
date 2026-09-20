@@ -17,11 +17,11 @@ export default function HomeworkSection({
 }) {
   return (
     <section className="flex min-h-0 flex-1 basis-0 flex-col">
-      <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+      <h4 className="mb-base shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
         Homework
       </h4>
 
-      <form onSubmit={onSubmit} className="mb-3 flex shrink-0 items-center gap-2">
+      <form onSubmit={onSubmit} className="mb-comfy flex shrink-0 items-center gap-inline">
         <div className="flex-1">
           <Input
             id="quick-add-homework"
@@ -41,7 +41,7 @@ export default function HomeworkSection({
         </button>
       </form>
       {addError && (
-        <p className="mb-2 shrink-0 text-xs text-[var(--color-danger)]">{addError}</p>
+        <p className="mb-base shrink-0 text-xs text-[var(--color-danger)]">{addError}</p>
       )}
 
       <div className="relative flex min-h-0 flex-1">
@@ -53,7 +53,7 @@ export default function HomeworkSection({
           {homework.length === 0 ? (
             <p className="text-sm text-[var(--color-text-muted)]">No homework linked yet.</p>
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul className="flex flex-col gap-inline">
               {homework.map((hw) => {
                 const isDone = hw.status === "done";
                 const isToggling = togglingIds.has(hw.id);
@@ -61,9 +61,9 @@ export default function HomeworkSection({
                 return (
                   <li
                     key={hw.id}
-                    className="group rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-2 text-sm transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]"
+                    className="group rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-comfy py-base text-sm transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]"
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-cozy">
                       <Checkbox
                         id={`hw-${hw.id}`}
                         checked={isDone}

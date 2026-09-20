@@ -23,7 +23,7 @@ function OpacityRangeControl({ value, onChange }) {
   const pct = Math.round(value * 100);
 
   return (
-    <div className="flex items-center gap-2.5 w-full max-w-[220px]">
+    <div className="flex items-center gap-cozy w-full max-w-[220px]">
       <SlidersHorizontal size={12} className="shrink-0 text-[var(--color-text-muted)]" />
       <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
         Focus
@@ -115,9 +115,9 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
   if (!enabled) return null;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
+    <div className="flex h-full min-h-0 flex-col gap-comfy">
       {!loading && !error && orderedDays.length > 0 && (
-        <div className="flex shrink-0 items-center justify-between gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5">
+        <div className="flex shrink-0 items-center justify-between gap-roomy rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-comfy py-cozy">
           <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
             Controls
           </span>
@@ -126,13 +126,13 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
       )}
 
       {loading && (
-        <p className="p-4 text-sm text-[var(--color-text-muted)]">Loading timetable…</p>
+        <p className="p-roomy text-sm text-[var(--color-text-muted)]">Loading timetable…</p>
       )}
       {!loading && error && (
-        <p className="p-4 text-sm text-[var(--color-danger)]">{error}</p>
+        <p className="p-roomy text-sm text-[var(--color-danger)]">{error}</p>
       )}
       {!loading && !error && orderedDays.length === 0 && (
-        <p className="p-4 text-sm text-[var(--color-text-muted)]">No schedule set up yet.</p>
+        <p className="p-roomy text-sm text-[var(--color-text-muted)]">No schedule set up yet.</p>
       )}
 
       {!loading && !error && orderedDays.length > 0 && (
@@ -148,7 +148,7 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
           >
             <div
               style={{ gridColumn: 1, gridRow: 1 }}
-              className="sticky top-0 left-0 z-20 border-b border-r border-[var(--color-border)] bg-[var(--color-surface-alt)] px-1 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"
+              className="sticky top-0 left-0 z-20 border-b border-r border-[var(--color-border)] bg-[var(--color-surface-alt)] px-tight py-base text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]"
             >
               Time
             </div>
@@ -161,7 +161,7 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
                   style={{ gridColumn: `${g1Column} / span 2`, gridRow: 1 }}
                   className={`sticky top-0 z-10 border-b border-[var(--color-border)] ${
                     isLastCol ? "" : "border-r"
-                  } bg-[var(--color-surface-alt)] px-1 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]`}
+                  } bg-[var(--color-surface-alt)] px-tight py-base text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]`}
                 >
                   {WEEKDAY_FULL[day.day_of_week]}
                 </div>
@@ -177,7 +177,7 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
                     style={{ gridColumn: 1, gridRow }}
                     className={`sticky left-0 z-10 flex items-center justify-center border-r border-[var(--color-border)] bg-[var(--color-surface-alt)] ${
                       isLastRow ? "" : "border-b"
-                    } px-1.5 text-center text-[10px] font-medium tabular-nums tracking-tight text-[var(--color-text-muted)]`}
+                    } px-snug text-center text-[10px] font-medium tabular-nums tracking-tight text-[var(--color-text-muted)]`}
                   >
                     {timeRangeLabel(slot.start_time, slot.end_time)}
                   </div>

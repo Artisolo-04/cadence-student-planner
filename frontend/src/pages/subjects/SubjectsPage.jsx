@@ -84,13 +84,13 @@ export default function SubjectsPage() {
           onSelect={openDetail}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-          <div className="rounded-full bg-[var(--color-surface-alt)] p-4">
+        <div className="flex flex-col items-center justify-center gap-roomy py-24 text-center">
+          <div className="rounded-full bg-[var(--color-surface-alt)] p-roomy">
             <BookOpen size={28} className="text-[var(--color-text-muted)]" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-[var(--color-text)]">No subjects yet</h2>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">
+            <p className="text-sm text-[var(--color-text-muted)] mt-tight">
               Add the subjects you'll assign into your timetable.
             </p>
           </div>
