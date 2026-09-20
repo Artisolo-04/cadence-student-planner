@@ -43,7 +43,7 @@ export default function DocxViewer({ item }) {
 
   if (status === "loading") {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
+      <div className="flex flex-1 flex-col items-center justify-center gap-inline rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
         <Loader2 size={22} className="animate-spin" />
         <p className="text-xs">Extracting document text…</p>
       </div>
@@ -52,7 +52,7 @@ export default function DocxViewer({ item }) {
 
   if (status === "error") {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
+      <div className="flex flex-1 flex-col items-center justify-center gap-inline rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
         <FileWarning size={22} />
         <p className="text-xs">Couldn't extract a preview for this document.</p>
       </div>
@@ -81,7 +81,7 @@ export default function DocxViewer({ item }) {
           <div
             ref={scrollRef}
             onScroll={updateScrollFades}
-            className="docx-preview scrollbar-hidden rounded-lg h-full w-full overflow-auto bg-[var(--color-surface-alt)] p-5 text-sm leading-relaxed text-[var(--color-text)]"
+            className="docx-preview scrollbar-hidden rounded-lg h-full w-full overflow-auto bg-[var(--color-surface-alt)] p-plush text-sm leading-relaxed text-[var(--color-text)]"
             dangerouslySetInnerHTML={{ __html: html }}
           />
           <TopFade show={showTopFade} fromColor="var(--color-surface-alt)" />

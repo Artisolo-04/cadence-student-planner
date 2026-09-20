@@ -24,7 +24,7 @@ const toggleIn = (list, id) => (list.includes(id) ? list.filter((x) => x !== id)
 
 function Section({ title, children }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-inline">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
         {title}
       </p>
@@ -39,7 +39,7 @@ function ToggleChip({ active, Icon, label, onClick }) {
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] ${
+      className={`inline-flex items-center gap-snug rounded-lg border px-cozy py-snug text-xs font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] ${
         active
           ? "border-[var(--color-primary)]/60 bg-[var(--color-primary)]/15 text-[var(--color-primary)]"
           : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)]"
@@ -99,7 +99,7 @@ export default function VaultFilterBar({ value, onChange }) {
   }, [open]);
 
   return (
-    <div className="relative flex shrink-0 items-center gap-2">
+    <div className="relative flex shrink-0 items-center gap-inline">
       <div className="relative flex-1">
         <Search
           size={15}
@@ -112,14 +112,14 @@ export default function VaultFilterBar({ value, onChange }) {
           onChange={(e) => set({ query: e.target.value })}
           placeholder="Search resources or folders..."
           aria-label="Search resources or folders"
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-9 pr-9 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-9 pr-9 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
         />
         {value.query && (
           <button
             type="button"
             aria-label="Clear search"
             onClick={() => set({ query: "" })}
-            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-tight text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
           >
             <X size={14} />
           </button>
@@ -133,7 +133,7 @@ export default function VaultFilterBar({ value, onChange }) {
           aria-haspopup="dialog"
           aria-expanded={open}
           onClick={() => setOpen((o) => !o)}
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] ${
+          className={`inline-flex items-center gap-inline rounded-lg border px-comfy py-base text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] ${
             activeCount > 0 || open
               ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
               : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -145,18 +145,18 @@ export default function VaultFilterBar({ value, onChange }) {
           />
           Filters
           {activeCount > 0 && (
-            <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--color-primary)] px-1 text-[10px] font-bold text-[var(--color-primary-fg)]">
+            <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[var(--color-primary)] px-tight text-[10px] font-bold text-[var(--color-primary-fg)]">
               {activeCount}
             </span>
           )}
         </button>
 
         {mounted && (
-          <div className="absolute inset-x-0 top-full z-30 pt-4 sm:left-auto sm:right-0 sm:w-80">
+          <div className="absolute inset-x-0 top-full z-30 pt-roomy sm:left-auto sm:right-0 sm:w-80">
             <div
               role="dialog"
               aria-label="Vault filters"
-              className={`flex max-h-[70dvh] origin-top-right flex-col gap-4 overflow-y-auto scrollbar-cadence rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-lg transition-all duration-150 ease-out ${
+              className={`flex max-h-[70dvh] origin-top-right flex-col gap-roomy overflow-y-auto scrollbar-cadence rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-roomy shadow-lg transition-all duration-150 ease-out ${
                 visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1"
               }`}
             >
@@ -166,7 +166,7 @@ export default function VaultFilterBar({ value, onChange }) {
                   <button
                     type="button"
                     onClick={() => onChange({ ...DEFAULT_VAULT_FILTERS, query: value.query })}
-                    className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+                    className="inline-flex items-center gap-tight rounded-md px-snug py-tight text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
                   >
                     <RotateCcw size={12} />
                     Reset
@@ -175,7 +175,7 @@ export default function VaultFilterBar({ value, onChange }) {
               </div>
 
               <Section title="Resource type">
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-snug">
                   {TYPE_OPTIONS.map(({ id, label }) => (
                     <ToggleChip
                       key={id}
@@ -189,7 +189,7 @@ export default function VaultFilterBar({ value, onChange }) {
               </Section>
 
               <Section title="Workspace contents">
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-snug">
                   {CONTENT_OPTIONS.map(({ id, label }) => (
                     <ToggleChip
                       key={id}
@@ -202,7 +202,7 @@ export default function VaultFilterBar({ value, onChange }) {
               </Section>
 
               <Section title="Sort by">
-                <div role="radiogroup" aria-label="Sort order" className="flex flex-col gap-1.5">
+                <div role="radiogroup" aria-label="Sort order" className="flex flex-col gap-snug">
                   {SORT_OPTIONS.map(({ id, label, hint }) => {
                     const selected = value.sort === id;
                     return (
@@ -212,7 +212,7 @@ export default function VaultFilterBar({ value, onChange }) {
                         role="radio"
                         aria-checked={selected}
                         onClick={() => set({ sort: id })}
-                        className={`flex items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] ${
+                        className={`flex items-center justify-between rounded-lg px-cozy py-base text-left text-sm transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] ${
                           selected
                             ? "bg-[var(--color-primary)]/10 text-[var(--color-text)]"
                             : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)]"
@@ -220,7 +220,7 @@ export default function VaultFilterBar({ value, onChange }) {
                       >
                         <span>
                           {label}
-                          <span className="ml-2 text-xs opacity-60">{hint}</span>
+                          <span className="ml-base text-xs opacity-60">{hint}</span>
                         </span>
                         {selected && <Check size={14} className="text-[var(--color-primary)]" />}
                       </button>

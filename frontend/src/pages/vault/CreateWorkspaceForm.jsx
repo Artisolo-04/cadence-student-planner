@@ -98,10 +98,10 @@ export default function CreateWorkspaceForm({
         </>
       }
     >
-      <form id="create-workspace-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form id="create-workspace-form" onSubmit={handleSubmit} className="flex flex-col gap-comfy">
         {mode === "subject" ? (
           noSubjectsLeft ? (
-            <div className="flex items-center gap-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5 text-sm text-[var(--color-text-muted)]">
+            <div className="flex items-center gap-cozy rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-comfy py-cozy text-sm text-[var(--color-text-muted)]">
               <Landmark size={15} className="shrink-0" />
               All your subjects already have a workspace.
             </div>

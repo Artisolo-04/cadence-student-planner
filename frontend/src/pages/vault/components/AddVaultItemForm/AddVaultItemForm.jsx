@@ -94,7 +94,7 @@ export default function AddVaultItemForm({
         </>
       }
     >
-      <form id="add-vault-item-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form id="add-vault-item-form" onSubmit={handleSubmit} className="flex flex-col gap-comfy">
         <DestinationField
           effectiveDestination={effectiveDestination}
           isLocked={isLocked}
@@ -108,7 +108,7 @@ export default function AddVaultItemForm({
         />
 
         {selectedFile ? (
-          <div className="flex items-center gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2 text-sm text-[var(--color-text-muted)]">
+          <div className="flex items-center gap-inline rounded-md border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-comfy py-base text-sm text-[var(--color-text-muted)]">
             <FileText className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="truncate">{selectedFile.name}</span>
             <span className="ml-auto shrink-0 tabular-nums">{formatFileSize(selectedFile.size)}</span>
@@ -124,7 +124,7 @@ export default function AddVaultItemForm({
               />
               {isLinkMode && (
                 <span
-                  className="pointer-events-none absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-1 rounded-md border px-chip-sm-x py-chip-sm-y text-[10px] font-semibold tracking-wide"
+                  className="pointer-events-none absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center gap-tight rounded-md border px-chip-sm-x py-chip-sm-y text-[10px] font-semibold tracking-wide"
                   style={{
                     borderColor: `color-mix(in srgb, var(${linkBrand?.accentVar || "--color-primary"}) 45%, transparent)`,
                     color: `var(${linkBrand?.accentVar || "--color-primary"})`,

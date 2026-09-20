@@ -197,15 +197,15 @@ export default function VaultPage() {
 
   return (
     <div className="flex h-full w-full min-h-0 flex-col gap-grid">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
+      <header className="flex flex-col gap-comfy sm:flex-row sm:items-center sm:justify-between sm:gap-roomy shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
-          <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
+          <p className="mt-tight hidden text-sm text-[var(--color-text-muted)] sm:block">
             Your documents and links, organized by subject or custom folder.
           </p>
         </div>
 
-        <div className="flex w-full flex-nowrap items-center gap-1.5 sm:w-auto sm:gap-3">
+        <div className="flex w-full flex-nowrap items-center gap-snug sm:w-auto sm:gap-comfy">
           <SegmentedControl
             ariaLabel="Content view"
             options={CONTENT_VIEWS}
@@ -232,7 +232,7 @@ export default function VaultPage() {
             variant="icon"
             size="md"
           />
-          <Button type="button" onClick={() => setCreateFormOpen(true)} className="h-9 flex-1 justify-center px-2.5 sm:flex-none sm:px-4">
+          <Button type="button" onClick={() => setCreateFormOpen(true)} className="h-9 flex-1 justify-center px-cozy sm:flex-none sm:px-roomy">
             <FolderPlus size={16} />
             <span className="text-xs sm:text-sm">New workspace</span>
           </Button>
@@ -242,12 +242,12 @@ export default function VaultPage() {
       <VaultFilterBar value={filters} onChange={setFilters} />
 
       {error && (
-        <div className="shrink-0 rounded-md border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-4 py-3 text-sm text-[var(--color-danger)]">
+        <div className="shrink-0 rounded-md border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-roomy py-comfy text-sm text-[var(--color-danger)]">
           {error}
         </div>
       )}
 
-      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
+      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-base sm:p-roomy">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
@@ -256,7 +256,7 @@ export default function VaultPage() {
           {loading ? (
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-roomy">
               {visibleGroups.length === 0 ? (
                 <p className="text-sm text-[var(--color-text-muted)]">{isFiltering ? "No workspaces match your search or filters." : emptyMessage}</p>
               ) : layoutMode === "grid" ? (
@@ -289,7 +289,7 @@ export default function VaultPage() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-inline">
                   {visibleGroups.map((group) => (
                     <VaultFolderCard
                       key={isUniversity ? group.subjectId : group.folderName}

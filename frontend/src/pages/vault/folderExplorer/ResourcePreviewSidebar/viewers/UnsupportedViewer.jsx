@@ -7,7 +7,7 @@ export default function UnsupportedViewer({ item, meta }) {
   const showDownload = isDownloadKind(meta);
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-6 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-comfy rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-airy text-center">
       <FileWarning size={26} className="text-[var(--color-text-muted)]" />
       <p className="max-w-[280px] text-xs text-[var(--color-text-muted)]">
         {showDownload
@@ -18,7 +18,7 @@ export default function UnsupportedViewer({ item, meta }) {
         variant="secondary"
         onClick={showDownload ? () => downloadFile(item) : () => item.url_path && window.open(resolveAssetUrl(item.url_path), "_blank", "noopener,noreferrer")}
         disabled={!item.url_path}
-        className="gap-1.5 px-btn-sm-x py-btn-sm-y text-xs"
+        className="gap-snug px-btn-sm-x py-btn-sm-y text-xs"
       >
         {showDownload ? <Download size={13} /> : <ExternalLink size={13} />}
         {showDownload ? "Download" : "Open in new tab"}

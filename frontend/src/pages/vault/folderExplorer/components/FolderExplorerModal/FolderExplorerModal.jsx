@@ -54,7 +54,7 @@ export default function FolderExplorerModal({
   if (!mounted) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center md:p-8">
+    <div className="absolute inset-0 z-50 flex items-center justify-center md:p-wide">
       <div
         className={`absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
@@ -80,7 +80,7 @@ export default function FolderExplorerModal({
               existingFolderNames={existingFolderNames}
             />
 
-            <div className="relative z-10 flex min-h-0 flex-1 p-5">
+            <div className="relative z-10 flex min-h-0 flex-1 p-plush">
               <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-xl">
                 <div
                   ref={scrollRef}

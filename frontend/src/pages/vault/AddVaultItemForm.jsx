@@ -19,7 +19,7 @@ function stripExtension(filename) {
 
 function LockedDestination({ icon: Icon, label, name }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5">
+    <div className="flex items-center gap-cozy rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-comfy py-cozy">
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-[var(--color-primary)]">
         <Icon size={14} />
       </span>
@@ -148,7 +148,7 @@ function FolderCombobox({ value, onChange, options }) {
             setOpen(true);
           }}
           placeholder="Search or create a folder…"
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-9 pr-3 text-sm text-[var(--color-text)]
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-9 pr-comfy text-sm text-[var(--color-text)]
             placeholder:text-[var(--color-text-muted)] transition-shadow duration-150
             focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] focus-visible:border-[var(--color-ring)]"
         />
@@ -166,7 +166,7 @@ function FolderCombobox({ value, onChange, options }) {
               width: coords.width,
               maxHeight: listHeight,
             }}
-            className={`z-[100] overflow-y-auto scrollbar-cadence p-1
+            className={`z-[100] overflow-y-auto scrollbar-cadence p-tight
               rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg
               transition-all duration-150 ease-out
               ${coords.openUp ? "origin-bottom" : "origin-top"}
@@ -177,18 +177,18 @@ function FolderCombobox({ value, onChange, options }) {
               }`}
           >
             {showCreateOption && (
-              <li className="mb-1 border-b border-[var(--color-border)] pb-1">
+              <li className="mb-tight border-b border-[var(--color-border)] pb-tight">
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => selectFolder(query.trim())}
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm font-medium
+                  className="flex w-full items-center gap-inline rounded-sm px-comfy py-base text-left text-sm font-medium
                     text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary)]/10"
                 >
                   <FolderPlus size={16} className="shrink-0" />
                   <span className="shrink-0">Create folder</span>
                   <span
-                    className="ml-auto flex max-w-[55%] items-center justify-center truncate rounded-md px-2.5 py-1 text-xs font-semibold leading-none"
+                    className="ml-auto flex max-w-[55%] items-center justify-center truncate rounded-md px-cozy py-tight text-xs font-semibold leading-none"
                     style={{
                       backgroundColor: "color-mix(in srgb, var(--color-primary) 16%, transparent)",
                       color: "var(--color-primary)",
@@ -201,7 +201,7 @@ function FolderCombobox({ value, onChange, options }) {
             )}
 
             {filtered.length === 0 && !showCreateOption && (
-              <li className="px-3 py-2 text-sm text-[var(--color-text-muted)]">
+              <li className="px-comfy py-base text-sm text-[var(--color-text-muted)]">
                 Start typing to create a folder
               </li>
             )}
@@ -216,11 +216,11 @@ function FolderCombobox({ value, onChange, options }) {
                     aria-selected={isSelected}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => selectFolder(name)}
-                    className={`flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2 text-left text-sm
+                    className={`flex w-full items-center justify-between gap-inline rounded-sm px-comfy py-base text-left text-sm
                       transition-colors hover:bg-[var(--color-surface-alt)]
                       ${isSelected ? "font-medium text-[var(--color-primary)]" : "text-[var(--color-text)]"}`}
                   >
-                    <span className="flex min-w-0 items-center gap-2">
+                    <span className="flex min-w-0 items-center gap-inline">
                       <Folder size={15} className="shrink-0 text-[var(--color-text-muted)]" />
                       <span className="truncate">{name}</span>
                     </span>
@@ -439,7 +439,7 @@ export default function AddVaultItemForm({
         </>
       }
     >
-      <form id="add-vault-item-form" onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form id="add-vault-item-form" onSubmit={handleSubmit} className="flex flex-col gap-comfy">
         {effectiveDestination === "subject" ? (
           isLocked ? (
             <LockedDestination icon={Landmark} label="University track" name={lockedTarget.name} />
@@ -474,8 +474,8 @@ export default function AddVaultItemForm({
         {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
       </form>
 
-      <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+      <div className="mt-roomy border-t border-[var(--color-border)] pt-roomy">
+        <p className="mb-base text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
           Or attach a file to upload
         </p>
         <div
@@ -483,7 +483,7 @@ export default function AddVaultItemForm({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors ${
+          className={`flex flex-col items-center justify-center gap-inline rounded-xl border-2 border-dashed px-airy py-wide text-center transition-colors ${
             isDragging
               ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
               : "border-[var(--color-border)] bg-[var(--color-bg)]"
@@ -496,7 +496,7 @@ export default function AddVaultItemForm({
               <p className="text-xs text-[var(--color-text-muted)]">
                 Ready to upload — click "Add resource" to confirm
               </p>
-              <Button type="button" variant="secondary" className="mt-1" onClick={clearSelectedFile} disabled={submitting}>
+              <Button type="button" variant="secondary" className="mt-tight" onClick={clearSelectedFile} disabled={submitting}>
                 Choose a different file
               </Button>
             </>
@@ -507,7 +507,7 @@ export default function AddVaultItemForm({
               <Button
                 type="button"
                 variant="secondary"
-                className="mt-1"
+                className="mt-tight"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={submitting}
               >

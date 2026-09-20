@@ -46,7 +46,7 @@ export default function TextViewer({ item }) {
 
   if (state.status === "error") {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
+      <div className="flex flex-1 flex-col items-center justify-center gap-inline rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
         <AlertCircle size={20} />
         <p className="text-xs">Could not load a text preview.</p>
       </div>
@@ -59,7 +59,7 @@ export default function TextViewer({ item }) {
         <pre
           ref={scrollRef}
           onScroll={updateScrollFades}
-          className="h-full w-full overflow-auto whitespace-pre-wrap break-words p-3 text-xs leading-relaxed text-[var(--color-text)] scrollbar-hidden"
+          className="h-full w-full overflow-auto whitespace-pre-wrap break-words p-comfy text-xs leading-relaxed text-[var(--color-text)] scrollbar-hidden"
           style={{ backgroundColor: TEXT_BG }}
         >
           {state.content}

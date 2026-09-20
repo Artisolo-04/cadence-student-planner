@@ -25,15 +25,15 @@ export default function FileCard({ item, folderTitle, onRequestDelete, onPreview
   };
 
   return (
-    <div className="group relative flex flex-col gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--color-border))]">
+    <div className="group relative flex flex-col gap-inline rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-comfy transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_40%,var(--color-border))]">
       <ThumbnailBlock meta={meta} />
 
-      <div className="flex min-w-0 items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center justify-between gap-inline">
         <p className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
           {stripExtension(item.title)}
         </p>
         <span
-          className="w-fit shrink-0 rounded-md border px-2 py-0.5 text-[10px] font-semibold tracking-wide"
+          className="w-fit shrink-0 rounded-md border px-base py-hair text-[10px] font-semibold tracking-wide"
           style={{
             borderColor: `color-mix(in srgb, var(${meta.accentVar}) 45%, transparent)`,
             color: `var(${meta.accentVar})`,
@@ -45,7 +45,7 @@ export default function FileCard({ item, folderTitle, onRequestDelete, onPreview
       </div>
 
       {(meta.kind !== "url" || item.file_size_bytes != null) && (
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+        <div className="flex min-w-0 flex-wrap items-center gap-snug">
           {meta.kind !== "url" && formatBytes(item.file_size_bytes) && (
             <MetaBadge icon={HardDrive}>{formatBytes(item.file_size_bytes)}</MetaBadge>
           )}
@@ -57,12 +57,12 @@ export default function FileCard({ item, folderTitle, onRequestDelete, onPreview
         </div>
       )}
 
-      <div className="mt-auto flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
+      <div className="mt-auto flex items-center gap-inline border-t border-[var(--color-border)] pt-comfy">
         <Button
           variant="secondary"
           onClick={handlePreview}
           disabled={!item.url_path}
-          className="flex-1 gap-1.5 px-btn-sm-x py-btn-sm-y text-xs"
+          className="flex-1 gap-snug px-btn-sm-x py-btn-sm-y text-xs"
         >
           <ExternalLink size={13} />
           Open

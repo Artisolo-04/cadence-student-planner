@@ -12,10 +12,10 @@ export default function PreviewHeader({ item, meta, onClose }) {
 
   return (
     <AccentHeaderShell accent={accent}>
-      <div className="relative z-10 flex min-w-0 flex-1 items-center gap-4">
+      <div className="relative z-10 flex min-w-0 flex-1 items-center gap-roomy">
         <AccentIconBox accent={accent} icon={Icon} />
 
-        <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-inline">
           <h3
             className="min-w-0 flex-1 truncate text-sm font-semibold text-[var(--color-text)]"
             title={item.title}
@@ -34,13 +34,13 @@ export default function PreviewHeader({ item, meta, onClose }) {
             {badge}
           </span>
           {sizeLabel && (
-            <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-1.5 text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
+            <span className="inline-flex h-5 shrink-0 items-center gap-tight rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-snug text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
               <HardDrive size={10} />
               {sizeLabel}
             </span>
           )}
           {Number.isInteger(item.page_count) && item.page_count > 0 && (
-            <span className="inline-flex h-5 shrink-0 items-center gap-1 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-1.5 text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
+            <span className="inline-flex h-5 shrink-0 items-center gap-tight rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-snug text-[10px] font-medium leading-none text-[var(--color-text-muted)]">
               <Layers size={10} />
               {item.page_count} {item.page_count === 1 ? "page" : "pages"}
             </span>
@@ -48,7 +48,7 @@ export default function PreviewHeader({ item, meta, onClose }) {
         </div>
       </div>
 
-      <div className="relative z-10 flex shrink-0 items-center gap-2">
+      <div className="relative z-10 flex shrink-0 items-center gap-inline">
         {!showDownload && (
           <button
             type="button"
@@ -58,7 +58,7 @@ export default function PreviewHeader({ item, meta, onClose }) {
             }
             disabled={!item.url_path}
             aria-label="Open in new tab"
-            className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-40"
+            className="rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-40"
           >
             <ExternalLink size={16} />
           </button>
@@ -70,7 +70,7 @@ export default function PreviewHeader({ item, meta, onClose }) {
             onClick={() => downloadFile(item)}
             disabled={!item.url_path}
             aria-label="Download file"
-            className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-40"
+            className="rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)] disabled:pointer-events-none disabled:opacity-40"
           >
             <Download size={16} />
           </button>

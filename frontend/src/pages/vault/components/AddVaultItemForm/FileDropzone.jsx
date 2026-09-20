@@ -15,8 +15,8 @@ export default function FileDropzone({
   onClearSelectedFile,
 }) {
   return (
-    <div className="mt-4 border-t border-[var(--color-border)] pt-4">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
+    <div className="mt-roomy border-t border-[var(--color-border)] pt-roomy">
+      <p className="mb-base text-xs font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
         Or attach a file to upload
       </p>
       <div
@@ -24,7 +24,7 @@ export default function FileDropzone({
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-colors ${
+        className={`flex flex-col items-center justify-center gap-inline rounded-xl border-2 border-dashed px-airy py-wide text-center transition-colors ${
           isDragging
             ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
             : "border-[var(--color-border)] bg-[var(--color-bg)]"
@@ -37,7 +37,7 @@ export default function FileDropzone({
             <p className="text-xs text-[var(--color-text-muted)]">
               Ready to upload — click "Add resource" to confirm
             </p>
-            <Button type="button" variant="secondary" className="mt-1" onClick={onClearSelectedFile} disabled={submitting}>
+            <Button type="button" variant="secondary" className="mt-tight" onClick={onClearSelectedFile} disabled={submitting}>
               Choose a different file
             </Button>
           </>
@@ -48,7 +48,7 @@ export default function FileDropzone({
             <Button
               type="button"
               variant="secondary"
-              className="mt-1"
+              className="mt-tight"
               onClick={() => fileInputRef.current?.click()}
               disabled={submitting}
             >

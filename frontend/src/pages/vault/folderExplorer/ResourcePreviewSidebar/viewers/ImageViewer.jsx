@@ -7,7 +7,7 @@ export default function ImageViewer({ item }) {
 
   if (!item.url_path || errored) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
+      <div className="flex flex-1 flex-col items-center justify-center gap-inline rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
         <ImageOff size={22} />
         <p className="text-xs">Image preview unavailable.</p>
       </div>
@@ -15,7 +15,7 @@ export default function ImageViewer({ item }) {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center overflow-auto rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-2">
+    <div className="flex flex-1 items-center justify-center overflow-auto rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] p-base">
       <img
         src={resolveAssetUrl(item.url_path)}
         alt={item.title}

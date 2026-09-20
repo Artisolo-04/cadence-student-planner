@@ -51,7 +51,7 @@ function buildBreakdown(items) {
 
 function Chip({ children }) {
   return (
-    <span className="inline-flex h-6 items-center rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-2 text-[11px] font-medium leading-none text-[var(--color-text-muted)]">
+    <span className="inline-flex h-6 items-center rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-base text-[11px] font-medium leading-none text-[var(--color-text-muted)]">
       {children}
     </span>
   );
@@ -60,7 +60,7 @@ function Chip({ children }) {
 function CountBadge({ count, accent, className = "" }) {
   return (
     <span
-      className={`inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-md px-2.5 text-[11px] font-semibold leading-none ${className}`}
+      className={`inline-flex h-6 shrink-0 items-center whitespace-nowrap rounded-md px-cozy text-[11px] font-semibold leading-none ${className}`}
       style={{
         color: accent,
         backgroundColor: "color-mix(in srgb, var(--folder-color) 16%, transparent)",
@@ -99,15 +99,15 @@ export default function VaultFolderCard({
         }}
         className="cursor-pointer overflow-hidden rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
       >
-        <div className="flex w-full flex-nowrap items-center justify-between gap-3 px-2 py-2 md:px-4 md:py-3">
-          <div className="flex min-w-0 flex-1 items-center gap-2.5">
+        <div className="flex w-full flex-nowrap items-center justify-between gap-comfy px-base py-base md:px-roomy md:py-comfy">
+          <div className="flex min-w-0 flex-1 items-center gap-cozy">
             <Folder size={15} style={{ color: accent }} className="shrink-0" />
             <span className="min-w-0 w-full truncate text-sm font-medium text-[var(--color-text)]">
               {title}
             </span>
           </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-            <div className="hidden items-center gap-1.5 md:flex">
+          <div className="flex shrink-0 flex-wrap items-center gap-snug">
+            <div className="hidden items-center gap-snug md:flex">
               {breakdown.map(({ label, count }) => (
                 <Chip key={label}>
                   {count} {label}
@@ -122,7 +122,7 @@ export default function VaultFolderCard({
                   e.stopPropagation();
                   onDeleteFolder?.({ title, items });
                 }}
-                className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                className="rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                 aria-label={`Delete ${title}`}
                 title="Delete folder"
               >
@@ -151,7 +151,7 @@ export default function VaultFolderCard({
           onOpen?.({ title, items });
         }
       }}
-      className="group relative flex h-auto cursor-pointer flex-col gap-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--folder-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+      className="group relative flex h-auto cursor-pointer flex-col gap-roomy overflow-hidden rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--folder-color)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--folder-color)_35%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
     >
       <div
         aria-hidden="true"
@@ -163,9 +163,9 @@ export default function VaultFolderCard({
         className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-b from-[color-mix(in_srgb,var(--color-text)_4%,transparent)] to-transparent"
       />
 
-      <div className="relative z-10 flex flex-col gap-4 p-card">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+      <div className="relative z-10 flex flex-col gap-roomy p-card">
+        <div className="flex items-start justify-between gap-comfy">
+          <div className="flex min-w-0 items-center gap-comfy">
             <span
               className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
               style={{
@@ -200,7 +200,7 @@ export default function VaultFolderCard({
                 e.stopPropagation();
                 onDeleteFolder?.({ title, items });
               }}
-              className="shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+              className="shrink-0 rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
               aria-label={`Delete ${title}`}
               title="Delete folder"
             >
@@ -209,17 +209,17 @@ export default function VaultFolderCard({
           )}
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-snug">
           <div>
             <CountBadge
               count={itemCount}
               accent={accent}
-              className="h-auto px-2.5 py-1 text-xs"
+              className="h-auto px-cozy py-tight text-xs"
             />
           </div>
 
           {breakdown.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-snug">
               {breakdown.map(({ label, count }) => (
                 <Chip key={label}>
                   {count} {label}

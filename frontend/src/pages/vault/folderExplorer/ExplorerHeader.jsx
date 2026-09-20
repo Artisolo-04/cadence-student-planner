@@ -80,10 +80,10 @@ export default function ExplorerHeader({
 
   return (
     <AccentHeaderShell accent={accent}>
-      <div className="relative z-10 flex min-w-0 items-center gap-4">
+      <div className="relative z-10 flex min-w-0 items-center gap-roomy">
         <AccentIconBox accent={accent} icon={Folder} />
 
-        <div className="relative flex min-w-0 flex-1 items-center gap-4">
+        <div className="relative flex min-w-0 flex-1 items-center gap-roomy">
           {isCustomWorkspace && isEditing ? (
             <input
               ref={inputRef}
@@ -95,7 +95,7 @@ export default function ExplorerHeader({
               aria-label="Rename workspace"
               aria-invalid={Boolean(duplicateName)}
               title={draftTitle}
-              className={`-mx-2 -my-1 w-full truncate rounded-md bg-[var(--color-surface-alt)] px-2 py-1 text-sm font-semibold text-[var(--color-text)] outline-none ring-1 transition-shadow duration-150 ${
+              className={`-mx-base -my-tight w-full truncate rounded-md bg-[var(--color-surface-alt)] px-base py-tight text-sm font-semibold text-[var(--color-text)] outline-none ring-1 transition-shadow duration-150 ${
                 duplicateName
                   ? "ring-[var(--color-danger)]"
                   : "ring-[var(--color-border)] focus:ring-[var(--color-ring)]"
@@ -116,7 +116,7 @@ export default function ExplorerHeader({
           {duplicateName && (
             <span
               role="alert"
-              className="shrink-0 whitespace-nowrap text-xs font-medium text-[var(--color-danger)] px-1"
+              className="shrink-0 whitespace-nowrap text-xs font-medium text-[var(--color-danger)] px-tight"
             >
               A folder named [ {duplicateName} ] already exists
             </span>
@@ -124,12 +124,12 @@ export default function ExplorerHeader({
         </div>
       </div>
 
-      <div className="relative z-10 flex shrink-0 items-center gap-2">
+      <div className="relative z-10 flex shrink-0 items-center gap-inline">
         {onAddResource && (
           <Button
             variant="secondary"
             onClick={onAddResource}
-            className="gap-1.5 px-btn-sm-x py-btn-sm-y text-xs"
+            className="gap-snug px-btn-sm-x py-btn-sm-y text-xs"
           >
             <Plus size={14} />
             Add resource
