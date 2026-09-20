@@ -199,12 +199,12 @@ export default function TimetableGrid({
       >
         <div className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col relative overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
           {saveError && (
-            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-4 py-2 text-sm text-[var(--color-danger)]">
+            <div className="flex shrink-0 items-center justify-between gap-comfy border-b border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-roomy py-base text-sm text-[var(--color-danger)]">
               <span>{saveError.message}</span>
               <button
                 type="button"
                 onClick={clearSaveError}
-                className="shrink-0 rounded-md px-2 py-0.5 text-xs font-medium hover:bg-[var(--color-danger)]/10"
+                className="shrink-0 rounded-md px-base py-hair text-xs font-medium hover:bg-[var(--color-danger)]/10"
               >
                 Dismiss
               </button>
@@ -335,7 +335,7 @@ export default function TimetableGrid({
 
         <div
           className={`hidden shrink-0 overflow-hidden transition-[width,opacity,margin] duration-500 ease-in-out sm:block ${
-            isEditMode ? "ml-2" : "ml-0"
+            isEditMode ? "ml-base" : "ml-0"
           } ${
             isEditMode ? "opacity-100" : "opacity-0"
           }`}

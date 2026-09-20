@@ -11,7 +11,7 @@ function SubjectPickerRow({ subject, selected, onSelect }) {
         backgroundImage:
           "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 20%, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface) 92%)) 0%, color-mix(in srgb, var(--subject-color) 10%, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface) 94%)) 100%)",
       }}
-      className={`group relative flex min-h-[52px] items-center gap-3 overflow-hidden rounded-lg border px-3 py-2 text-left backdrop-blur-2xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-200 ease-out
+      className={`group relative flex min-h-[52px] items-center gap-comfy overflow-hidden rounded-lg border px-comfy py-base text-left backdrop-blur-2xl backdrop-saturate-150 transition-[background-color,border-color,box-shadow] duration-200 ease-out
         focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]
         ${
           selected

@@ -61,7 +61,7 @@ export default function SubjectDonut({
 
   if (!subjects.length) {
     return (
-      <div className="flex flex-col items-center gap-5 lg:h-full lg:flex-row">
+      <div className="flex flex-col items-center gap-plush lg:h-full lg:flex-row">
         <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true">
           <circle
             cx={CENTER}
@@ -79,7 +79,7 @@ export default function SubjectDonut({
 
   return (
     <>
-      <div className="flex flex-col gap-6 lg:h-full lg:min-h-0 lg:flex-row lg:items-stretch">
+      <div className="flex flex-col gap-airy lg:h-full lg:min-h-0 lg:flex-row lg:items-stretch">
         <div className="flex shrink-0 flex-col items-center justify-center">
           <div className="relative" style={{ width: SIZE, height: SIZE }}>
             <svg
@@ -138,7 +138,7 @@ export default function SubjectDonut({
             className="scrollbar-hidden min-w-0 flex-1 overflow-visible rounded-md lg:h-full lg:overflow-y-scroll"
             style={{ WebkitMaskImage: fadeMask, maskImage: fadeMask }}
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-inline">
               {slices.map((slice) => {
                 const barPercent = Math.max(4, (slice.pct / maxPercent) * 100);
 
@@ -148,10 +148,10 @@ export default function SubjectDonut({
                     type="button"
                     onClick={() => setSelected(slice)}
                     title={`Open ${slice.name} schedule`}
-                    className="group flex w-full flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/50 px-3 py-2.5 text-left transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[var(--color-surface-alt)]/80"
+                    className="group flex w-full flex-col gap-inline rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/50 px-comfy py-cozy text-left transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[var(--color-surface-alt)]/80"
                   >
-                    <div className="flex min-w-0 items-center justify-between gap-3">
-                      <span className="flex min-w-0 items-center gap-2">
+                    <div className="flex min-w-0 items-center justify-between gap-comfy">
+                      <span className="flex min-w-0 items-center gap-inline">
                         <span
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
                           style={{ backgroundColor: slice.color }}
@@ -190,14 +190,14 @@ export default function SubjectDonut({
         elevated
       >
         {selected && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-roomy">
+            <div className="grid grid-cols-2 gap-comfy">
               <Metric label="Weekly time" value={hoursToLabel(selected.weeklyHours)} />
               <Metric label="Weekly share" value={`${selected.percentOfWeek}%`} />
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="mb-base text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                 Scheduled classes
               </p>
               <ScheduleDetails entries={selectedEntries} slots={slots} />
@@ -211,9 +211,9 @@ export default function SubjectDonut({
 
 function Metric({ label, value }) {
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-3">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-comfy">
       <p className="text-[11px] text-[var(--color-text-muted)]">{label}</p>
-      <p className="mt-0.5 text-base font-semibold tabular-nums text-[var(--color-text)]">
+      <p className="mt-hair text-base font-semibold tabular-nums text-[var(--color-text)]">
         {value}
       </p>
     </div>

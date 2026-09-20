@@ -41,7 +41,7 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
           className="scrollbar-hidden min-w-0 flex-1 overflow-visible rounded-md lg:h-full lg:overflow-y-scroll"
           style={{ WebkitMaskImage: fadeMask, maskImage: fadeMask }}
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-inline">
             {faculty.map((teacher, index) => {
               const loadPercent = Math.max(
                 4,
@@ -54,9 +54,9 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
                   type="button"
                   onClick={() => setSelected(teacher)}
                   title={`Open ${teacher.teacher}'s teaching schedule`}
-                  className="group flex w-full flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/50 px-3 py-2.5 text-left transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[var(--color-surface-alt)]/80"
+                  className="group flex w-full flex-col gap-inline rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/50 px-comfy py-cozy text-left transition-colors duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[var(--color-surface-alt)]/80"
                 >
-                  <div className="flex min-w-0 items-baseline justify-between gap-3">
+                  <div className="flex min-w-0 items-baseline justify-between gap-comfy">
                     <p className="truncate text-sm font-semibold text-[var(--color-text)]">
                       {teacher.teacher}
                     </p>
@@ -100,8 +100,8 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
         elevated
       >
         {selected && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-roomy">
+            <div className="grid grid-cols-2 gap-comfy">
               <Metric label="Weekly time" value={hoursToLabel(selected.weeklyHours)} />
               <Metric
                 label="Subjects"
@@ -112,7 +112,7 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+              <p className="mb-base text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                 Teaching schedule
               </p>
               <ScheduleDetails entries={selectedEntries} slots={slots} />
@@ -126,9 +126,9 @@ export default function FacultyBars({ faculty = [], rawEntries = [], slots = [] 
 
 function Metric({ label, value }) {
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-3">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-comfy">
       <p className="text-[11px] text-[var(--color-text-muted)]">{label}</p>
-      <p className="mt-0.5 text-base font-semibold tabular-nums text-[var(--color-text)]">
+      <p className="mt-hair text-base font-semibold tabular-nums text-[var(--color-text)]">
         {value}
       </p>
     </div>

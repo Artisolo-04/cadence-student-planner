@@ -39,22 +39,22 @@ export default function ActionNoticeBanner({ notice, onUndo, onDismiss }) {
     >
       <div className="overflow-hidden">
         <div
-          className={`flex items-start justify-between gap-3 border-b border-[var(--color-warning)]/25 bg-[var(--color-warning)]/[0.08] px-4 py-2.5 text-sm transition-all duration-200 ease-out ${
+          className={`flex items-start justify-between gap-comfy border-b border-[var(--color-warning)]/25 bg-[var(--color-warning)]/[0.08] px-roomy py-cozy text-sm transition-all duration-200 ease-out ${
             open ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
           }`}
         >
-          <div className="flex items-start gap-2.5">
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-warning)]/15 text-[var(--color-warning)]">
+          <div className="flex items-start gap-cozy">
+            <span className="mt-hair flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-warning)]/15 text-[var(--color-warning)]">
               <Info size={12} strokeWidth={2.5} />
             </span>
-            <div className="flex flex-col gap-0.5 pt-0.5">
+            <div className="flex flex-col gap-hair pt-hair">
               <span className="font-semibold text-[var(--color-text)]">{rendered.title}</span>
               {rendered.warnings?.length > 0 && (
-                <ul className="flex flex-col gap-0.5">
+                <ul className="flex flex-col gap-hair">
                   {rendered.warnings.map((msg, i) => (
                     <li
                       key={i}
-                      className="ml-4 list-disc text-[var(--color-text-muted)] marker:text-[var(--color-warning)]/60"
+                      className="ml-roomy list-disc text-[var(--color-text-muted)] marker:text-[var(--color-warning)]/60"
                     >
                       {msg}
                     </li>
@@ -64,11 +64,11 @@ export default function ActionNoticeBanner({ notice, onUndo, onDismiss }) {
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+          <div className="flex shrink-0 items-center gap-snug pt-hair">
             <button
               type="button"
               onClick={onUndo}
-              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--color-warning)] transition-colors duration-150 hover:bg-[var(--color-warning)]/20 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+              className="inline-flex items-center gap-snug rounded-md border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-cozy py-tight text-xs font-semibold text-[var(--color-warning)] transition-colors duration-150 hover:bg-[var(--color-warning)]/20 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
             >
               <Undo2 size={12} strokeWidth={2.5} />
               Undo

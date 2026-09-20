@@ -47,12 +47,12 @@ export default function TrackFractureBar({
           <span className="text-xs text-[var(--color-text-muted)]">{scopeLabel}, by time</span>
         </div>
 
-        <div className="mt-5 flex h-2.5 w-full shrink-0 overflow-hidden rounded-full bg-[var(--color-border)]">
+        <div className="mt-plush flex h-2.5 w-full shrink-0 overflow-hidden rounded-full bg-[var(--color-border)]">
           <div style={{ width: `${fullWidthMinutesPercent}%`, background: "#5eead4" }} />
           <div style={{ width: `${splitMinutesPercent}%`, background: "#fb7185" }} />
         </div>
 
-        <div className="mt-5 flex flex-1 min-h-0 flex-col justify-center gap-2">
+        <div className="mt-plush flex flex-1 min-h-0 flex-col justify-center gap-inline">
           {rows.map((row) => (
             <button
               key={row.key}
@@ -60,14 +60,14 @@ export default function TrackFractureBar({
               disabled={row.count === 0}
               onClick={() => row.count > 0 && setSelected(row.key)}
               title={row.count > 0 ? `Open ${row.label.toLowerCase()} classes` : undefined}
-              className={`group flex w-full flex-col gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2.5 text-left transition-colors duration-200 ${
+              className={`group flex w-full flex-col gap-inline rounded-lg border border-[var(--color-border)] px-comfy py-cozy text-left transition-colors duration-200 ${
                 row.count > 0
                   ? "bg-[var(--color-surface-alt)]/50 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[var(--color-surface-alt)]/80"
                   : "cursor-default bg-[var(--color-surface-alt)]/20 opacity-60"
               }`}
             >
-              <div className="flex min-w-0 items-center justify-between gap-3">
-                <span className="flex min-w-0 items-center gap-2">
+              <div className="flex min-w-0 items-center justify-between gap-comfy">
+                <span className="flex min-w-0 items-center gap-inline">
                   <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: row.dot }} />
                   <span className="truncate text-sm font-medium text-[var(--color-text)]">{row.label}</span>
                 </span>
@@ -90,14 +90,14 @@ export default function TrackFractureBar({
       </div>
 
       <Modal open={Boolean(selected)} onClose={() => setSelected(null)} title={selectedTitle} elevated>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-roomy">
+          <div className="grid grid-cols-2 gap-comfy">
             <Metric label="Share of time" value={`${selectedPercent}%`} />
             <Metric label="Classes" value={`${selectedEntries.length}`} />
           </div>
 
           <div>
-            <p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+            <p className="mb-base text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
               Scheduled classes
             </p>
             <ScheduleDetails entries={selectedEntries} slots={slots} />
@@ -110,9 +110,9 @@ export default function TrackFractureBar({
 
 function Metric({ label, value }) {
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-3">
+    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-comfy">
       <p className="text-[11px] text-[var(--color-text-muted)]">{label}</p>
-      <p className="mt-0.5 text-base font-semibold tabular-nums text-[var(--color-text)]">
+      <p className="mt-hair text-base font-semibold tabular-nums text-[var(--color-text)]">
         {value}
       </p>
     </div>

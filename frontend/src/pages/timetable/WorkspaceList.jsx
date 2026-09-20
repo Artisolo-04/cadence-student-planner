@@ -52,21 +52,21 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
 
   return (
     <div className="flex h-full w-full min-h-0 flex-col gap-grid">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
+      <header className="flex flex-col gap-comfy sm:flex-row sm:items-center sm:justify-between sm:gap-roomy shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Your timetables</h2>
-          <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
+          <p className="mt-tight hidden text-sm text-[var(--color-text-muted)] sm:block">
             Pick a workspace to open, or create a new one.
           </p>
         </div>
 
-        <Button type="button" onClick={onAddNew} className="h-9 w-full justify-center px-2.5 shrink-0 sm:w-auto sm:px-4">
+        <Button type="button" onClick={onAddNew} className="h-9 w-full justify-center px-cozy shrink-0 sm:w-auto sm:px-roomy">
           <Plus size={16} />
           <span className="text-xs sm:text-sm">New timetable</span>
         </Button>
       </header>
 
-      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
+      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-base sm:p-roomy">
         <div
           ref={scrollRef}
           onScroll={updateScrollFades}
@@ -84,7 +84,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                       ? "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 30%, transparent) 0%, color-mix(in srgb, var(--color-primary) 14%, transparent) 55%, transparent 100%)"
                       : "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)",
                   }}
-                  className={`group relative flex h-auto flex-col justify-between gap-4 overflow-hidden rounded-xl border bg-white/[0.03] p-card backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
+                  className={`group relative flex h-auto flex-col justify-between gap-roomy overflow-hidden rounded-xl border bg-white/[0.03] p-card backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_20px_45px_-18px_color-mix(in_srgb,var(--color-primary)_55%,transparent)] ${
                     isActive ? "border-[var(--color-primary)]/50" : "border-white/10"
                   }`}
                 >
@@ -105,7 +105,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                   />
 
                   <div className="relative z-10 flex items-start justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-inline">
                       <span
                         className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
                         style={{
@@ -125,7 +125,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
 
                       {isActive && (
                         <span
-                          className="relative z-10 inline-flex h-9 w-fit items-center gap-1.5 overflow-hidden rounded-md px-2.5 text-[11px] font-semibold tracking-wide text-[var(--color-surface)]"
+                          className="relative z-10 inline-flex h-9 w-fit items-center gap-snug overflow-hidden rounded-md px-cozy text-[11px] font-semibold tracking-wide text-[var(--color-surface)]"
                           style={{
                             backgroundImage:
                               "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 100%, white 8%) 0%, var(--color-primary) 100%)",
@@ -149,7 +149,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                         setError("");
                         setSelectedTimetable(timetable);
                       }}
-                      className="relative z-20 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                      className="relative z-20 rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                       aria-label={`Delete ${timetable.name}`}
                       title="Delete timetable"
                     >
@@ -157,7 +157,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                     </button>
                   </div>
 
-                  <span className="relative z-10 pr-7 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
+                  <span className="relative z-10 pr-ample text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
                     {timetable.name}
                   </span>
                 </article>
@@ -202,7 +202,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-danger)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-inline rounded-lg bg-[var(--color-danger)] px-roomy py-base text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Trash2 size={16} />
               {deleting ? "Deleting..." : "Delete timetable"}
@@ -210,7 +210,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
           </>
         }
       >
-        <div className="flex gap-3">
+        <div className="flex gap-comfy">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
             <AlertTriangle size={18} />
           </span>
@@ -218,10 +218,10 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
             <p className="text-sm leading-6 text-[var(--color-text-muted)]">
               Delete <strong className="font-semibold text-[var(--color-text)]">{selectedTimetable?.name}</strong>?
             </p>
-            <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
+            <p className="mt-tight text-sm leading-6 text-[var(--color-text-muted)]">
               Its timetable days and slots will be permanently removed.
             </p>
-            {error && <p className="mt-3 text-sm text-[var(--color-danger)]">{error}</p>}
+            {error && <p className="mt-comfy text-sm text-[var(--color-danger)]">{error}</p>}
           </div>
         </div>
       </Modal>

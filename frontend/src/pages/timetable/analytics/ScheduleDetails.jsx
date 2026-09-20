@@ -7,18 +7,18 @@ export default function ScheduleDetails({ entries = [], slots = [] }) {
 
   if (!sortedEntries.length) {
     return (
-      <p className="py-2 text-sm text-[var(--color-text-muted)]">
+      <p className="py-base text-sm text-[var(--color-text-muted)]">
         No scheduled classes found.
       </p>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-base">
       {sortedEntries.map((entry) => (
         <article
           key={entry.id}
-          className="flex items-center gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/45 px-3 py-2.5"
+          className="flex items-center gap-comfy rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)]/45 px-comfy py-cozy"
         >
           <span
             className="h-9 w-1 shrink-0 rounded"
@@ -29,7 +29,7 @@ export default function ScheduleDetails({ entries = [], slots = [] }) {
             <p className="truncate text-sm font-medium text-[var(--color-text)]">
               {entry.subject_name}
             </p>
-            <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-hair text-xs text-[var(--color-text-muted)]">
               {DAY_LABELS_FULL[entry.day_of_week]} · {entryTimeLabel(entry, slots)}
             </p>
           </div>

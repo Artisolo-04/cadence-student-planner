@@ -99,7 +99,7 @@ function SubjectLabel({
         transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         transitionDelay: pulseColor ? "40ms" : "0ms",
       }}
-      className={`group/label absolute inset-0.5 flex flex-col justify-center overflow-hidden rounded-md border-t border-white/15 px-2 py-1.5 ${
+      className={`group/label absolute inset-0.5 flex flex-col justify-center overflow-hidden rounded-md border-t border-white/15 px-base py-snug ${
         dimmed ? "" : "transition-opacity duration-150 hover:opacity-90"
       } ${isEditMode ? "touch-none cursor-grab active:cursor-grabbing" : ""} ${
         isRejected ? "animate-cadence-shake" : ""
@@ -121,13 +121,13 @@ function SubjectLabel({
       {roomText && (
         <span
           title={roomText}
-          className="absolute right-1 top-1 z-20 max-w-[70%] sm:max-w-[45%] truncate rounded bg-black/30 px-1 py-0.5 text-[8px] font-bold uppercase tracking-wide text-white/90"
+          className="absolute right-1 top-1 z-20 max-w-[70%] sm:max-w-[45%] truncate rounded bg-black/30 px-tight py-hair text-[8px] font-bold uppercase tracking-wide text-white/90"
         >
           {roomText}
         </span>
       )}
 
-      <span className="relative z-10 flex-1 flex items-center justify-center px-1 text-center text-[10px] sm:text-[12px] font-bold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
+      <span className="relative z-10 flex-1 flex items-center justify-center px-tight text-center text-[10px] sm:text-[12px] font-bold leading-tight text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.35)]">
         <span className="max-w-full line-clamp-2 sm:line-clamp-1 sm:truncate">{entry.subject_name}</span>
       </span>
 

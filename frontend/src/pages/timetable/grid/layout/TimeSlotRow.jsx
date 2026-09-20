@@ -26,11 +26,11 @@ export function TimeSlotRow({
       <div
         data-row-height-ref={rowIdx === 0 ? "true" : undefined}
         style={{ gridColumn: 1, gridRow }}
-        className={`sticky left-0 z-20 flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] px-1 sm:px-3 ${
+        className={`sticky left-0 z-20 flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] px-tight sm:px-comfy ${
           isLastRow ? "" : "border-b"
         } bg-[var(--color-surface)] transition-all duration-500 ease-in-out`}
       >
-        <div className="flex items-center justify-center gap-2 py-1">
+        <div className="flex items-center justify-center gap-inline py-tight">
           {slot.label && (
             <span className="relative hidden h-8 w-8 sm:flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
               <span
@@ -40,7 +40,7 @@ export function TimeSlotRow({
               <span className="relative z-10">{slot.label}</span>
             </span>
           )}
-          <div className="flex flex-col items-center gap-1 leading-none">
+          <div className="flex flex-col items-center gap-tight leading-none">
             <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
               {slot.start_time.slice(0, 5)}
             </span>

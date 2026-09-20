@@ -124,8 +124,8 @@ export default function SubjectPickerModal({
         </>
       }
     >
-      <div className="flex h-full min-h-0 flex-col gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex h-full min-h-0 flex-col gap-roomy">
+        <div className="flex items-center gap-inline">
           <SegmentedControl
             ariaLabel="Filter by group"
             options={GROUP_OPTIONS}
@@ -164,7 +164,7 @@ export default function SubjectPickerModal({
 
             <div className="relative flex min-h-0 w-full flex-1">
               {filteredSubjects.length === 0 ? (
-                <p className="py-4 text-center text-sm text-[var(--color-text-muted)]">
+                <p className="py-roomy text-center text-sm text-[var(--color-text-muted)]">
                   No subjects match "{search}".
                 </p>
               ) : (
@@ -172,7 +172,7 @@ export default function SubjectPickerModal({
                   ref={scrollRef}
                   onScroll={handleScroll}
                   style={{ "--list-max-height": `${LIST_MAX_HEIGHT}px` }}
-                  className="flex min-w-0 flex-1 flex-col gap-1.5 overflow-y-auto scrollbar-hidden sm:max-h-[var(--list-max-height)]"
+                  className="flex min-w-0 flex-1 flex-col gap-snug overflow-y-auto scrollbar-hidden sm:max-h-[var(--list-max-height)]"
                 >
                   {filteredSubjects.map((subject) => (
                     <SubjectPickerRow

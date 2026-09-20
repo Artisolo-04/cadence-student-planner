@@ -202,12 +202,12 @@ export default function TimetablePage() {
         >
           <div className="relative flex min-w-0 items-center">
             <div
-              className={`flex items-center gap-2 transition-all duration-200 ease-in-out ${standardActionClass}`}
+              className={`flex items-center gap-inline transition-all duration-200 ease-in-out ${standardActionClass}`}
             >
               <Button
                 variant="secondary"
                 onClick={handleBackToList}
-                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out"
+                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-roomy whitespace-nowrap transition-all duration-200 ease-in-out"
               >
                 <ArrowLeft size={15} />
                 <span className="hidden sm:inline">All timetables</span>
@@ -270,7 +270,7 @@ export default function TimetablePage() {
             </div>
 
             <div
-              className={`absolute left-0 flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition-all duration-200 ease-in-out ${editActionClass}`}
+              className={`absolute left-0 flex h-9 items-center gap-inline rounded-lg border px-comfy text-xs font-semibold transition-all duration-200 ease-in-out ${editActionClass}`}
               style={{
                 color: "var(--color-text)",
                 borderColor: "var(--color-border)",
@@ -293,7 +293,7 @@ export default function TimetablePage() {
               <Button
                 variant="primary"
                 onClick={() => { if (!isAnalytics) toggleEditMode(); }}
-                className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out ${isAnalytics ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"}`}
+                className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-roomy whitespace-nowrap transition-all duration-200 ease-in-out ${isAnalytics ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"}`}
               >
                 <Pencil size={15} />
                 <span className="hidden sm:inline">Edit</span>
@@ -327,7 +327,7 @@ export default function TimetablePage() {
               <Button
                 variant="primary"
                 onClick={toggleEditMode}
-                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap"
+                className="!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-roomy whitespace-nowrap"
               >
                 <Check size={16} />
                 <span className="hidden sm:inline">Save Changes</span>
@@ -356,7 +356,7 @@ export default function TimetablePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5 py-24 text-center">
+    <div className="flex flex-col items-center justify-center gap-plush py-24 text-center">
       <div
         className="flex items-center justify-center rounded-2xl"
         style={{

@@ -11,10 +11,10 @@ export function SubjectChipContent({ subject, lifted, size, bare }) {
           "linear-gradient(155deg, color-mix(in srgb, var(--subject-color) 20%, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface) 92%)) 0%, color-mix(in srgb, var(--subject-color) 10%, color-mix(in srgb, var(--color-accent) 6%, var(--color-surface) 94%)) 100%)",
         ...(size ? { width: size.width, height: size.height } : null),
       }}
-      className={`group relative flex items-center gap-2.5 overflow-hidden rounded-md backdrop-blur-2xl backdrop-saturate-150 ${
+      className={`group relative flex items-center gap-cozy overflow-hidden rounded-md backdrop-blur-2xl backdrop-saturate-150 ${
         bare ? "border-0" : "border"
       } ${
-        size ? "p-3" : "py-2.5 pl-3.5 pr-3"
+        size ? "p-comfy" : "py-cozy pl-3.5 pr-comfy"
       } transition-[background-color,border-color,box-shadow${
         size ? ",width,height" : ""
       }] duration-200 ease-out

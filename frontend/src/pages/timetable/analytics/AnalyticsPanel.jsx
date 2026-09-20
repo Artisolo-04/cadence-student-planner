@@ -92,7 +92,7 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
   if (status === "error") {
     return (
       <Shell>
-        <div className="flex flex-col items-center gap-2 text-center">
+        <div className="flex flex-col items-center gap-inline text-center">
           <AlertCircle size={22} className="text-[var(--color-text-muted)]" />
           <p className="text-sm text-[var(--color-text)]">
             Couldn't load analytics right now.
@@ -107,7 +107,7 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
   const { longestDay } = data;
 
   return (
-    <div className="flex flex-1 flex-col gap-4 lg:min-h-0">
+    <div className="flex flex-1 flex-col gap-roomy lg:min-h-0">
       <section className="grid shrink-0 grid-cols-1 divide-y divide-[var(--color-border)] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 shadow-lg sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <Stat
           icon={<Clock3 size={16} />}
@@ -131,11 +131,11 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
         />
       </section>
 
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-comfy">
         <div
           role="tablist"
           aria-label="Analytics categories"
-          className="inline-flex self-start rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-1"
+          className="inline-flex self-start rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-tight"
         >
           {TABS.map((item) => (
             <button
@@ -144,7 +144,7 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
               role="tab"
               aria-selected={tab === item.id}
               onClick={() => setTab(item.id)}
-              className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`rounded-md px-comfy py-snug text-[13px] font-medium transition-colors ${
                 tab === item.id
                   ? "bg-[var(--color-surface-alt)] text-[var(--color-text)] shadow-sm"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -158,7 +158,7 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
         <div
           role="tablist"
           aria-label="Group view"
-          className="inline-flex shrink-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-1"
+          className="inline-flex shrink-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-tight"
         >
           {GROUP_VIEWS.map((item) => (
             <button
@@ -167,7 +167,7 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
               role="tab"
               aria-selected={activeGroupFilter === item.id}
               onClick={() => setActiveGroupFilter(item.id)}
-              className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`rounded-md px-comfy py-snug text-[13px] font-medium transition-colors ${
                 activeGroupFilter === item.id
                   ? "bg-[var(--color-surface-alt)] text-[var(--color-text)] shadow-sm"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -180,8 +180,8 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
       </div>
 
       {tab === "time" ? (
-        <div className="grid flex-1 grid-cols-1 gap-4 lg:min-h-0 lg:[grid-template-columns:65fr_35fr]">
-          <section className="relative min-h-[320px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-lg sm:p-6 lg:min-h-0">
+        <div className="grid flex-1 grid-cols-1 gap-roomy lg:min-h-0 lg:[grid-template-columns:65fr_35fr]">
+          <section className="relative min-h-[320px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-roomy shadow-lg sm:p-airy lg:min-h-0">
             <div
               className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-20 blur-3xl"
               style={{ background: "radial-gradient(circle, #5eead4 0%, transparent 70%)" }}
@@ -191,14 +191,14 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
             </div>
           </section>
 
-          <section className="min-h-[200px] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-4 sm:p-6 lg:min-h-0">
+          <section className="min-h-[200px] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-roomy sm:p-airy lg:min-h-0">
             <TrackFractureBar trackFracture={displayedTrackFracture} scopeLabel={scopeLabel} />
           </section>
         </div>
       ) : (
-        <div className="grid flex-1 grid-cols-1 gap-4 lg:min-h-0 lg:grid-cols-2">
-          <section className="flex min-h-[320px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-4 sm:p-6 lg:min-h-0">
-            <h3 className="mb-5 shrink-0 text-[15px] font-medium text-[var(--color-text)]">
+        <div className="grid flex-1 grid-cols-1 gap-roomy lg:min-h-0 lg:grid-cols-2">
+          <section className="flex min-h-[320px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-roomy sm:p-airy lg:min-h-0">
+            <h3 className="mb-plush shrink-0 text-[15px] font-medium text-[var(--color-text)]">
               Time Invested per Subject
             </h3>
             <div className="min-h-[240px] flex-1 lg:min-h-0">
@@ -211,8 +211,8 @@ export default function AnalyticsPanel({ workspace, slots = [] }) {
             </div>
           </section>
 
-          <section className="flex min-h-[320px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-4 sm:p-6 lg:min-h-0">
-            <h3 className="mb-5 shrink-0 text-[15px] font-medium text-[var(--color-text)]">
+          <section className="flex min-h-[320px] flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/40 p-roomy sm:p-airy lg:min-h-0">
+            <h3 className="mb-plush shrink-0 text-[15px] font-medium text-[var(--color-text)]">
               Faculty load
             </h3>
             <div className="min-h-[240px] flex-1 lg:min-h-0">
@@ -239,7 +239,7 @@ function Shell({ children }) {
 
 function Stat({ icon, tint, label, value, sub }) {
   return (
-    <div className="flex items-center gap-3.5 px-4 py-4 sm:px-6 sm:py-5">
+    <div className="flex items-center gap-3.5 px-roomy py-roomy sm:px-airy sm:py-plush">
       <span
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
         style={{ background: `${tint}1f`, color: tint }}

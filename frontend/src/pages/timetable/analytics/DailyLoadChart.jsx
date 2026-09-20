@@ -40,7 +40,7 @@ export default function DailyLoadChart({ dailyLoad, viewMode = "all" }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="mb-2 flex shrink-0 items-baseline justify-between">
+      <div className="mb-base flex shrink-0 items-baseline justify-between">
         <h3 className="text-[15px] font-medium text-[var(--color-text)]">Your Weekly Study Distribution</h3>
         <span className="text-xs text-[var(--color-text-muted)]">Hours per day</span>
       </div>
@@ -134,7 +134,7 @@ export default function DailyLoadChart({ dailyLoad, viewMode = "all" }) {
 
         {hoverDay && (
           <div
-            className="pointer-events-none absolute z-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs shadow-xl"
+            className="pointer-events-none absolute z-10 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-comfy py-base text-xs shadow-xl"
             style={{
               left: `${(44 / VB_W + ((hoverIndex + 0.5) * ((VB_W - 44) / 7)) / VB_W) * 100}%`,
               top: `${(Math.max(
@@ -152,7 +152,7 @@ export default function DailyLoadChart({ dailyLoad, viewMode = "all" }) {
               {DAY_LABELS_FULL[hoverDay.day]} · {hoursToLabel(hoverDay.hours)}
             </p>
             {statusText(hoverDay) && (
-              <p className={`mt-1 max-w-[220px] ${hoverDay.hasParallelTracks ? "text-[#fbbf24]" : "text-[var(--color-text-muted)]"}`}>
+              <p className={`mt-tight max-w-[220px] ${hoverDay.hasParallelTracks ? "text-[#fbbf24]" : "text-[var(--color-text-muted)]"}`}>
                 {statusText(hoverDay)}
               </p>
             )}

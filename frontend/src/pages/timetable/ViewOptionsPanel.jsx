@@ -24,7 +24,7 @@ function SegmentedControl({ options, value, onChange, disabledOption }) {
   );
 
   return (
-    <div className="relative grid grid-cols-3 rounded-lg bg-[var(--color-surface-alt)] p-1.5">
+    <div className="relative grid grid-cols-3 rounded-lg bg-[var(--color-surface-alt)] p-snug">
       <span
         aria-hidden="true"
         className="pointer-events-none absolute bottom-1.5 left-1.5 top-1.5 w-[calc((100%-12px)/3)] rounded-md bg-[var(--color-primary)]/15 shadow-sm transition-transform duration-200 ease-in-out"
@@ -41,7 +41,7 @@ function SegmentedControl({ options, value, onChange, disabledOption }) {
             type="button"
             disabled={disabled}
             onClick={() => onChange(option.value)}
-            className={`relative z-10 cursor-pointer rounded-md px-2 py-2 text-xs font-medium transition-colors duration-200
+            className={`relative z-10 cursor-pointer rounded-md px-base py-base text-xs font-medium transition-colors duration-200
               disabled:cursor-not-allowed disabled:opacity-45
               ${
                 active
@@ -116,11 +116,11 @@ export default function ViewOptionsPanel({
   function renderPanelBody() {
     return (
       <>
-        <div className="border-t border-[var(--color-border)] py-3 first:border-t-0 first:pt-0">
-          <p className="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+        <div className="border-t border-[var(--color-border)] py-comfy first:border-t-0 first:pt-0">
+          <p className="px-tight text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
             My group
           </p>
-          <div className="mt-2">
+          <div className="mt-base">
             <SegmentedControl
               options={MY_GROUP_OPTIONS}
               value={myGroup}
@@ -129,14 +129,14 @@ export default function ViewOptionsPanel({
           </div>
         </div>
 
-        <div className="border-t border-[var(--color-border)] py-3">
-          <div className="flex items-center gap-2 px-1">
+        <div className="border-t border-[var(--color-border)] py-comfy">
+          <div className="flex items-center gap-inline px-tight">
             <Users size={15} className="text-[var(--color-text-muted)]" />
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
               Show groups
             </p>
           </div>
-          <div className="mt-2">
+          <div className="mt-base">
             <SegmentedControl
               options={GROUP_OPTIONS}
               value={viewOptions.groupVisibility}
@@ -149,13 +149,13 @@ export default function ViewOptionsPanel({
             />
           </div>
           {!myGroup && (
-            <p className="mt-2 px-1 text-xs text-[var(--color-text-muted)]">
+            <p className="mt-base px-tight text-xs text-[var(--color-text-muted)]">
               Choose G1 or G2 to filter the timetable.
             </p>
           )}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-[var(--color-border)] px-1 pt-4">
+        <div className="flex flex-col gap-comfy border-t border-[var(--color-border)] px-tight pt-roomy">
           <Checkbox
             id="view-options-show-teacher"
             label="Show teacher"
@@ -184,7 +184,7 @@ export default function ViewOptionsPanel({
       <Button
         variant="secondary"
         onClick={() => setOpen((current) => !current)}
-        className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 ${
+        className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-roomy ${
           open
             ? "!bg-[var(--color-primary)] !text-[var(--color-primary-fg)] shadow-sm !border-transparent"
             : ""
@@ -198,13 +198,13 @@ export default function ViewOptionsPanel({
       {/* Desktop: anchored popover */}
       {mounted && (
         <div
-          className={`absolute right-0 z-40 mt-2 hidden w-72 origin-top-right rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl transition-all duration-150 ease-out sm:block ${
+          className={`absolute right-0 z-40 mt-base hidden w-72 origin-top-right rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-comfy shadow-xl transition-all duration-150 ease-out sm:block ${
             visible
               ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-1 scale-95 opacity-0"
           }`}
         >
-          <div className="flex items-center gap-2 px-1 pb-3">
+          <div className="flex items-center gap-inline px-tight pb-comfy">
             <Eye size={16} className="text-[var(--color-primary)]" />
             <h3 className="text-sm font-semibold text-[var(--color-text)]">
               View options
