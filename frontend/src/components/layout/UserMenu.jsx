@@ -94,12 +94,12 @@ export default function UserMenu() {
       {mounted && (
         <div
           role="menu"
-          className={`absolute right-0 mt-4 w-48 rounded-lg border border-[var(--color-border)]
-            bg-[var(--color-surface)] shadow-lg p-1 z-30 origin-top-right
+          className={`absolute right-0 mt-roomy w-48 rounded-lg border border-[var(--color-border)]
+            bg-[var(--color-surface)] shadow-lg p-tight z-30 origin-top-right
             transition-all duration-150 ease-out
             ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1"}`}
         >
-          <div className="px-3 py-2 border-b mb-1 border-[var(--color-border)]">
+          <div className="px-comfy py-base border-b mb-tight border-[var(--color-border)]">
             <p className="text-sm font-medium text-[var(--color-text)] truncate">
               {profile?.full_name || "Student"}
             </p>
@@ -114,7 +114,7 @@ export default function UserMenu() {
                 setOpen(false);
                 item.onClick();
               }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors rounded-sm
+              className={`w-full flex items-center gap-cozy px-comfy py-base text-sm text-left transition-colors rounded-sm
                 hover:bg-[var(--color-surface-alt)]
                 ${item.danger ? "text-[var(--color-danger)]" : "text-[var(--color-text)]"}`}
             >

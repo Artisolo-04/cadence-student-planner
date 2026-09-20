@@ -124,7 +124,7 @@ export default function WorkspaceContextSwitcher() {
             ? VISIBLE_ITEMS * ITEM_HEIGHT + LIST_PADDING
             : undefined,
       }}
-      className={`z-[100] overflow-y-auto scrollbar-cadence p-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg transition-all duration-200 ease-out ${
+      className={`z-[100] overflow-y-auto scrollbar-cadence p-tight rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg transition-all duration-200 ease-out ${
         openUpward ? "origin-bottom" : "origin-top"
       } ${
         visible
@@ -141,7 +141,7 @@ export default function WorkspaceContextSwitcher() {
               role="option"
               aria-selected={isSelected}
               onClick={() => handleSelect(t.id)}
-              className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left rounded-sm hover:bg-[var(--color-surface-alt)] transition-colors ${
+              className={`w-full flex items-center justify-between gap-inline px-comfy py-base text-sm text-left rounded-sm hover:bg-[var(--color-surface-alt)] transition-colors ${
                 isSelected ? "text-[var(--color-primary)] font-medium" : "text-[var(--color-text)]"
               }`}
             >
@@ -162,7 +162,7 @@ export default function WorkspaceContextSwitcher() {
         onClick={() => setOpen((o) => !o)}
         aria-label="Switch workspace"
         aria-expanded={open}
-        className={`flex items-center justify-center w-full py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-[var(--color-text-muted)] backdrop-blur-md transition-colors duration-200 hover:bg-[var(--color-border)]/40 hover:text-[var(--color-text)] ${
+        className={`flex items-center justify-center w-full py-snug rounded-lg border border-white/10 bg-white/[0.03] text-[var(--color-text-muted)] backdrop-blur-md transition-colors duration-200 hover:bg-[var(--color-border)]/40 hover:text-[var(--color-text)] ${
           open ? "text-[var(--color-primary)] border-[var(--color-primary)]/40" : ""
         }`}
       >
@@ -177,7 +177,7 @@ export default function WorkspaceContextSwitcher() {
     );
 
     return (
-      <div className="mb-2">
+      <div className="mb-base">
         {open ? trigger : <Tooltip label={`Workspace: ${label}`}>{trigger}</Tooltip>}
         {mounted && createPortal(listNode, document.body)}
       </div>
@@ -185,13 +185,13 @@ export default function WorkspaceContextSwitcher() {
   }
 
   return (
-    <div className="mb-2">
+    <div className="mb-base">
       <button
         type="button"
         ref={triggerRef}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className={`w-full flex items-center py-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2 backdrop-blur-md transition-colors duration-200 hover:bg-[var(--color-border)]/40 ${
+        className={`w-full flex items-center py-snug rounded-lg border border-white/10 bg-white/[0.04] px-base backdrop-blur-md transition-colors duration-200 hover:bg-[var(--color-border)]/40 ${
           open ? "border-[var(--color-primary)]/40" : ""
         }`}
       >
@@ -204,7 +204,7 @@ export default function WorkspaceContextSwitcher() {
         </span>
         <span
           className={`flex-1 overflow-hidden whitespace-nowrap text-left text-[13px] font-medium text-[var(--color-text)] transition-all duration-150 ease-in-out ${
-            collapsed ? "max-w-0 ml-0" : "max-w-[160px] ml-2"
+            collapsed ? "max-w-0 ml-0" : "max-w-[160px] ml-base"
           } ${contentVisible ? "opacity-100" : "opacity-0"}`}
         >
           <span className="block truncate">{label}</span>

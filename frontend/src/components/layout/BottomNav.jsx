@@ -12,7 +12,7 @@ function NavItemLink({ item, onClick }) {
       to={item.path}
       onClick={onClick}
       className={({ isActive }) =>
-        `flex flex-col items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-medium transition-colors duration-150 ${
+        `flex flex-col items-center gap-tight px-comfy py-tight rounded-lg text-[11px] font-medium transition-colors duration-150 ${
           isActive ? "text-[var(--color-primary)]" : "text-[var(--color-text-muted)]"
         }`
       }
@@ -58,16 +58,16 @@ function MoreSheet({ items, open, onClose }) {
       <div
         role="menu"
         className={`absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-[var(--color-border)]
-          bg-[var(--color-surface)] shadow-lg p-4
+          bg-[var(--color-surface)] shadow-lg p-roomy
           pb-[calc(env(safe-area-inset-bottom)+1rem)]
           transition-transform duration-200 ease-out
           ${visible ? "translate-y-0" : "translate-y-full"}`}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--color-border)]" />
-        <p className="mb-3 text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
+        <div className="mx-auto mb-comfy h-1 w-10 rounded-full bg-[var(--color-border)]" />
+        <p className="mb-comfy text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
           More
         </p>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-inline">
           {items.map((item) => (
             <NavItemLink key={item.path} item={item} onClick={onClose} />
           ))}
@@ -96,7 +96,7 @@ export default function BottomNav() {
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around
           border-t border-[var(--color-border)] bg-[var(--color-surface)]
-          px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]"
+          px-base pt-base pb-[calc(env(safe-area-inset-bottom)+0.5rem)]"
       >
         {primaryItems.map((item) => (
           <NavItemLink key={item.path} item={item} />
@@ -108,7 +108,7 @@ export default function BottomNav() {
             onClick={() => setSheetOpen((o) => !o)}
             aria-haspopup="menu"
             aria-expanded={sheetOpen}
-            className={`flex flex-col items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-medium transition-colors duration-150 ${
+            className={`flex flex-col items-center gap-tight px-comfy py-tight rounded-lg text-[11px] font-medium transition-colors duration-150 ${
               overflowActive || sheetOpen
                 ? "text-[var(--color-primary)]"
                 : "text-[var(--color-text-muted)]"

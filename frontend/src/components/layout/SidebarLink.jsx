@@ -9,8 +9,8 @@ export default function SidebarLink({ to, icon: Icon, collapsed, children }) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `flex items-center py-1.5 rounded-lg text-[13px] font-medium transition-colors duration-200 ease-in-out w-full ${
-          collapsed ? "justify-center px-0" : "px-2"
+        `flex items-center py-snug rounded-lg text-[13px] font-medium transition-colors duration-200 ease-in-out w-full ${
+          collapsed ? "justify-center px-0" : "px-base"
         } ${
           isActive
             ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
@@ -27,7 +27,7 @@ export default function SidebarLink({ to, icon: Icon, collapsed, children }) {
       </span>
       <span
         className={`overflow-hidden whitespace-nowrap transition-all duration-150 ease-in-out ${
-          collapsed ? "max-w-0 ml-0" : "max-w-[160px] ml-2"
+          collapsed ? "max-w-0 ml-0" : "max-w-[160px] ml-base"
         } ${contentVisible ? "opacity-100" : "opacity-0"}`}
       >
         {children}

@@ -56,7 +56,7 @@ function MobileWorkspaceButton() {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-1.5 h-9 max-w-[140px] px-2.5 rounded-md shrink-0
+        className="flex items-center gap-snug h-9 max-w-[140px] px-cozy rounded-md shrink-0
           border border-[var(--color-border)] bg-[var(--color-surface)]
           hover:bg-[var(--color-surface-alt)] hover:border-[var(--color-primary)]/60
           transition-colors duration-200
@@ -76,12 +76,12 @@ function MobileWorkspaceButton() {
       {mounted && (
         <div
           role="menu"
-          className={`absolute right-0 top-full mt-2 w-56 rounded-lg border border-[var(--color-border)]
-            bg-[var(--color-surface)] shadow-lg p-1 z-30 origin-top-right
+          className={`absolute right-0 top-full mt-base w-56 rounded-lg border border-[var(--color-border)]
+            bg-[var(--color-surface)] shadow-lg p-tight z-30 origin-top-right
             transition-all duration-150 ease-out
             ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-1"}`}
         >
-          <div className="px-3 py-2 border-b mb-1 border-[var(--color-border)]">
+          <div className="px-comfy py-base border-b mb-tight border-[var(--color-border)]">
             <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wide">
               Your timetables
             </p>
@@ -96,7 +96,7 @@ function MobileWorkspaceButton() {
                     role="option"
                     aria-selected={isSelected}
                     onClick={() => handleSelect(t.id)}
-                    className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left rounded-sm
+                    className={`w-full flex items-center justify-between gap-inline px-comfy py-base text-sm text-left rounded-sm
                       hover:bg-[var(--color-surface-alt)] transition-colors
                       ${isSelected ? "text-[var(--color-primary)] font-medium" : "text-[var(--color-text)]"}`}
                   >
@@ -115,9 +115,9 @@ function MobileWorkspaceButton() {
 
 export default function TopBar() {
   return (
-    <header className="flex items-center justify-between px-4 md:px-8 py-2 border-b border-[var(--color-border)]">
+    <header className="flex items-center justify-between px-roomy md:px-8 py-base border-b border-[var(--color-border)]">
       <span className="text-lg font-semibold text-[var(--color-primary)]">Cadence</span>
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-inline md:gap-comfy">
         <ThemeToggle />
         <MobileWorkspaceButton />
         <UserMenu />
