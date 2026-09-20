@@ -73,7 +73,7 @@ export default function ProfileForm() {
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-roomy mb-airy">
         <button
           type="button"
           onClick={() => setAvatarModalOpen(true)}
@@ -122,7 +122,7 @@ export default function ProfileForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-roomy">
         <Input
           id="fullName"
           label="Full name"
@@ -132,7 +132,7 @@ export default function ProfileForm() {
           placeholder="Your full name"
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-roomy">
           <Input
             id="faculty"
             label="Faculty"
@@ -153,12 +153,12 @@ export default function ProfileForm() {
 
         {errors.form && <p className="text-xs text-[var(--color-danger)]">{errors.form}</p>}
 
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex items-center gap-comfy pt-base">
           <Button type="submit" disabled={saving}>
             {saving ? "Saving..." : "Save changes"}
           </Button>
           {saved && (
-            <span className="flex items-center gap-1.5 text-sm text-[var(--color-primary)]">
+            <span className="flex items-center gap-snug text-sm text-[var(--color-primary)]">
               <Check size={16} /> Saved
             </span>
           )}

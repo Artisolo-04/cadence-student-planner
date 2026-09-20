@@ -297,12 +297,12 @@ export default function AvatarUploadModal({ open, onClose, onUploaded, profile }
           <Loader2 size={24} className="animate-spin text-[var(--color-text-muted)]" />
         </div>
       ) : !imgUrl ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-10">
+        <div className="flex flex-col items-center justify-center gap-comfy py-10">
           <button
             type="button"
             onClick={handlePickClick}
-            className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-[var(--color-border)]
-              px-8 py-8 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]
+            className="flex flex-col items-center gap-inline rounded-lg border border-dashed border-[var(--color-border)]
+              px-wide py-wide text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]
               hover:text-[var(--color-text)] transition-colors"
           >
             <ImagePlus size={28} />
@@ -312,7 +312,7 @@ export default function AvatarUploadModal({ open, onClose, onUploaded, profile }
           {error && <p className="text-xs text-[var(--color-danger)]">{error}</p>}
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-4 py-1">
+        <div className="flex flex-col items-center gap-roomy py-tight">
           <div
             ref={frameRef}
             onPointerDown={handlePointerDown}
@@ -370,7 +370,7 @@ export default function AvatarUploadModal({ open, onClose, onUploaded, profile }
             className="max-w-[240px]"
           />
 
-          <span className="text-xs text-[var(--color-text-muted)] -mt-2">{zoomPct}%</span>
+          <span className="text-xs text-[var(--color-text-muted)] -mt-base">{zoomPct}%</span>
 
           <button
             type="button"

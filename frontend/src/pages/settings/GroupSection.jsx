@@ -23,7 +23,7 @@ export default function GroupSection() {
   if (loading) {
     return (
       <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
-        <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
+        <h2 className="text-base font-semibold text-[var(--color-text)] mb-tight">My group</h2>
         <p className="text-sm text-[var(--color-text-muted)]">Loading your workspaces...</p>
       </div>
     );
@@ -32,7 +32,7 @@ export default function GroupSection() {
   if (workspaces.length === 0) {
     return (
       <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
-        <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
+        <h2 className="text-base font-semibold text-[var(--color-text)] mb-tight">My group</h2>
         <p className="text-sm text-[var(--color-text-muted)]">
           You don't have any timetables yet. Create one first, then come back to set your group.
         </p>
@@ -53,13 +53,13 @@ export default function GroupSection() {
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
-      <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
-      <p className="text-sm text-[var(--color-text-muted)] mb-4">
+      <h2 className="text-base font-semibold text-[var(--color-text)] mb-tight">My group</h2>
+      <p className="text-sm text-[var(--color-text-muted)] mb-roomy">
         Pick which group's sessions show up for you in each workspace.
       </p>
 
-      <div className="flex flex-col gap-4 max-w-md">
-        <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-roomy max-w-md">
+        <div className="flex flex-col gap-snug">
           <Dropdown
             id="settings-workspace"
             label="Workspace"
@@ -68,7 +68,7 @@ export default function GroupSection() {
             options={workspaceOptions}
           />
           {isSelectedActive && (
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-lg py-1 border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-2 py-0.5 text-[11px] font-medium text-[var(--color-primary)] backdrop-blur-sm">
+            <span className="inline-flex w-fit items-center gap-snug rounded-lg py-tight border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-base text-[11px] font-medium text-[var(--color-primary)] backdrop-blur-sm">
               <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
               Currently active workspace
             </span>

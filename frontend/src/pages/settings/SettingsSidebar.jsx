@@ -10,8 +10,8 @@ const TIPS = [
 export function AppearanceCard() {
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
-      <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">Appearance</h2>
-      <p className="text-sm text-[var(--color-text-muted)] mb-4">
+      <h2 className="text-base font-semibold text-[var(--color-text)] mb-tight">Appearance</h2>
+      <p className="text-sm text-[var(--color-text-muted)] mb-roomy">
         Switch between light and dark mode.
       </p>
       <ThemeToggle />
@@ -22,7 +22,7 @@ export function AppearanceCard() {
 export function TipsCard() {
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-card">
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-inline mb-comfy">
         <Info size={16} className="text-[var(--color-primary)]" />
         <h2 className="text-base font-semibold text-[var(--color-text)]">Tips</h2>
       </div>
