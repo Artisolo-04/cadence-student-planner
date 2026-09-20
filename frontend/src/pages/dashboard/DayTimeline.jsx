@@ -33,7 +33,7 @@ export default function DayTimeline({ sessions = [] }) {
 
   return (
     <div
-      className="relative h-full min-h-0 flex-1 overflow-hidden rounded-2xl border border-white/10 p-4 backdrop-blur-xl"
+      className="relative h-full min-h-0 flex-1 overflow-hidden rounded-2xl border border-white/10 p-roomy backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",
@@ -47,7 +47,7 @@ export default function DayTimeline({ sessions = [] }) {
 
       <div className="relative z-10 flex h-full flex-col justify-between">
         <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-snug">
             <BarChart2 size={12} />
             Today
           </span>
@@ -57,7 +57,7 @@ export default function DayTimeline({ sessions = [] }) {
         </div>
 
         {hasSessions ? (
-          <div className="mt-4">
+          <div className="mt-roomy">
             <div className="flex w-full items-center gap-[3px]">
               {Array.from({ length: BAR_COUNT }).map((_, i) => {
                 const colThreshold = ((i + 1) / BAR_COUNT) * 100;
@@ -86,7 +86,7 @@ export default function DayTimeline({ sessions = [] }) {
               })}
             </div>
 
-            <div className="mt-1.5 flex justify-between font-mono text-[9px] text-[var(--color-text-muted)]">
+            <div className="mt-snug flex justify-between font-mono text-[9px] text-[var(--color-text-muted)]">
               <span>
                 {String(Math.floor(dayStart / 60)).padStart(2, "0")}:
                 {String(dayStart % 60).padStart(2, "0")}
@@ -98,7 +98,7 @@ export default function DayTimeline({ sessions = [] }) {
             </div>
           </div>
         ) : (
-          <p className="mt-4 text-center text-xs text-[var(--color-text-muted)]">
+          <p className="mt-roomy text-center text-xs text-[var(--color-text-muted)]">
             Nothing scheduled today.
           </p>
         )}

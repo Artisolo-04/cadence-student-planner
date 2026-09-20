@@ -72,12 +72,12 @@ export default function SessionTimerCard({ sessions = [], currentKey }) {
       />
 
       <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+        <div className="flex items-center gap-snug text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
           <Timer size={12} />
           {mode === "current" ? "In session" : mode === "next" ? "Up next" : "Timer"}
         </div>
 
-        <div className="mt-4 flex flex-1 items-stretch gap-4 border-t border-white/10 pt-4">
+        <div className="mt-roomy flex flex-1 items-stretch gap-roomy border-t border-white/10 pt-roomy">
           <div className="flex w-7 shrink-0 flex-col-reverse gap-[3px]">
             {Array.from({ length: 14 }).map((_, i) => {
               const rowThreshold = ((i + 1) / 14) * 100;
@@ -110,12 +110,12 @@ export default function SessionTimerCard({ sessions = [], currentKey }) {
             </p>
 
             <span
-              className="mt-3 font-mono text-2xl font-bold tabular-nums leading-none"
+              className="mt-comfy font-mono text-2xl font-bold tabular-nums leading-none"
               style={{ color: mode === "idle" ? "var(--color-text)" : accentColor }}
             >
               {mode === "idle" ? formatHMS(nowSeconds) : formatHMS(remaining)}
             </span>
-            <p className="mt-0.5 text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
+            <p className="mt-hair text-[10px] uppercase tracking-wide text-[var(--color-text-muted)]">
               {mode === "current" && "left"}
               {mode === "next" && "to go"}
               {mode === "idle" && "now"}

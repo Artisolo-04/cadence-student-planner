@@ -41,13 +41,13 @@ export default function DueSoonCard({ homework, loading }) {
 
       <div className="relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+          <div className="flex items-center gap-inline">
+            <div className="flex items-center gap-snug text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
               <ClipboardList size={12} />
               Due Soon
             </div>
             {!loading && homework.length > 0 && (
-              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--color-primary)]/15 px-1.5 text-[10px] font-bold text-[var(--color-primary)]">
+              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--color-primary)]/15 px-snug text-[10px] font-bold text-[var(--color-primary)]">
                 {homework.length}
               </span>
             )}
@@ -57,7 +57,7 @@ export default function DueSoonCard({ homework, loading }) {
             <button
               type="button"
               onClick={() => navigate("/homework")}
-              className="flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+              className="flex items-center gap-tight text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
             >
               View all
               <ArrowRight size={12} />
@@ -66,13 +66,13 @@ export default function DueSoonCard({ homework, loading }) {
         </div>
 
         {loading ? (
-          <p className="mt-3 text-xs text-[var(--color-text-muted)]">Loading…</p>
+          <p className="mt-comfy text-xs text-[var(--color-text-muted)]">Loading…</p>
         ) : homework.length === 0 ? (
-          <p className="mt-3 text-sm text-[var(--color-text-muted)]">
+          <p className="mt-comfy text-sm text-[var(--color-text-muted)]">
             Nothing due — you're all caught up.
           </p>
         ) : (
-          <div className="mt-4 flex flex-col divide-y divide-white/[0.06] border-t border-white/10">
+          <div className="mt-roomy flex flex-col divide-y divide-white/[0.06] border-t border-white/10">
             {homework.map((item) => {
               const overdue = isOverdue(item.due_date, item.status);
               const priority = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES.normal;
@@ -81,18 +81,18 @@ export default function DueSoonCard({ homework, loading }) {
               const isToday = urgency === "Due today";
 
               return (
-                <div key={item.id} className="flex items-center gap-3 py-3 first:pt-3.5">
+                <div key={item.id} className="flex items-center gap-comfy py-comfy first:pt-3.5">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-[var(--color-text)]">
                       {item.title}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">
+                    <p className="mt-hair truncate text-xs text-[var(--color-text-muted)]">
                       {item.subject_name || "No subject"} · {priority.label} priority
                     </p>
                   </div>
 
                   <span
-                    className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-chip-x py-chip-y text-[11px] font-bold ${
+                    className={`inline-flex shrink-0 items-center gap-tight whitespace-nowrap rounded-md border px-chip-x py-chip-y text-[11px] font-bold ${
                       overdue
                         ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]"
                         : isToday

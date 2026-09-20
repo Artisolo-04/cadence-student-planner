@@ -23,18 +23,18 @@ export default function TodayOverviewCard({ todayLabel, nextSession, weekTotal, 
       />
 
       <div className="relative z-10">
-        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+        <div className="flex items-center gap-snug text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
           <Sparkles size={12} />
           Today
         </div>
-        <p className="mt-1 text-lg font-semibold text-[var(--color-text)]">{todayLabel}</p>
+        <p className="mt-tight text-lg font-semibold text-[var(--color-text)]">{todayLabel}</p>
         <p className="text-xs text-[var(--color-text-muted)]">{formatDate()}</p>
 
-        <div className="mt-4 flex flex-col gap-2.5 border-t border-white/10 pt-4">
+        <div className="mt-roomy flex flex-col gap-cozy border-t border-white/10 pt-roomy">
           {nextSession ? (
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-start gap-cozy">
               <span
-                className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
+                className="mt-hair flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
                 style={{ backgroundColor: `color-mix(in srgb, ${nextSession.color} 25%, transparent)` }}
               >
                 <Clock size={13} style={{ color: nextSession.color }} />
@@ -53,8 +53,8 @@ export default function TodayOverviewCard({ todayLabel, nextSession, weekTotal, 
           )}
 
           {weekTotal > 0 && (
-            <div className="flex items-start gap-2.5">
-              <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-primary)]/15">
+            <div className="flex items-start gap-cozy">
+              <span className="mt-hair flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--color-primary)]/15">
                 <Flame size={13} className="text-[var(--color-primary)]" />
               </span>
               <div className="min-w-0">

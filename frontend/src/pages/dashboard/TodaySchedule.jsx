@@ -47,13 +47,13 @@ export default function TodaySchedule({ sessions, currentKey }) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-2xl border border-white/10 p-4 backdrop-blur-xl"
+      className="relative overflow-hidden rounded-2xl border border-white/10 p-roomy backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, color-mix(in srgb, var(--color-accent) 5%, transparent) 65%, transparent 100%)",
       }}
     >
-      <div className="mb-3 flex items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+      <div className="mb-comfy flex items-center gap-snug px-tight text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
         <CalendarClock size={12} />
         Today's schedule
       </div>
@@ -67,8 +67,8 @@ export default function TodaySchedule({ sessions, currentKey }) {
             ? { maskImage, WebkitMaskImage: maskImage }
             : {}),
         }}
-        className={`flex flex-col gap-0.5 transition-[mask-image] duration-150 ${
-          needsScroll ? "overflow-y-auto scrollbar-cadence pr-1" : ""
+        className={`flex flex-col gap-hair transition-[mask-image] duration-150 ${
+          needsScroll ? "overflow-y-auto scrollbar-cadence pr-tight" : ""
         }`}
       >
         {sessions.map((s, i) => (

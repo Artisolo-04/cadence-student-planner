@@ -120,20 +120,20 @@ export default function FocusTimeline({ sessions }) {
       }}
     >
       <div className="relative z-10 flex h-full flex-col">
-        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+        <div className="flex items-center gap-snug text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
           <Target size={12} />
           Focus
         </div>
 
         {hasSessions && (
-          <div className="mt-3">
+          <div className="mt-comfy">
             <div className="flex items-center justify-between font-mono text-[10px] text-[var(--color-text-muted)]">
               <span>
                 {doneCount}/{sessions.length} done
               </span>
               {freeMinutes > 0 && <span>{formatGap(freeMinutes)} free</span>}
             </div>
-            <div className="relative mt-1.5 flex h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="relative mt-snug flex h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
               {scrubberSegments.map((seg) =>
                 seg.type === "session" ? (
                   <div
@@ -160,7 +160,7 @@ export default function FocusTimeline({ sessions }) {
         )}
 
         {!hasSessions && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-inline text-center">
             <Target size={22} className="text-[var(--color-text-muted)]" />
             <p className="text-sm font-medium text-[var(--color-text)]">Nothing scheduled today</p>
             <p className="text-xs text-[var(--color-text-muted)]">Enjoy the free time.</p>
@@ -174,7 +174,7 @@ export default function FocusTimeline({ sessions }) {
             style={
               maskImage ? { maskImage, WebkitMaskImage: maskImage } : {}
             }
-            className="scrollbar-cadence relative mt-4 flex-1 min-h-0 overflow-y-auto border-t border-white/10 pl-1 pr-1 pt-4 transition-[mask-image] duration-150"
+            className="scrollbar-cadence relative mt-roomy flex-1 min-h-0 overflow-y-auto border-t border-white/10 pl-tight pr-tight pt-roomy transition-[mask-image] duration-150"
           >
             {timelineGroups.map((group, gi) => {
               const start = toMinutes(group.start);
@@ -213,7 +213,7 @@ export default function FocusTimeline({ sessions }) {
                   };
 
               return (
-                <div key={`${group.start}-${group.end}`} className="flex gap-2">
+                <div key={`${group.start}-${group.end}`} className="flex gap-inline">
                   <div className="flex flex-col items-center">
                     <span
                       className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 font-mono text-[9px] font-bold transition-colors duration-300"
@@ -223,7 +223,7 @@ export default function FocusTimeline({ sessions }) {
                     </span>
 
                     {!isLast && (
-                      <div className="relative my-1 w-[2px] flex-1 overflow-hidden rounded-full bg-white/10">
+                      <div className="relative my-tight w-[2px] flex-1 overflow-hidden rounded-full bg-white/10">
                         <div
                           className="absolute inset-x-0 top-0 rounded-full transition-[height] duration-500"
                           style={{
@@ -235,12 +235,12 @@ export default function FocusTimeline({ sessions }) {
                     )}
                   </div>
 
-                  <div className={`min-w-0 flex-1 ${isLast ? "pb-0.5" : "pb-4"}`}>
+                  <div className={`min-w-0 flex-1 ${isLast ? "pb-hair" : "pb-roomy"}`}>
                     {}
                     <div
                       className={
                         isSplit
-                          ? "flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-2"
+                          ? "flex flex-col gap-inline rounded-xl border border-white/10 bg-white/[0.03] p-base"
                           : ""
                       }
                     >
@@ -251,7 +251,7 @@ export default function FocusTimeline({ sessions }) {
                         return (
                           <div key={session.key}>
                             <div
-                              className={`min-w-0 w-full rounded-lg ${isCurrent ? "px-2 py-1.5" : "py-0.5"} ${
+                              className={`min-w-0 w-full rounded-lg ${isCurrent ? "px-base py-snug" : "py-hair"} ${
                                 isPast ? "opacity-50" : ""
                               }`}
                               style={
@@ -266,8 +266,8 @@ export default function FocusTimeline({ sessions }) {
                                   : undefined
                               }
                             >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="flex items-center gap-1.5">
+                              <div className="flex items-center justify-between gap-inline">
+                                <span className="flex items-center gap-snug">
                                   {isSplit && (
                                     <span
                                       className="h-1.5 w-1.5 shrink-0 rounded-full"
@@ -278,7 +278,7 @@ export default function FocusTimeline({ sessions }) {
                                     {group.start.slice(0, 5)}–{group.end.slice(0, 5)}
                                   </p>
                                 </span>
-                                <span className="flex shrink-0 items-center gap-1">
+                                <span className="flex shrink-0 items-center gap-tight">
                                   <span
                                     className="inline-flex items-center rounded-md border px-chip-sm-x py-chip-sm-y text-[9px] font-bold uppercase tracking-wide"
                                     style={
@@ -313,7 +313,7 @@ export default function FocusTimeline({ sessions }) {
                               </div>
 
                               <p
-                                className={`mt-0.5 truncate text-sm ${
+                                className={`mt-hair truncate text-sm ${
                                   isCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
                                 }`}
                               >
@@ -329,13 +329,13 @@ export default function FocusTimeline({ sessions }) {
 
                               {isCurrent && (
                                 <>
-                                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                                  <div className="mt-base h-1.5 overflow-hidden rounded-full bg-white/10">
                                     <div
                                       className="h-full rounded-full"
                                       style={{ width: `${progress}%`, backgroundColor: session.color }}
                                     />
                                   </div>
-                                  <p className="mt-1 font-mono text-[11px] font-medium" style={{ color: session.color }}>
+                                  <p className="mt-tight font-mono text-[11px] font-medium" style={{ color: session.color }}>
                                     {minutesLeft}m left
                                   </p>
                                 </>
@@ -343,7 +343,7 @@ export default function FocusTimeline({ sessions }) {
                             </div>
 
                             {isNotLastInGroup && (
-                              <div className="mx-1 border-t border-white/[0.08]" />
+                              <div className="mx-tight border-t border-white/[0.08]" />
                             )}
                           </div>
                         );
@@ -351,7 +351,7 @@ export default function FocusTimeline({ sessions }) {
                     </div>
 
                     {gap != null && gap >= 15 && (
-                      <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-white/15 px-chip-x py-chip-y font-mono text-[10px] text-[var(--color-text-muted)]">
+                      <div className="mt-base inline-flex items-center gap-tight rounded-md border border-dashed border-white/15 px-chip-x py-chip-y font-mono text-[10px] text-[var(--color-text-muted)]">
                         {gap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
                         {formatGap(gap)} free
                       </div>

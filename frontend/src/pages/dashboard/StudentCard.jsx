@@ -61,13 +61,13 @@ export default function StudentCard({ user, profile, groupTag }) {
 
       <div className="relative z-10 flex w-full flex-col p-card">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
+          <div className="flex items-center gap-snug text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
             Cadence
           </div>
           <Wifi size={16} className="rotate-90 text-[var(--color-text-muted)] opacity-60" />
         </div>
 
-        <div className="mt-3 flex flex-1 items-center gap-5">
+        <div className="mt-comfy flex flex-1 items-center gap-5">
           <span
             className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 text-2xl font-semibold text-[var(--color-primary)] shadow-lg"
             style={{
@@ -92,7 +92,7 @@ export default function StudentCard({ user, profile, groupTag }) {
             <p className="truncate text-lg font-semibold leading-tight text-[var(--color-text)]">
               {fullName}
             </p>
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
+            <div className="mt-tight flex items-center gap-snug text-sm text-[var(--color-text-muted)]">
               <GraduationCap size={14} className="shrink-0" />
               <span className="truncate">
                 {[profile?.faculty, profile?.class_year, showGroupField ? groupTag.toUpperCase() : null]
@@ -103,7 +103,7 @@ export default function StudentCard({ user, profile, groupTag }) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-end justify-between border-t border-white/10 pt-3">
+        <div className="mt-roomy flex items-end justify-between border-t border-white/10 pt-comfy">
           <div>
             <p className="text-[9px] uppercase tracking-wider text-[var(--color-text-muted)]">
               Student ID

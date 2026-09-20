@@ -3,7 +3,7 @@ import { BookOpen } from "lucide-react";
 export default function SessionCard({ session, isCurrent }) {
   return (
     <div
-      className={`relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 transition-colors ${
+      className={`relative flex items-center gap-comfy overflow-hidden rounded-xl px-comfy py-cozy transition-colors ${
         isCurrent ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"
       }`}
       style={
