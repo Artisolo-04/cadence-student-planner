@@ -164,7 +164,7 @@
   margin-top: -5px;
   border-radius: 9999px;
   background: var(--color-primary);
-  border: 3px solid var(--color-background);
+  border: 3px solid var(--color-bg);
   box-shadow: 0 0 0 1px var(--color-primary), 0 2px 6px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -189,7 +189,7 @@
 .zoom-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  border: 3px solid var(--color-background);
+  border: 3px solid var(--color-bg);
   border-radius: 9999px;
   background: var(--color-primary);
   box-shadow: 0 0 0 1px var(--color-primary), 0 2px 6px rgba(0, 0, 0, 0.4);
