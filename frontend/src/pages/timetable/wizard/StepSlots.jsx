@@ -7,7 +7,7 @@ import ClearSlotsModal from "./ClearSlotsModal";
 import PresetGeneratorModal from "./PresetGeneratorModal";
 
 const inputClass =
-  "h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 text-sm text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
+  "h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-cozy text-sm text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
 
 function addMinutes(time, minutes) {
   const [hours, minutesPart] = time.split(":").map(Number);
@@ -215,17 +215,17 @@ const StepSlots = forwardRef(function StepSlots(
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-2 lg:p-4">
-      <div className="grid h-full grid-rows-[auto_minmax(0,1fr)] grid-cols-1 items-stretch gap-2 lg:grid-rows-[minmax(0,1fr)] lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-10">
-        <section className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto">
+    <div className="flex h-full w-full flex-col p-base lg:p-roomy">
+      <div className="grid h-full grid-rows-[auto_minmax(0,1fr)] grid-cols-1 items-stretch gap-inline lg:grid-rows-[minmax(0,1fr)] lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-broad">
+        <section className="flex h-full min-h-0 flex-col gap-roomy overflow-y-auto">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
               Step 3
             </p>
-            <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">
+            <h2 className="mt-base text-xl font-semibold text-[var(--color-text)]">
               Build your time slots
             </h2>
-            <p className="mt-2 hidden lg:block text-sm leading-6 text-[var(--color-text-muted)]">
+            <p className="mt-base hidden lg:block text-sm leading-6 text-[var(--color-text-muted)]">
               Generate a schedule, then fine-tune each slot below.
             </p>
           </div>
@@ -237,14 +237,14 @@ const StepSlots = forwardRef(function StepSlots(
           </p>
 
           {error && (
-            <p className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-3 py-2 text-sm text-[var(--color-danger)]">
+            <p className="rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-comfy py-base text-sm text-[var(--color-danger)]">
               {error}
             </p>
           )}
         </section>
 
         <aside className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-          <div className="flex shrink-0 items-center justify-between gap-2 lg:gap-3 border-b border-[var(--color-border)] p-2 lg:p-4">
+          <div className="flex shrink-0 items-center justify-between gap-inline lg:gap-comfy border-b border-[var(--color-border)] p-base lg:p-roomy">
             <div className="hidden lg:block">
               <h3 className="text-sm font-semibold text-[var(--color-text)]">Your slots</h3>
               <p className="text-xs text-[var(--color-text-muted)]">
@@ -252,10 +252,10 @@ const StepSlots = forwardRef(function StepSlots(
               </p>
             </div>
 
-            <div className="flex flex-1 items-center gap-2 sm:ml-auto sm:flex-none lg:ml-0">
+            <div className="flex flex-1 items-center gap-inline sm:ml-auto sm:flex-none lg:ml-0">
               {slots.length > 0 && (
                 <button type="button" onClick={() => setClearModalOpen(true)} disabled={clearing}
-                  className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 disabled:opacity-50">
+                  className="inline-flex h-8 items-center gap-tight rounded-md px-base text-xs font-medium text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 disabled:opacity-50">
                   <Trash2 size={14} />
                   <span className="hidden sm:inline">{clearing ? "Clearing..." : "Clear all"}</span>
                 </button>
@@ -280,36 +280,36 @@ const StepSlots = forwardRef(function StepSlots(
             </div>
           </div>
 
-          <div className="relative flex min-h-0 flex-1 p-2 lg:px-4">
+          <div className="relative flex min-h-0 flex-1 p-base lg:px-roomy">
             <div
               ref={scrollRef}
               onScroll={updateScrollFades}
-              className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden py-3"
+              className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden py-comfy"
             >
               {orderedSlots.length > 0 ? (
                 <table className="w-full border-collapse text-sm">
                   <tbody>
                     {orderedSlots.map((slot, index) => (
                       <tr key={slot.id} className="border-b border-[var(--color-border)] last:border-b-0">
-                        <td className="px-5 py-2">
+                        <td className="px-plush py-base">
                           <input aria-label={`Label for slot ${index + 1}`} value={slot.label || ""}
                             placeholder={`Slot ${index + 1}`}
                             onChange={(event) => updateLocalSlot(slot.id, "label", event.target.value)}
                             className={inputClass} />
                         </td>
-                        <td className="px-5 py-2">
+                        <td className="px-plush py-base">
                           <input aria-label={`Start time for slot ${index + 1}`} type="time"
                             value={timeValue(slot.start_time)}
                             onChange={(event) => updateLocalSlot(slot.id, "start_time", event.target.value)}
                             className={inputClass} />
                         </td>
-                        <td className="px-5 py-2">
+                        <td className="px-plush py-base">
                           <input aria-label={`End time for slot ${index + 1}`} type="time"
                             value={timeValue(slot.end_time)}
                             onChange={(event) => updateLocalSlot(slot.id, "end_time", event.target.value)}
                             className={inputClass} />
                         </td>
-                        <td className="px-5 py-2 text-right">
+                        <td className="px-plush py-base text-right">
                           <button type="button" onClick={() => handleRemove(slot.id)}
                             aria-label={`Remove slot ${index + 1}`} title="Remove slot"
                             className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]">
@@ -321,10 +321,10 @@ const StepSlots = forwardRef(function StepSlots(
                   </tbody>
                 </table>
               ) : (
-                <div className="flex h-full min-h-40 flex-col items-center justify-center px-5 text-center">
-                  <Clock3 size={22} className="mb-2 text-[var(--color-text-muted)]" />
+                <div className="flex h-full min-h-40 flex-col items-center justify-center px-plush text-center">
+                  <Clock3 size={22} className="mb-base text-[var(--color-text-muted)]" />
                   <p className="text-sm font-medium text-[var(--color-text)]">Your schedule will appear here</p>
-                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                  <p className="mt-tight text-xs text-[var(--color-text-muted)]">
                     Generate a preset or add a slot to get started.
                   </p>
                 </div>

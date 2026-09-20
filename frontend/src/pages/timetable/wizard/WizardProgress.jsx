@@ -12,7 +12,7 @@ export default function WizardProgress({
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between text-xs font-medium text-[var(--color-text-muted)]">
+      <div className="mb-airy flex items-center justify-between text-xs font-medium text-[var(--color-text-muted)]">
         <span>Step {currentStep} of {totalSteps}</span>
       </div>
 
@@ -34,7 +34,7 @@ export default function WizardProgress({
                 type="button"
                 disabled={!isInteractive || disabled}
                 onClick={() => onStepChange?.(stepNumber)}
-                className={`flex min-w-0 items-center gap-2 rounded-md text-left transition-colors duration-150 ${
+                className={`flex min-w-0 items-center gap-inline rounded-md text-left transition-colors duration-150 ${
                   isInteractive
                     ? "cursor-pointer hover:text-[var(--color-primary)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                     : "cursor-default"
@@ -68,7 +68,7 @@ export default function WizardProgress({
               {index < totalSteps - 1 && (
                 <span
                   aria-hidden="true"
-                  className="mx-3 h-1 min-w-4 flex-1 overflow-hidden rounded-full bg-[var(--color-border)]"
+                  className="mx-comfy h-1 min-w-4 flex-1 overflow-hidden rounded-full bg-[var(--color-border)]"
                 >
                   <span
                     className={`block h-full rounded-full transition-all duration-300 ${

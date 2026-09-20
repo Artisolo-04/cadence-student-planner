@@ -23,7 +23,7 @@ export default function ClearSlotsModal({
             type="button"
             onClick={onConfirm}
             disabled={clearing}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-danger)] px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-inline rounded-lg bg-[var(--color-danger)] px-roomy py-base text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Trash2 size={16} />
             {clearing ? "Clearing..." : "Clear all slots"}
@@ -31,11 +31,11 @@ export default function ClearSlotsModal({
         </>
       }
     >
-      <div className="flex gap-3">
+      <div className="flex gap-comfy">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)]">
           <AlertTriangle size={18} />
         </span>
-        <p className="pt-1 text-sm leading-6 text-[var(--color-text-muted)]">
+        <p className="pt-tight text-sm leading-6 text-[var(--color-text-muted)]">
           This will permanently delete all {slotCount} timetable slots. You cannot undo this action.
         </p>
       </div>

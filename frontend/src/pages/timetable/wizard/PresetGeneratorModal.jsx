@@ -69,16 +69,16 @@ export default function PresetGeneratorModal({
         </>
       }
     >
-      <div className="flex gap-4 items-center justify-between">
+      <div className="flex gap-roomy items-center justify-between">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--color-accent)]/10 text-[var(--color-accent)] ring-1 ring-inset ring-[var(--color-accent)]/15">
           <Clock3 size={18} />
         </span>
-        <p className="p-2 text-sm leading-6 text-[var(--color-text-muted)]">
+        <p className="p-base text-sm leading-6 text-[var(--color-text-muted)]">
           Create an evenly spaced schedule. You can fine-tune each slot afterwards.
         </p>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3">
+      <div className="mt-plush grid grid-cols-2 gap-x-roomy gap-y-comfy">
         <Input
           id="preset-start"
           label="Start time"
@@ -112,14 +112,14 @@ export default function PresetGeneratorModal({
         />
       </div>
 
-      <div className="mt-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-4">
+      <div className="mt-plush rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-alt)]/40 p-roomy">
         <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
           Preview
         </div>
 
         {preview ? (
           <>
-            <div className="mt-2 flex items-center gap-2.5">
+            <div className="mt-base flex items-center gap-cozy">
               <span className="text-lg font-semibold text-[var(--color-text)] tabular-nums">
                 {preview.start}
               </span>
@@ -128,13 +128,13 @@ export default function PresetGeneratorModal({
                 {preview.end}
               </span>
             </div>
-            <p className="mt-1.5 text-[12px] text-[var(--color-text-muted)]">
+            <p className="mt-snug text-[12px] text-[var(--color-text-muted)]">
               {preview.count} slots · {preview.duration} min each
               {preview.gap > 0 ? ` · ${preview.gap} min break` : ""}
             </p>
           </>
         ) : (
-          <p className="mt-2 text-[12px] text-[var(--color-text-muted)]">
+          <p className="mt-base text-[12px] text-[var(--color-text-muted)]">
             Fill in the fields above to preview your schedule.
           </p>
         )}

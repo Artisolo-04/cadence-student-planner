@@ -57,22 +57,22 @@ const StepDays = forwardRef(function StepDays(
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="h-full w-full p-2 lg:p-4">
-      <div className="grid h-full grid-rows-[minmax(0,1fr)] grid-cols-1 items-stretch gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        <section className="flex h-full min-h-0 flex-col gap-4 overflow-y-auto">
+    <form ref={formRef} onSubmit={handleSubmit} className="h-full w-full p-base lg:p-roomy">
+      <div className="grid h-full grid-rows-[minmax(0,1fr)] grid-cols-1 items-stretch gap-broad lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <section className="flex h-full min-h-0 flex-col gap-roomy overflow-y-auto">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
               Step 2
             </p>
-            <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">
+            <h2 className="mt-base text-xl font-semibold text-[var(--color-text)]">
               Choose your active days
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+            <p className="mt-base text-sm leading-6 text-[var(--color-text-muted)]">
               Pick the days you will actually use in this timetable.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-x-2 gap-y-1">
+          <div className="flex flex-wrap gap-x-inline gap-y-tight">
             <button
               type="button"
               onClick={() => setSelected(FULL_WEEK)}
@@ -98,7 +98,7 @@ const StepDays = forwardRef(function StepDays(
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+          <div className="grid grid-cols-2 gap-comfy lg:grid-cols-1">
             {DAYS.map((day) => (
               <Checkbox
                 key={day.value}
@@ -118,12 +118,12 @@ const StepDays = forwardRef(function StepDays(
         </section>
 
         <aside className="hidden h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm lg:flex">
-          <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+          <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-plush py-roomy">
             <div className="min-w-0">
               <p className="text-xs font-medium text-[var(--color-text-muted)]">
                 Active days preview
               </p>
-              <h3 className="mt-0.5 truncate text-sm font-semibold text-[var(--color-text)]">
+              <h3 className="mt-hair truncate text-sm font-semibold text-[var(--color-text)]">
                 {previewName}
               </h3>
             </div>
@@ -132,24 +132,24 @@ const StepDays = forwardRef(function StepDays(
             </span>
           </div>
 
-          <div className="flex flex-1 items-center justify-center overflow-hidden p-4">
+          <div className="flex flex-1 items-center justify-center overflow-hidden p-roomy">
             <div className="w-full overflow-hidden rounded-xl border border-[var(--color-border)]">
               <div
                 className="grid bg-[var(--color-surface-alt)] text-xs font-medium text-[var(--color-text-muted)]"
                 style={gridStyle}
               >
-                <span className="border-r border-[var(--color-border)] px-3 py-2.5">Time</span>
+                <span className="border-r border-[var(--color-border)] px-comfy py-cozy">Time</span>
                 {previewDays.length > 0 ? (
                   previewDays.map((day) => (
                     <span
                       key={day.value}
-                      className="border-r border-[var(--color-border)] px-3 py-2.5 text-center last:border-r-0"
+                      className="border-r border-[var(--color-border)] px-comfy py-cozy text-center last:border-r-0"
                     >
                       {day.short}
                     </span>
                   ))
                 ) : (
-                  <span className="px-3 py-2.5 text-center">No days selected</span>
+                  <span className="px-comfy py-cozy text-center">No days selected</span>
                 )}
               </div>
 
@@ -159,7 +159,7 @@ const StepDays = forwardRef(function StepDays(
                   className="grid border-t border-[var(--color-border)]"
                   style={gridStyle}
                 >
-                  <span className="border-r border-[var(--color-border)] px-3 py-3 text-xs font-medium text-[var(--color-text-muted)]">
+                  <span className="border-r border-[var(--color-border)] px-comfy py-comfy text-xs font-medium text-[var(--color-text-muted)]">
                     {time}
                   </span>
 
@@ -167,7 +167,7 @@ const StepDays = forwardRef(function StepDays(
                     previewDays.map((day, columnIndex) => (
                       <div
                         key={`${time}-${day.value}`}
-                        className="flex items-center border-r border-[var(--color-border)] px-3 last:border-r-0"
+                        className="flex items-center border-r border-[var(--color-border)] px-comfy last:border-r-0"
                       >
                         <span
                           className={`h-2.5 rounded-full bg-[var(--color-primary)]/20 ${
@@ -183,7 +183,7 @@ const StepDays = forwardRef(function StepDays(
                       </div>
                     ))
                   ) : (
-                    <div className="px-3 py-3 text-center text-xs text-[var(--color-text-muted)]">
+                    <div className="px-comfy py-comfy text-center text-xs text-[var(--color-text-muted)]">
                       —
                     </div>
                   )}
@@ -192,7 +192,7 @@ const StepDays = forwardRef(function StepDays(
             </div>
           </div>
 
-          <div className="shrink-0 border-t border-[var(--color-border)] px-5 py-3">
+          <div className="shrink-0 border-t border-[var(--color-border)] px-plush py-comfy">
             <p className="text-xs text-[var(--color-text-muted)]">
               {previewDays.length === 0
                 ? "Select at least one day to build your weekly timetable."

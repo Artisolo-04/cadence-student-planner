@@ -71,22 +71,22 @@ export default function StepPreview({ name, days = [], slots = [] }) {
   }, [orderedDays.length, orderedSlots.length]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-5 p-2 lg:p-4">
+    <div className="flex h-full w-full flex-col gap-plush p-base lg:p-roomy">
 
-      <div className="flex shrink-0 items-center justify-between gap-5">
+      <div className="flex shrink-0 items-center justify-between gap-plush">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
             Step 4
           </p>
-          <h2 className="mt-2 text-xl font-semibold text-[var(--color-text)]">
+          <h2 className="mt-base text-xl font-semibold text-[var(--color-text)]">
             Review your timetable
           </h2>
-          <p className="mt-2 hidden text-sm text-[var(--color-text-muted)] lg:block">
+          <p className="mt-base hidden text-sm text-[var(--color-text-muted)] lg:block">
             Your weekly structure is ready. Check it once more before generating.
           </p>
         </div>
 
-        <span className="hidden shrink-0 items-center gap-2 rounded-full bg-[var(--color-primary)]/10 px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)] sm:inline-flex">
+        <span className="hidden shrink-0 items-center gap-inline rounded-full bg-[var(--color-primary)]/10 px-comfy py-snug text-xs font-semibold text-[var(--color-primary)] sm:inline-flex">
           <CheckCircle2 size={15} />
           Ready to generate
         </span>
@@ -96,32 +96,32 @@ export default function StepPreview({ name, days = [], slots = [] }) {
         <div
           ref={outerScrollRef}
           onScroll={updateOuterScrollFades}
-          className="scrollbar-hidden grid min-w-0 flex-1 gap-4 overflow-y-auto lg:overflow-visible lg:grid-rows-1 lg:grid-cols-[minmax(240px,0.85fr)_minmax(0,1.15fr)]"
+          className="scrollbar-hidden grid min-w-0 flex-1 gap-roomy overflow-y-auto lg:overflow-visible lg:grid-rows-1 lg:grid-cols-[minmax(240px,0.85fr)_minmax(0,1.15fr)]"
         >
-          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
-            <div className="flex items-center gap-2">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-plush">
+            <div className="flex items-center gap-inline">
               <LayoutGrid size={16} className="text-[var(--color-primary)]" />
               <p className="text-sm font-semibold text-[var(--color-text)]">
                 Timetable name
               </p>
             </div>
-            <h3 className="mt-2 text-lg font-semibold text-[var(--color-text)]">
+            <h3 className="mt-base text-lg font-semibold text-[var(--color-text)]">
               {name || "My workspace"}
             </h3>
 
-            <div className="mt-5 border-t border-[var(--color-border)] pt-4">
-              <div className="flex items-center gap-2">
+            <div className="mt-plush border-t border-[var(--color-border)] pt-roomy">
+              <div className="flex items-center gap-inline">
                 <CalendarDays size={16} className="text-[var(--color-primary)]" />
                 <p className="text-sm font-semibold text-[var(--color-text)]">
                   Active days
                 </p>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-1.5">
+              <div className="mt-comfy flex flex-wrap gap-snug">
                 {orderedDays.map((day) => (
                   <span
                     key={day}
-                    className="rounded-full bg-[var(--color-surface-alt)] px-2.5 py-1 text-xs font-medium text-[var(--color-text)]"
+                    className="rounded-full bg-[var(--color-surface-alt)] px-cozy py-tight text-xs font-medium text-[var(--color-text)]"
                   >
                     {DAY_LABELS[day]}
                   </span>
@@ -130,15 +130,15 @@ export default function StepPreview({ name, days = [], slots = [] }) {
             </div>
           </div>
 
-          <div className="flex flex-col rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 lg:h-full lg:min-h-0">
-            <div className="flex shrink-0 items-center gap-2">
+          <div className="flex flex-col rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-plush lg:h-full lg:min-h-0">
+            <div className="flex shrink-0 items-center gap-inline">
               <Clock3 size={16} className="text-[var(--color-primary)]" />
               <p className="text-sm font-semibold text-[var(--color-text)]">
                 Time slots
               </p>
             </div>
 
-            <div className="mt-2 flex shrink-0 items-baseline gap-2">
+            <div className="mt-base flex shrink-0 items-baseline gap-inline">
               <p className="text-2xl font-semibold text-[var(--color-text)]">
                 {orderedSlots.length}
               </p>
@@ -148,16 +148,16 @@ export default function StepPreview({ name, days = [], slots = [] }) {
             </div>
 
             {orderedSlots.length > 0 && (
-              <div className="relative mt-4 flex min-h-0 lg:flex-1">
+              <div className="relative mt-roomy flex min-h-0 lg:flex-1">
                 <div
                   ref={slotsScrollRef}
                   onScroll={updateSlotsScrollFades}
-                  className="scrollbar-hidden grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3 lg:h-full lg:overflow-y-auto"
+                  className="scrollbar-hidden grid min-w-0 flex-1 grid-cols-2 gap-inline sm:grid-cols-3 lg:h-full lg:overflow-y-auto"
                 >
                   {orderedSlots.map((slot) => (
                     <span
                       key={slot.id}
-                      className="rounded-lg bg-[var(--color-surface-alt)] px-2.5 py-1.5 text-center text-xs font-medium text-[var(--color-text)] flex items-center justify-center"
+                      className="rounded-lg bg-[var(--color-surface-alt)] px-cozy py-snug text-center text-xs font-medium text-[var(--color-text)] flex items-center justify-center"
                     >
                       {timeValue(slot.start_time)} – {timeValue(slot.end_time)}
                     </span>

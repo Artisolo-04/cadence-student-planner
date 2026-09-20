@@ -145,9 +145,9 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
   return (
     <section className="mx-auto flex h-full w-full max-w-6xl">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
-        <header className="shrink-0 border-b border-[var(--color-border)] px-4 py-4 sm:px-8 sm:py-5">
+        <header className="shrink-0 border-b border-[var(--color-border)] px-roomy py-roomy sm:px-wide sm:py-plush">
           <div className="mx-auto max-w-5xl">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+            <p className="mb-roomy text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
               {isEdit ? "Edit timetable" : "New timetable"}
             </p>
             <WizardProgress
@@ -159,13 +159,13 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
           </div>
         </header>
 
-        <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-2 py-2 sm:px-12 sm:py-7">
+        <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden px-base py-base sm:px-vast sm:py-ample">
           <div className={`flex h-full w-full items-center justify-center transition-opacity duration-150 ${
             contentVisible ? "opacity-100" : "opacity-0"
           }`}>
             <div className="h-full w-full [&>form]:mx-auto [&>div]:mx-auto">
               {error && (
-                <p className="mx-auto mb-4 max-w-md rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-3 py-2 text-center text-sm text-[var(--color-danger)]">
+                <p className="mx-auto mb-roomy max-w-md rounded-lg border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-comfy py-base text-center text-sm text-[var(--color-danger)]">
                   {error}
                 </p>
               )}
@@ -185,8 +185,8 @@ export default function TimetableWizard({ mode = "create", workspace = null, onC
           </div>
         </main>
 
-        <footer className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-4 sm:px-8 sm:py-4">
-          <div className="mx-auto flex max-w-5xl items-center gap-3 sm:justify-between sm:gap-0">
+        <footer className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] px-roomy py-roomy sm:px-wide sm:py-roomy">
+          <div className="mx-auto flex max-w-5xl items-center gap-comfy sm:justify-between sm:gap-0">
             <Button type="button" variant="secondary" onClick={handleFooterBack} disabled={saving} className="flex-1 sm:flex-none sm:w-auto">
               {step === 1 ? "Cancel" : "Back"}
             </Button>
