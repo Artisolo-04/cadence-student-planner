@@ -313,3 +313,13 @@
   --spacing-cozy: var(--sp-cozy);
   --spacing-comfy: var(--sp-comfy);
 }
+
+:root {
+  --sp-base: 0.5rem;
+  --sp-roomy: 1rem;
+}
+
+@theme inline {
+  --spacing-base: var(--sp-base);
+  --spacing-roomy: var(--sp-roomy);
+}
