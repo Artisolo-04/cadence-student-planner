@@ -297,3 +297,19 @@
   --spacing-btn-sm-x: var(--sp-btn-sm-x);
   --spacing-btn-sm-y: var(--sp-btn-sm-y);
 }
+
+:root {
+  --sp-hair: 0.125rem;
+  --sp-tight: 0.25rem;
+  --sp-snug: 0.375rem;
+  --sp-cozy: 0.625rem;
+  --sp-comfy: 0.75rem;
+}
+
+@theme inline {
+  --spacing-hair: var(--sp-hair);
+  --spacing-tight: var(--sp-tight);
+  --spacing-snug: var(--sp-snug);
+  --spacing-cozy: var(--sp-cozy);
+  --spacing-comfy: var(--sp-comfy);
+}
