@@ -115,7 +115,7 @@ export default function Dropdown({
   }
 
   const triggerClasses = isSm
-    ? "w-auto inline-flex items-center gap-8 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium text-[var(--color-text-muted)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+    ? "w-auto inline-flex items-center gap-wide whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-base text-[11px] font-medium text-[var(--color-text-muted)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
     : "w-full flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-input-x py-input-y text-sm text-[var(--color-text)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
 
   const triggerStyle = isSm
@@ -129,7 +129,7 @@ export default function Dropdown({
     : undefined;
 
   return (
-    <div className={isSm ? "flex" : "flex flex-col gap-2"}>
+    <div className={isSm ? "flex" : "flex flex-col gap-inline"}>
       {label && (
         <label
           htmlFor={id}
@@ -168,7 +168,7 @@ export default function Dropdown({
                 width: coords.width,
                 maxHeight: listHeight,
               }}
-              className={`z-[100] overflow-y-auto scrollbar-cadence p-1
+              className={`z-[100] overflow-y-auto scrollbar-cadence p-tight
                 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg
                 transition-all duration-150 ease-out
                 ${coords.openUp ? "origin-bottom" : "origin-top"}
@@ -187,7 +187,7 @@ export default function Dropdown({
                       role="option"
                       aria-selected={isSelected}
                       onClick={() => select(opt)}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left rounded-sm
+                      className={`w-full flex items-center justify-between px-comfy py-base text-sm text-left rounded-sm
                         hover:bg-[var(--color-surface-alt)] transition-colors
                         ${isSelected ? "text-[var(--color-primary)] font-medium" : "text-[var(--color-text)]"}`}
                     >

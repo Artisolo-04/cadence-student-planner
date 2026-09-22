@@ -25,11 +25,11 @@ const PRESET_COLORS = [
 
 export default function ColorSwatchPicker({ label, value, onChange }) {
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="flex flex-col gap-inline w-full">
       {label && (
         <span className="text-sm font-medium text-[var(--color-text)]">{label}</span>
       )}
-      <div className="grid grid-cols-[repeat(10,minmax(0,max-content))] w-full gap-y-2 justify-between items-center">
+      <div className="grid grid-cols-[repeat(10,minmax(0,max-content))] w-full gap-y-inline justify-between items-center">
         {PRESET_COLORS.map((color) => {
           const selected = value === color;
           return (

@@ -12,7 +12,7 @@ export default function ZoomSlider({
   const pct = ((value - min) / (max - min)) * 100;
 
   return (
-    <div className={`flex items-center gap-2 w-full ${className}`}>
+    <div className={`flex items-center gap-inline w-full ${className}`}>
       <button
         type="button"
         onClick={() => onChange(Math.max(min, value - step))}

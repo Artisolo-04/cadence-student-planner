@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 export function AccentHeaderShell({ accent, children, className = "" }) {
   return (
     <div
-      className={`relative z-10 flex h-[76px] shrink-0 items-center justify-between gap-4 overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-4 ${className}`}
+      className={`relative z-10 flex h-[76px] shrink-0 items-center justify-between gap-roomy overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)] px-plush py-roomy ${className}`}
     >
       <div
         aria-hidden="true"
@@ -34,7 +34,7 @@ export function HeaderCloseButton({ onClose, ariaLabel = "Close", size = 18 }) {
       type="button"
       onClick={onClose}
       aria-label={ariaLabel}
-      className="relative z-10 shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
+      className="relative z-10 shrink-0 rounded-md p-snug text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
     >
       <X size={size} />
     </button>

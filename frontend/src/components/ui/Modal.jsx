@@ -28,7 +28,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
   }, [open, onClose]);
   if (!mounted) return null;
   return (
-    <div className={`absolute inset-0 flex items-center justify-center ${mobileFullscreen ? "p-0 sm:p-4" : "p-4"} ${elevated ? "z-[60]" : "z-50"}`}>
+    <div className={`absolute inset-0 flex items-center justify-center ${mobileFullscreen ? "p-0 sm:p-roomy" : "p-roomy"} ${elevated ? "z-[60]" : "z-50"}`}>
       <div
         className={`absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity duration-200 ${
           visible ? "opacity-100" : "opacity-0"
@@ -49,7 +49,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           }
           ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
       >
-        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-modal-x py-modal-y">
+        <div className="flex min-w-0 items-center justify-between gap-comfy border-b border-[var(--color-border)] px-modal-x py-modal-y">
           <h2 title={title} className="min-w-0 flex-1 truncate text-base font-semibold">
             {title}
           </h2>
@@ -57,7 +57,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="shrink-0 rounded-md p-1 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]"
+            className="shrink-0 rounded-md p-tight text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)]"
           >
             <X size={18} />
           </button>
@@ -72,7 +72,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           {children}
         </div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] px-modal-x py-modal-y">
+          <div className="flex justify-end gap-inline border-t border-[var(--color-border)] px-modal-x py-modal-y">
             {footer}
           </div>
         )}

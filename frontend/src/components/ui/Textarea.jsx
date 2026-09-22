@@ -1,6 +1,6 @@
 export default function Textarea({ label, id, error, className = "", ...rest }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-snug">
       {label && (
         <label htmlFor={id} className="text-sm font-medium text-[var(--color-text)]">
           {label}
