@@ -293,11 +293,11 @@ export default function AvatarUploadModal({ open, onClose, onUploaded, profile }
       }
     >
       {loadingCurrent ? (
-        <div className="flex items-center justify-center py-16">
+        <div className="flex items-center justify-center py-grand">
           <Loader2 size={24} className="animate-spin text-[var(--color-text-muted)]" />
         </div>
       ) : !imgUrl ? (
-        <div className="flex flex-col items-center justify-center gap-comfy py-10">
+        <div className="flex flex-col items-center justify-center gap-comfy py-broad">
           <button
             type="button"
             onClick={handlePickClick}

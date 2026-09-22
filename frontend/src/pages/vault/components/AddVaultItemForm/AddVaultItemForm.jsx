@@ -120,7 +120,7 @@ export default function AddVaultItemForm({
                 placeholder="Paste a link, or drop a file below"
                 value={urlPath}
                 onChange={(e) => setUrlPath(e.target.value)}
-                className={isLinkMode ? "pr-24" : undefined}
+                className={isLinkMode ? "pr-input-badge-x" : undefined}
               />
               {isLinkMode && (
                 <span

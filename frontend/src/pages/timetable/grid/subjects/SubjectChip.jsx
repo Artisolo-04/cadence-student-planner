@@ -14,7 +14,7 @@ export function SubjectChipContent({ subject, lifted, size, bare }) {
       className={`group relative flex items-center gap-cozy overflow-hidden rounded-md backdrop-blur-2xl backdrop-saturate-150 ${
         bare ? "border-0" : "border"
       } ${
-        size ? "p-comfy" : "py-cozy pl-3.5 pr-comfy"
+        size ? "p-comfy" : "py-cozy pl-hearty pr-comfy"
       } transition-[background-color,border-color,box-shadow${
         size ? ",width,height" : ""
       }] duration-200 ease-out

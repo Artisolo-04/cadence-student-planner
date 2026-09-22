@@ -284,7 +284,7 @@ export default function SubjectDetailDrawer({
                       }`}
                     >
                       <div
-                        className={`min-h-0 flex-1 flex-col px-plush py-roomy pb-24 md:flex md:border-r md:border-[var(--color-border)] md:pb-roomy ${
+                        className={`min-h-0 flex-1 flex-col px-plush py-roomy pb-nav-clearance-b md:flex md:border-r md:border-[var(--color-border)] md:pb-roomy ${
                           activeTab === "schedule" ? "flex" : "hidden"
                         }`}
                       >
@@ -297,7 +297,7 @@ export default function SubjectDetailDrawer({
                       </div>
 
                       <div
-                        className={`min-h-0 flex-1 flex-col px-plush py-roomy pb-24 md:flex md:pb-roomy ${
+                        className={`min-h-0 flex-1 flex-col px-plush py-roomy pb-nav-clearance-b md:flex md:pb-roomy ${
                           activeTab === "tasks" ? "flex" : "hidden"
                         }`}
                       >

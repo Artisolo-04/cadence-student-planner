@@ -81,7 +81,7 @@ export default function DueSoonCard({ homework, loading }) {
               const isToday = urgency === "Due today";
 
               return (
-                <div key={item.id} className="flex items-center gap-comfy py-comfy first:pt-3.5">
+                <div key={item.id} className="flex items-center gap-comfy py-comfy first:pt-hearty">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-[var(--color-text)]">
                       {item.title}

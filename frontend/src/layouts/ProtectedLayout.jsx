@@ -9,7 +9,7 @@ export default function ProtectedLayout() {
       <TopBar />
       <div className="flex min-h-0 flex-1">
         <Sidebar />
-        <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto scrollbar-cadence px-page-x py-page-y pb-24 md:pb-page-y lg:overflow-hidden">
+        <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto scrollbar-cadence px-page-x py-page-y pb-nav-clearance-b md:pb-page-y lg:overflow-hidden">
           <Outlet />
         </main>
       </div>

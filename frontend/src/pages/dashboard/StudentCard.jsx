@@ -67,7 +67,7 @@ export default function StudentCard({ user, profile, groupTag }) {
           <Wifi size={16} className="rotate-90 text-[var(--color-text-muted)] opacity-60" />
         </div>
 
-        <div className="mt-comfy flex flex-1 items-center gap-5">
+        <div className="mt-comfy flex flex-1 items-center gap-plush">
           <span
             className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 text-2xl font-semibold text-[var(--color-primary)] shadow-lg"
             style={{

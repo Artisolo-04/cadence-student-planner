@@ -356,7 +356,7 @@ export default function TimetablePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-plush py-24 text-center">
+    <div className="flex flex-col items-center justify-center gap-plush py-empty-state-y text-center">
       <div
         className="flex items-center justify-center rounded-2xl"
         style={{

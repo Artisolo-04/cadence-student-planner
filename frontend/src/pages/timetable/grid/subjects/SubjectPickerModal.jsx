@@ -157,7 +157,7 @@ export default function SubjectPickerModal({
                 placeholder="Search subjects..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
+                className="pl-input-icon-x"
                 autoFocus
               />
             </div>

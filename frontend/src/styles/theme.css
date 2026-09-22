@@ -341,3 +341,33 @@
   --spacing-broad: var(--sp-broad);
   --spacing-vast: var(--sp-vast);
 }
+
+:root {
+  --sp-hearty: 0.875rem;
+  --sp-grand: 4rem;
+}
+
+@theme inline {
+  --spacing-hearty: var(--sp-hearty);
+  --spacing-grand: var(--sp-grand);
+}
+
+:root {
+  --sp-input-icon-x: 2.25rem;
+  --sp-nav-clearance-b: 6rem;
+  --sp-empty-state-y: 6rem;
+}
+
+@theme inline {
+  --spacing-input-icon-x: var(--sp-input-icon-x);
+  --spacing-nav-clearance-b: var(--sp-nav-clearance-b);
+  --spacing-empty-state-y: var(--sp-empty-state-y);
+}
+
+:root {
+  --sp-input-badge-x: 6rem;
+}
+
+@theme inline {
+  --spacing-input-badge-x: var(--sp-input-badge-x);
+}

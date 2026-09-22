@@ -136,7 +136,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
         style={{
           backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accentColor} 16%, transparent) 0%, color-mix(in srgb, var(--color-accent) 5%, transparent) 55%, transparent 100%)`,
         }}
-        className="relative flex flex-col gap-comfy overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl sm:hidden"
+        className="relative flex flex-col gap-comfy overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-hearty backdrop-blur-xl sm:hidden"
       >
         <div
           aria-hidden="true"

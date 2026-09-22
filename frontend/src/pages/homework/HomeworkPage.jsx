@@ -95,7 +95,7 @@ export default function HomeworkPage() {
           onReorder={handleReorder}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center gap-roomy py-24 text-center">
+        <div className="flex flex-col items-center justify-center gap-roomy py-empty-state-y text-center">
           <div className="rounded-full bg-[var(--color-surface-alt)] p-roomy">
             <ClipboardList size={28} className="text-[var(--color-text-muted)]" />
           </div>

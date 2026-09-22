@@ -33,7 +33,7 @@ export default function SessionCard({ session, isCurrent }) {
         <BookOpen size={13} style={{ color: session.color }} />
       </span>
 
-      <div className={`min-w-0 flex-1 ${isCurrent ? "pr-12" : ""}`}>
+      <div className={`min-w-0 flex-1 ${isCurrent ? "pr-vast" : ""}`}>
         <div className="truncate text-sm font-medium text-[var(--color-text)]">
           {session.subjectName}
         </div>

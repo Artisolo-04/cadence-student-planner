@@ -239,7 +239,7 @@ function Shell({ children }) {
 
 function Stat({ icon, tint, label, value, sub }) {
   return (
-    <div className="flex items-center gap-3.5 px-roomy py-roomy sm:px-airy sm:py-plush">
+    <div className="flex items-center gap-hearty px-roomy py-roomy sm:px-airy sm:py-plush">
       <span
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
         style={{ background: `${tint}1f`, color: tint }}
