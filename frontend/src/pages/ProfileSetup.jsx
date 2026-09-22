@@ -30,16 +30,16 @@ export default function ProfileSetup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4">
-      <div className="w-full max-w-sm flex flex-col gap-6">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-roomy">
+      <div className="w-full max-w-sm flex flex-col gap-airy">
         <div className="text-center">
           <h1 className="text-xl font-semibold text-[var(--color-text)]">Complete your profile</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <p className="text-sm text-[var(--color-text-muted)] mt-tight">
             Tell us a bit about yourself
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-roomy">
           <Input
             id="fullName"
             label="Full name"

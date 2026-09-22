@@ -27,14 +27,14 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-4">
-      <div className="w-full max-w-sm flex flex-col gap-6">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] px-roomy">
+      <div className="w-full max-w-sm flex flex-col gap-airy">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-[var(--color-primary)]">Cadence</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">Find your rhythm.</p>
+          <p className="text-sm text-[var(--color-text-muted)] mt-tight">Find your rhythm.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-roomy">
           <Input
             id="email"
             label="Email"

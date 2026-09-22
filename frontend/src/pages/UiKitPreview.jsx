@@ -13,27 +13,27 @@ export default function UiKitPreview() {
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <header className="flex items-center justify-between px-6 py-3 border-b border-[var(--color-border)]">
+      <header className="flex items-center justify-between px-airy py-comfy border-b border-[var(--color-border)]">
         <span className="font-semibold text-[var(--color-primary)]">Cadence</span>
         <ThemeToggle />
       </header>
 
-      <main className="max-w-md mx-auto px-6 py-8 space-y-8">
-        <section className="space-y-2">
+      <main className="max-w-md mx-auto px-airy py-wide space-y-wide">
+        <section className="space-y-inline">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)]">Buttons</h2>
-          <div className="flex gap-3">
+          <div className="flex gap-comfy">
             <Button variant="primary">Primary</Button>
             <Button variant="secondary">Secondary</Button>
             <Button variant="ghost">Ghost</Button>
           </div>
         </section>
 
-        <section className="space-y-2">
+        <section className="space-y-inline">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)]">Input</h2>
           <Input id="demo-input" label="Full name" placeholder="e.g. Jane Doe" />
         </section>
 
-        <section className="space-y-2">
+        <section className="space-y-inline">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)]">Checkbox</h2>
           <Checkbox
             id="demo-check"
@@ -43,7 +43,7 @@ export default function UiKitPreview() {
           />
         </section>
 
-        <section className="space-y-2">
+        <section className="space-y-inline">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)]">Dropdown</h2>
           <Dropdown
             id="demo-dropdown"
@@ -58,7 +58,7 @@ export default function UiKitPreview() {
           />
         </section>
 
-        <section className="space-y-2">
+        <section className="space-y-inline">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)]">Modal</h2>
           <Button variant="primary" onClick={() => setModalOpen(true)}>
             Open modal
