@@ -115,7 +115,7 @@ function MobileWorkspaceButton() {
 
 export default function TopBar() {
   return (
-    <header className="flex items-center justify-between px-roomy md:px-8 py-base border-b border-[var(--color-border)]">
+    <header className="flex items-center justify-between px-roomy md:px-wide py-base border-b border-[var(--color-border)]">
       <span className="text-lg font-semibold text-[var(--color-primary)]">Cadence</span>
       <div className="flex items-center gap-inline md:gap-comfy">
         <ThemeToggle />

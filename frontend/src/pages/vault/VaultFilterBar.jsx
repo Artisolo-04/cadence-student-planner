@@ -112,7 +112,7 @@ export default function VaultFilterBar({ value, onChange }) {
           onChange={(e) => set({ query: e.target.value })}
           placeholder="Search resources or folders..."
           aria-label="Search resources or folders"
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-9 pr-9 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-input-icon-x pr-input-icon-x text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
         />
         {value.query && (
           <button

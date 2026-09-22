@@ -148,7 +148,7 @@ function FolderCombobox({ value, onChange, options }) {
             setOpen(true);
           }}
           placeholder="Search or create a folder…"
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-9 pr-comfy text-sm text-[var(--color-text)]
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-input-icon-x pr-comfy text-sm text-[var(--color-text)]
             placeholder:text-[var(--color-text-muted)] transition-shadow duration-150
             focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)] focus-visible:border-[var(--color-ring)]"
         />

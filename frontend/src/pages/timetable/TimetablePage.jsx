@@ -371,11 +371,10 @@ export default function TimetablePage() {
 
       <div style={{ maxWidth: "280px" }}>
         <h2
-          className="text-base font-semibold"
+          className="text-base font-semibold mb-label"
           style={{
             color: "var(--color-text)",
             letterSpacing: "-0.02em",
-            marginBottom: "6px",
           }}
         >
           No timetable yet

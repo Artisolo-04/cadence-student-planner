@@ -6,11 +6,10 @@ export function CustomScrollbar({ scrollRef }) {
   return (
     <div
       ref={trackRef}
-      className="relative hidden shrink-0 rounded-full bg-[var(--color-border)]/40 md:block"
+      className={`relative hidden shrink-0 rounded-full bg-[var(--color-border)]/40 md:block ${thumb.visible ? "ml-base" : "ml-0"}`}
       style={{
         opacity: thumb.visible ? 1 : 0,
         width: thumb.visible ? "0.25rem" : 0,
-        marginLeft: thumb.visible ? "0.5rem" : 0,
       }}
     >
       <div

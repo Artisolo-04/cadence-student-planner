@@ -70,7 +70,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
         pointerEvents: isLeaving ? "none" : "auto",
         willChange: "transform, filter, opacity",
       }}
-      className="group relative flex flex-col gap-comfy overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
+      className="group relative flex flex-col gap-comfy overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-hearty backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
     >
       <div
         aria-hidden="true"

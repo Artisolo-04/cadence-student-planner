@@ -13,7 +13,7 @@ export default function FilterBar({ filters, setFilter, activeCount, open, onTog
           value={filters.search}
           onChange={(e) => setFilter("search", e.target.value)}
           placeholder="Search homework..."
-          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-9 pr-comfy text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+          className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-base pl-input-icon-x pr-comfy text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
         />
       </div>
 
