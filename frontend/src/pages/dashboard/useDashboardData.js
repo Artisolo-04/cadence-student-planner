@@ -190,6 +190,54 @@ export function useDashboardData() {
       .sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
   }, [workspace, slots, visibleEntries, subjectsById]);
 
+  const allTodaySessions = useMemo(() => {
+    if (!workspace) return [];
+
+    const todayIdx = getTodayIndex();
+    const slotsById = {};
+    slots.forEach((slot) => {
+      slotsById[slot.id] = slot;
+    });
+
+    return entries
+      .filter(
+        (entry) =>
+          Number(entry.day_of_week ?? entry.dayOfWeek) === todayIdx
+      )
+      .map((entry) => {
+        const startSlotId =
+          entry.start_slot_id ??
+          entry.startSlotId ??
+          entry.slot_id ??
+          entry.slotId;
+
+        const endSlotId =
+          entry.end_slot_id ??
+          entry.endSlotId ??
+          startSlotId;
+
+        const startSlot = slotsById[startSlotId];
+        const endSlot = slotsById[endSlotId] ?? startSlot;
+
+        const subjectId = entry.subject_id ?? entry.subjectId;
+        const subject = subjectsById[subjectId];
+        const groupTag = entry.group_tag ?? entry.groupTag ?? "all";
+
+        return {
+          key: `${startSlotId}-${endSlotId}-${groupTag}`,
+          start: startSlot?.start_time ?? startSlot?.startTime ?? null,
+          end: endSlot?.end_time ?? endSlot?.endTime ?? null,
+          subjectName: subject?.name ?? entry.subject_name ?? "Unknown subject",
+          teacher: subject?.teacher ?? entry.subject_teacher ?? "",
+          color: subject?.color ?? entry.subject_color ?? "#2dd4bf",
+          room: entry.room ?? null,
+          groupTag,
+        };
+      })
+      .filter((session) => session.start && session.end)
+      .sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
+  }, [workspace, slots, entries, subjectsById]);
+
   const weekStats = useMemo(() => {
     if (!workspace) return { total: 0, busiestDay: null };
 
@@ -217,6 +265,93 @@ export function useDashboardData() {
     };
   }, [workspace, visibleEntries]);
 
+  const weeklyIntensity = useMemo(() => {
+    const slotsById = {};
+    slots.forEach((slot) => {
+      slotsById[slot.id] = slot;
+    });
+
+    const minutesByDay = {};
+    visibleEntries.forEach((entry) => {
+      const day = Number(entry.day_of_week ?? entry.dayOfWeek);
+      const startSlotId =
+        entry.start_slot_id ?? entry.startSlotId ?? entry.slot_id ?? entry.slotId;
+      const endSlotId = entry.end_slot_id ?? entry.endSlotId ?? startSlotId;
+      const startSlot = slotsById[startSlotId];
+      const endSlot = slotsById[endSlotId] ?? startSlot;
+      if (!startSlot || !endSlot) return;
+      const start = toMinutes(startSlot.start_time ?? startSlot.startTime);
+      const end = toMinutes(endSlot.end_time ?? endSlot.endTime);
+      if (start == null || end == null) return;
+      minutesByDay[day] = (minutesByDay[day] || 0) + Math.max(0, end - start);
+    });
+
+    const order = [1, 2, 3, 4, 5, 6, 0]; // Mon -> Sun
+    return order.map((day) => ({
+      label: DAY_LABELS[day].slice(0, 3),
+      minutes: minutesByDay[day] || 0,
+    }));
+  }, [visibleEntries, slots]);
+
+  const weekAgenda = useMemo(() => {
+    const slotsById = {};
+    slots.forEach((slot) => {
+      slotsById[slot.id] = slot;
+    });
+
+    const byDay = {};
+    visibleEntries.forEach((entry) => {
+      const day = Number(entry.day_of_week ?? entry.dayOfWeek);
+      const startSlotId =
+        entry.start_slot_id ?? entry.startSlotId ?? entry.slot_id ?? entry.slotId;
+      const endSlotId = entry.end_slot_id ?? entry.endSlotId ?? startSlotId;
+      const startSlot = slotsById[startSlotId];
+      const endSlot = slotsById[endSlotId] ?? startSlot;
+      if (!startSlot || !endSlot) return;
+
+      const subjectId = entry.subject_id ?? entry.subjectId;
+      const subject = subjectsById[subjectId];
+      const groupTag = entry.group_tag ?? entry.groupTag ?? "all";
+
+      const session = {
+        key: `${day}-${startSlotId}-${endSlotId}-${groupTag}`,
+        start: startSlot.start_time ?? startSlot.startTime ?? null,
+        end: endSlot.end_time ?? endSlot.endTime ?? null,
+        subjectName: subject?.name ?? entry.subject_name ?? "Unknown subject",
+        teacher: subject?.teacher ?? entry.subject_teacher ?? "",
+        color: subject?.color ?? entry.subject_color ?? "#2dd4bf",
+        groupTag,
+        room: entry.room ?? null,
+      };
+
+      if (!byDay[day]) byDay[day] = [];
+      byDay[day].push(session);
+    });
+
+    Object.values(byDay).forEach((list) =>
+      list.sort((a, b) => toMinutes(a.start) - toMinutes(b.start))
+    );
+
+    const today = new Date();
+    const todayIdx = today.getDay();
+    const mondayOffset = todayIdx === 0 ? -6 : 1 - todayIdx;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+
+    const order = [1, 2, 3, 4, 5, 6, 0]; // Mon -> Sun
+    return order.map((day, i) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      return {
+        day,
+        label: DAY_LABELS[day].slice(0, 3),
+        dateNum: date.getDate(),
+        isToday: day === todayIdx,
+        sessions: byDay[day] || [],
+      };
+    });
+  }, [visibleEntries, slots, subjectsById]);
+
   const nowMin = timeNowMinutes();
 
   const currentKey = todaySessions.find(
@@ -224,9 +359,23 @@ export function useDashboardData() {
       toMinutes(session.start) <= nowMin && nowMin < toMinutes(session.end)
   )?.key;
 
-  const nextSession = todaySessions.find(
+  const myGroup = workspace?.my_group ?? workspace?.myGroup ?? null;
+
+  const rawNextSession = todaySessions.find(
     (session) => toMinutes(session.start) > nowMin
   );
+
+  const nextSession = rawNextSession
+    ? {
+        ...rawNextSession,
+        hasGroupFilter: Boolean(myGroup),
+        concurrent: allTodaySessions.filter(
+          (session) =>
+            session.start === rawNextSession.start &&
+            session.key !== rawNextSession.key
+        ),
+      }
+    : null;
 
   return {
     loading: loadingWorkspaces || loadingSubjects || loadingDetail,
@@ -239,6 +388,8 @@ export function useDashboardData() {
     currentKey,
     nextSession,
     weekStats,
+    weeklyIntensity,
+    weekAgenda,
     todayLabel: DAY_LABELS[getTodayIndex()],
   };
 }

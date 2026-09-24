@@ -17,11 +17,18 @@ function formatGap(minutes) {
   return `${m}m`;
 }
 
-export default function FocusTimeline({ sessions }) {
+export default function FocusTimeline({ week = [] }) {
   const [now, setNow] = useState(() => new Date());
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
+
+  const todayEntry = week.find((d) => d.isToday) ?? week[0] ?? null;
+  const [selectedDay, setSelectedDay] = useState(() => todayEntry?.day ?? null);
+
+  useEffect(() => {
+    if (selectedDay == null && todayEntry) setSelectedDay(todayEntry.day);
+  }, [todayEntry, selectedDay]);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 30000);
@@ -37,6 +44,10 @@ export default function FocusTimeline({ sessions }) {
     );
   }
 
+  const selected = week.find((d) => d.day === selectedDay) ?? todayEntry;
+  const sessions = selected?.sessions ?? [];
+  const showLive = !!selected?.isToday;
+
   useEffect(() => {
     const frame = requestAnimationFrame(updateScrollFades);
     window.addEventListener("resize", updateScrollFades);
@@ -46,16 +57,17 @@ export default function FocusTimeline({ sessions }) {
     };
   }, [sessions]);
 
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMin = showLive ? now.getHours() * 60 + now.getMinutes() : null;
   const hasSessions = sessions && sessions.length > 0;
 
   const dayStart = hasSessions ? toMinutes(sessions[0].start) : null;
   const dayEnd = hasSessions ? toMinutes(sessions[sessions.length - 1].end) : null;
   const dayTotal = hasSessions ? Math.max(1, dayEnd - dayStart) : 1;
 
-  const doneCount = hasSessions
-    ? sessions.filter((s) => toMinutes(s.end) <= nowMin).length
-    : 0;
+  const doneCount =
+    hasSessions && showLive
+      ? sessions.filter((s) => toMinutes(s.end) <= nowMin).length
+      : 0;
 
   let freeMinutes = 0;
   const scrubberSegments = [];
@@ -85,7 +97,7 @@ export default function FocusTimeline({ sessions }) {
   }
 
   const nowPct =
-    hasSessions && nowMin >= dayStart && nowMin <= dayEnd
+    hasSessions && showLive && nowMin >= dayStart && nowMin <= dayEnd
       ? ((nowMin - dayStart) / dayTotal) * 100
       : null;
 
@@ -125,11 +137,35 @@ export default function FocusTimeline({ sessions }) {
           Focus
         </div>
 
+        {week.length > 0 && (
+          <div className="mt-3 grid grid-cols-7 gap-1 rounded-lg border border-white/15 bg-white/[0.02] p-1">
+            {week.map((d) => {
+              const isSelected = d.day === selected?.day;
+              return (
+                <button
+                  key={d.day}
+                  type="button"
+                  onClick={() => setSelectedDay(d.day)}
+                  className={`rounded-md py-1.5 text-[9px] font-bold uppercase tracking-wide transition-colors ${
+                    isSelected
+                      ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
+                      : d.isToday
+                      ? "text-[var(--color-primary)] hover:bg-white/[0.08]"
+                      : "text-[var(--color-text-muted)] hover:bg-white/[0.08]"
+                  }`}
+                >
+                  {d.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {hasSessions && (
           <div className="mt-3">
             <div className="flex items-center justify-between font-mono text-[10px] text-[var(--color-text-muted)]">
               <span>
-                {doneCount}/{sessions.length} done
+                {showLive ? `${doneCount}/${sessions.length} done` : `${sessions.length} scheduled`}
               </span>
               {freeMinutes > 0 && <span>{formatGap(freeMinutes)} free</span>}
             </div>
@@ -179,8 +215,8 @@ export default function FocusTimeline({ sessions }) {
             {timelineGroups.map((group, gi) => {
               const start = toMinutes(group.start);
               const end = toMinutes(group.end);
-              const isCurrent = nowMin >= start && nowMin < end;
-              const isPast = end <= nowMin;
+              const isCurrent = showLive && nowMin >= start && nowMin < end;
+              const isPast = showLive && end <= nowMin;
               const progress = isCurrent
                 ? Math.min(100, Math.max(0, ((nowMin - start) / (end - start)) * 100))
                 : 0;
@@ -245,7 +281,10 @@ export default function FocusTimeline({ sessions }) {
                       }
                     >
                       {group.items.map((session, idx) => {
-                        const badgeLabel = session.groupTag || (isSplit ? `G${idx + 1}` : "All");
+                          const badgeLabel =
+                            session.groupTag && session.groupTag !== "all"
+                              ? session.groupTag
+                              : "All";
                         const isNotLastInGroup = isSplit && idx < group.items.length - 1;
 
                         return (

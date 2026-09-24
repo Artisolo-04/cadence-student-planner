@@ -92,13 +92,17 @@ export default function StudentCard({ user, profile, groupTag }) {
             <p className="truncate text-lg font-semibold leading-tight text-[var(--color-text)]">
               {fullName}
             </p>
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-[var(--color-text-muted)]">
-              <GraduationCap size={14} className="shrink-0" />
-              <span className="truncate">
-                {[profile?.faculty, profile?.class_year, showGroupField ? groupTag.toUpperCase() : null]
-                  .filter(Boolean)
-                  .join(" · ")}
+            <div className="mt-1 flex flex-col gap-0.5 text-sm text-[var(--color-text-muted)]">
+              <span className="flex items-center gap-1.5 truncate">
+                <GraduationCap size={14} className="shrink-0" />
+                <span className="truncate">{profile?.faculty || "—"}</span>
               </span>
+              {profile?.class_year ? (
+                <span className="truncate pl-[20px] text-xs">{profile.class_year}</span>
+              ) : null}
+              {showGroupField ? (
+                <span className="truncate pl-[20px] text-xs">{groupTag.toUpperCase()}</span>
+              ) : null}
             </div>
           </div>
         </div>
