@@ -3,7 +3,7 @@ import { useDashboardData } from "./useDashboardData";
 import { useDueSoonHomework } from "./useDueSoonHomework";
 import StudentCard from "./StudentCard";
 import FocusTimeline from "./FocusTimeline";
-import DueSoonCard from "./DueSoonCard";
+import InterceptVaultStack from "./InterceptVaultStack";
 import NextUpTile from "./NextUpTile";
 import VelocityRingTile from "./VelocityRingTile";
 import WeeklyIntensityTile from "./WeeklyIntensityTile";
@@ -21,7 +21,7 @@ export default function DashboardPage() {
     nextSession,
   } = useDashboardData();
 
-  const { buckets, stats: homeworkStats, loading: dueSoonLoading } = useDueSoonHomework(3);
+  const { buckets, stats: homeworkStats, loading: dueSoonLoading } = useDueSoonHomework(5);
 
   if (loading && timetables.length === 0) return null;
 
@@ -54,7 +54,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex-1 min-h-0">
-          <DueSoonCard buckets={buckets} loading={dueSoonLoading} />
+          <InterceptVaultStack buckets={buckets} loading={dueSoonLoading} />
         </div>
       </main>
 

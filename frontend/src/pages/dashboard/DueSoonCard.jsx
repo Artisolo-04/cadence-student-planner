@@ -1,6 +1,9 @@
-import { ClipboardList, AlertTriangle, ArrowRight, Radar, Clock, CheckCircle2 } from "lucide-react";
+import { useMemo } from "react";
+import { ClipboardList, AlertTriangle, ArrowRight, Radar, Clock, CheckCircle2, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { PRIORITY_STYLES, formatDueDate } from "../homework/homeworkUtils";
+import VaultMatchLink from "./VaultMatchLink";
+import { findVaultMatch } from "./vaultAccess";
+import { formatDueDate } from "../homework/homeworkUtils";
 
 function urgencyLabel(dueDate) {
   if (!dueDate) return "No date";
@@ -20,7 +23,7 @@ const SECTIONS = [
   {
     key: "overdue",
     label: "Overdue / Critical",
-    icon: AlertTriangle,
+    icon: Flag,
     dot: "var(--color-danger)",
     badgeClass: "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/15 text-[var(--color-danger)]",
   },
@@ -40,14 +43,40 @@ const SECTIONS = [
   },
 ];
 
-export default function DueSoonCard({ buckets, loading }) {
+const DISPLAY_LIMIT = 3;
+
+function limitBucketsForDisplay(buckets, max) {
+  if (!buckets) return buckets;
+  let left = max;
+  const out = { ...buckets };
+  for (const key of ["overdue", "active", "future"]) {
+    out[key] = (buckets[key] || []).slice(0, left);
+    left -= out[key].length;
+  }
+  return out;
+}
+
+export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles = [], onOpenFile }) {
   const navigate = useNavigate();
+
+  const buckets = useMemo(() => limitBucketsForDisplay(rawBuckets, DISPLAY_LIMIT), [rawBuckets]);
+
+  const vaultMatchByItemId = useMemo(() => {
+    const map = new Map();
+    if (!buckets) return map;
+    for (const key of ["overdue", "active", "future"]) {
+      for (const item of buckets[key] || []) {
+        map.set(item.id, findVaultMatch(item.title, vaultFiles));
+      }
+    }
+    return map;
+  }, [buckets, vaultFiles]);
 
   const shownCount = buckets
     ? buckets.overdue.length + buckets.active.length + buckets.future.length
     : 0;
   const grandTotal = buckets
-    ? buckets.overdueTotal + buckets.activeTotal + buckets.futureTotal
+    ? (buckets.overdueTotal ?? 0) + (buckets.activeTotal ?? 0) + (buckets.futureTotal ?? 0)
     : 0;
 
   const activeSectionCount = SECTIONS.filter(
@@ -68,7 +97,7 @@ export default function DueSoonCard({ buckets, loading }) {
         style={{ backgroundColor: "var(--color-primary)" }}
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
             <ClipboardList size={12} />
@@ -89,6 +118,12 @@ export default function DueSoonCard({ buckets, loading }) {
 
         {loading ? (
           <p className="mt-3 text-xs text-[var(--color-text-muted)]">Loading…</p>
+        ) : !buckets ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <AlertTriangle size={22} className="text-[var(--color-danger)]" />
+            <p className="text-sm font-medium text-[var(--color-text)]">Couldn't load tasks</p>
+            <p className="text-xs text-[var(--color-text-muted)]">Try refreshing the page.</p>
+          </div>
         ) : grandTotal === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
             <CheckCircle2 size={22} className="text-[var(--color-text-muted)]" />
@@ -96,53 +131,68 @@ export default function DueSoonCard({ buckets, loading }) {
             <p className="text-xs text-[var(--color-text-muted)]">Nothing due right now.</p>
           </div>
         ) : (
-          <div className="mt-4 flex flex-col gap-3.5">
-            {SECTIONS.map((section) => {
-              const items = buckets[section.key];
-              if (!items || items.length === 0) return null;
-              const Icon = section.icon;
+            <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-white/10 pt-3.5">
+              {SECTIONS.map((section) => {
+                const items = buckets[section.key];
+                if (!items || items.length === 0) return null;
+                const Icon = section.icon;
+                const accent = section.dot;
 
-              return (
-                <div key={section.key}>
-                  {activeSectionCount > 1 && (
-                    <div className="mb-1.5 flex items-center gap-1.5">
-                      <Icon size={11} style={{ color: section.dot }} />
-                      <span
-                        className="text-[10px] font-bold uppercase tracking-wider"
-                        style={{ color: section.dot }}
-                      >
-                        {section.label}
-                      </span>
-                    </div>
-                  )}
+                return (
+                  <div key={section.key} className="flex min-h-0 flex-1 flex-col gap-2">
+                    {activeSectionCount > 1 && (
+                      <div className="flex items-center gap-1.5">
+                        <Icon size={11} style={{ color: accent }} />
+                        <span
+                          className="text-[10px] font-bold uppercase tracking-wider"
+                          style={{ color: accent }}
+                        >
+                          {section.label}
+                        </span>
+                      </div>
+                    )}
 
-                  <div className="flex flex-col divide-y divide-white/[0.06] border-t border-white/10">
-                    {items.map((item) => {
-                      const priority = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES.normal;
-                      return (
-                        <div key={item.id} className="flex items-center gap-3 py-2 first:pt-2.5">
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-[var(--color-text)]">
-                              {item.title}
-                            </p>
-                            <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">
-                              {item.subject_name || "No subject"} · {priority.label} priority
-                            </p>
-                          </div>
-
-                          <span
-                            className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold ${section.badgeClass}`}
+                    <div className="flex min-h-0 flex-1 flex-col gap-2">
+                      {items.map((item) => {
+                        const vaultMatch = vaultMatchByItemId.get(item.id);
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex min-h-0 min-w-0 flex-1 flex-col justify-between rounded-lg border px-3 py-2.5"
+                            style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--color-border))` }}
                           >
-                            {urgencyLabel(item.due_date)}
-                          </span>
-                        </div>
-                      );
-                    })}
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
+                                  {item.title}
+                                </p>
+                                <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
+                                  <span className="truncate text-xs text-[var(--color-text-muted)]">
+                                    {item.subject_name || "No subject"}
+                                  </span>
+                                  <VaultMatchLink file={vaultMatch} onOpen={onOpenFile} />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-2 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-2">
+                              <span className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
+                                {section.label}
+                              </span>
+                              <span
+                                className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-[10px] font-bold ${section.badgeClass}`}
+                              >
+                                {urgencyLabel(item.due_date)}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
         )}
       </div>
     </div>
