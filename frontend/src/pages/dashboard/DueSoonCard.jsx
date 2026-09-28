@@ -159,7 +159,10 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
                           <div
                             key={item.id}
                             className="flex min-h-0 min-w-0 flex-1 flex-col justify-between rounded-lg border px-3 py-2.5"
-                            style={{ borderColor: `color-mix(in srgb, ${accent} 35%, var(--color-border))` }}
+                            style={{
+                              borderColor: `color-mix(in srgb, ${accent} 35%, var(--color-border))`,
+                              backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
+                            }}
                           >
                             <div className="flex min-w-0 items-center gap-3">
                               <div className="min-w-0 flex-1">
