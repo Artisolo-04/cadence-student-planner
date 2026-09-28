@@ -24,44 +24,36 @@ function VaultFileCard({ item, onOpen }) {
 
   return (
     <div
-      className="flex min-h-0 min-w-0 flex-1 flex-col justify-between rounded-lg border px-3 py-2.5"
+      className="flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-md px-3 py-1.5"
       style={{
-        borderColor: `color-mix(in srgb, ${accent} 22%, var(--color-border))`,
         backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
       }}
     >
-      <div className="flex min-w-0 items-center gap-3">
-        <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border"
-          style={{
-            color: accent,
-            borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`,
-          }}
-        >
-          <Icon size={20} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
-            {stripExtension(item.title)}
-          </p>
-          <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">
-            {item.folder_name || item.subject_name || "Vault"}
-          </p>
-        </div>
+      <div
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded"
+        style={{
+          color: accent,
+          backgroundColor: `color-mix(in srgb, ${accent} 14%, transparent)`,
+        }}
+      >
+        <Icon size={14} />
       </div>
-
-      <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-2">
-        <span className="truncate font-mono text-[10px] text-[var(--color-text-muted)]">{footer}</span>
-        <button
-          type="button"
-          onClick={() => onOpen?.(item)}
-          className="flex shrink-0 items-center gap-1 rounded border border-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
-        >
-          VIEW
-          <ArrowRight size={10} />
-        </button>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
+          {stripExtension(item.title)}
+        </p>
+        <p className="truncate text-xs text-[var(--color-text-muted)]">
+          {[item.folder_name || item.subject_name || "Vault", footer].filter(Boolean).join(" · ")}
+        </p>
       </div>
+      <button
+        type="button"
+        onClick={() => onOpen?.(item)}
+        className="flex shrink-0 items-center gap-1 rounded border border-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
+      >
+        VIEW
+        <ArrowRight size={10} />
+      </button>
     </div>
   );
 }
@@ -105,7 +97,7 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
         ) : items.length === 0 ? (
           <p className="mt-3 text-xs text-[var(--color-text-muted)]">No files in your Vault yet.</p>
         ) : (
-          <div className="mt-4 flex min-h-0 flex-1 flex-col gap-2.5 border-t border-white/10 pt-3.5">
+          <div className="mt-4 flex min-h-0 flex-1 flex-col justify-between gap-1.5 border-t border-white/10 pt-3.5">
             {items.map((item) => (
               <VaultFileCard key={item.id} item={item} onOpen={onOpen} />
             ))}

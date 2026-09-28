@@ -152,42 +152,33 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
                       </div>
                     )}
 
-                    <div className="flex min-h-0 flex-1 flex-col gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col justify-between gap-2">
                       {items.map((item) => {
                         const vaultMatch = vaultMatchByItemId.get(item.id);
                         return (
                           <div
                             key={item.id}
-                            className="flex min-h-0 min-w-0 flex-1 flex-col justify-between rounded-lg border px-3 py-2.5"
+                            className="flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-md px-3 py-1.5"
                             style={{
-                              borderColor: `color-mix(in srgb, ${accent} 35%, var(--color-border))`,
                               backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
                             }}
                           >
-                            <div className="flex min-w-0 items-center gap-3">
-                              <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
-                                  {item.title}
-                                </p>
-                                <div className="mt-0.5 flex min-w-0 items-center gap-1.5">
-                                  <span className="truncate text-xs text-[var(--color-text-muted)]">
-                                    {item.subject_name || "No subject"}
-                                  </span>
-                                  <VaultMatchLink file={vaultMatch} onOpen={onOpenFile} />
-                                </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
+                                {item.title}
+                              </p>
+                              <div className="flex min-w-0 items-center gap-1.5">
+                                <span className="truncate text-xs text-[var(--color-text-muted)]">
+                                  {item.subject_name || "No subject"}
+                                </span>
+                                <VaultMatchLink file={vaultMatch} onOpen={onOpenFile} />
                               </div>
                             </div>
-
-                            <div className="mt-2 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-2">
-                              <span className="truncate font-mono text-[10px] uppercase tracking-wider text-[var(--color-text-muted)]">
-                                {section.label}
-                              </span>
-                              <span
-                                className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-[10px] font-bold ${section.badgeClass}`}
-                              >
-                                {urgencyLabel(item.due_date)}
-                              </span>
-                            </div>
+                            <span
+                              className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-[10px] font-bold ${section.badgeClass}`}
+                            >
+                              {urgencyLabel(item.due_date)}
+                            </span>
                           </div>
                         );
                       })}

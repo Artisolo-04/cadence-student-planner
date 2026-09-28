@@ -12,7 +12,7 @@ export default function InterceptVaultStack({ buckets, loading }) {
   const [previewItem, setPreviewItem] = useState(null);
 
   return (
-    <div className="grid h-full min-h-0 grid-cols-1 grid-rows-[repeat(2,minmax(0,1fr))] gap-4 lg:grid-cols-2 lg:grid-rows-1">
+    <div className="grid h-full min-h-0 grid-cols-1 grid-rows-[repeat(2,minmax(0,1fr))] gap-4">
       <DueSoonCard buckets={buckets} loading={loading} vaultFiles={files} onOpenFile={setPreviewItem} />
       <VaultQuickAccessCard files={files} loading={vaultLoading} onOpen={setPreviewItem} />
 
