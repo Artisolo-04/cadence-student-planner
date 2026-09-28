@@ -17,7 +17,8 @@ function toMinutes(hhmm) {
 
 export default function NextUpTile({ session }) {
   const minutesUntil = session
-    ? toMinutes(session.start) - (new Date().getHours() * 60 + new Date().getMinutes())
+    ? toMinutes(session.start) -
+      (new Date().getHours() * 60 + new Date().getMinutes())
     : null;
 
   const accent = session?.color || "var(--color-primary)";
@@ -43,41 +44,61 @@ export default function NextUpTile({ session }) {
           </div>
 
           {session && (
-            <span
-              className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold"
-              style={{
-                borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
-                backgroundColor: `color-mix(in srgb, ${accent} 15%, transparent)`,
-                color: accent,
-              }}
-            >
-              {minutesUntil != null ? formatMinutesUntil(minutesUntil) : "starting now"}
-            </span>
+            <div className="flex items-center gap-2">
+              {!(session.concurrent?.length > 0 && !session.hasGroupFilter) && (
+                <>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: accent }}
+                    />
+                    {session.groupTag || "All"}
+                  </span>
+                  <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[11px] font-semibold text-[var(--color-text-muted)]">
+                    {session.start?.slice(0, 5)}–{session.end?.slice(0, 5)}
+                  </span>
+                </>
+              )}
+              <span
+                className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-md border px-2 py-1 text-[11px] font-bold"
+                style={{
+                  borderColor: `color-mix(in srgb, ${accent} 40%, transparent)`,
+                  backgroundColor: `color-mix(in srgb, ${accent} 15%, transparent)`,
+                  color: accent,
+                }}
+              >
+                {minutesUntil != null
+                  ? formatMinutesUntil(minutesUntil)
+                  : "starting now"}
+              </span>
+            </div>
           )}
         </div>
 
         {session ? (
           session.concurrent?.length > 0 && !session.hasGroupFilter ? (
-            <div className="mt-3 grid flex-1 auto-rows-fr grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="mt-3 grid flex-1 auto-rows-fr grid-cols-1 gap-4 sm:grid-cols-2">
               {[session, ...session.concurrent].map((s) => (
                 <div
                   key={s.key}
                   className="flex min-w-0 flex-col gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] p-3"
                 >
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className="h-1.5 w-1.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: s.color }}
-                    />
-                    <span className="shrink-0 rounded border border-white/10 px-1 text-[9px] font-bold uppercase tracking-wide text-[var(--color-text)]">
-                      {s.groupTag || "All"}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: s.color }}
+                      />
+                      <span className="shrink-0 rounded border border-white/10 px-1 text-[9px] font-bold uppercase tracking-wide text-[var(--color-text)]">
+                        {s.groupTag || "All"}
+                      </span>
+                    </div>
+                    <span className="font-mono text-[11px] text-[var(--color-text-muted)]">
+                      {s.start?.slice(0, 5)}–{s.end?.slice(0, 5)}
                     </span>
                   </div>
                   <p className="truncate text-sm font-semibold leading-tight text-[var(--color-text)]">
                     {s.subjectName}
-                  </p>
-                  <p className="font-mono text-[11px] text-[var(--color-text-muted)]">
-                    {s.start?.slice(0, 5)}–{s.end?.slice(0, 5)}
                   </p>
                   {(s.teacher || s.room) && (
                     <p className="truncate text-[11px] text-[var(--color-text-muted)]">
@@ -93,9 +114,6 @@ export default function NextUpTile({ session }) {
               <p className="mt-3 truncate text-xl font-semibold leading-tight text-[var(--color-text)]">
                 {session.subjectName}
               </p>
-              <p className="mt-1.5 font-mono text-xs text-[var(--color-text-muted)]">
-                {session.start?.slice(0, 5)}–{session.end?.slice(0, 5)}
-              </p>
 
               {(session.teacher || session.room) && (
                 <p className="mt-1 truncate text-xs text-[var(--color-text-muted)]">
@@ -105,16 +123,6 @@ export default function NextUpTile({ session }) {
               )}
 
               <div className="mt-auto space-y-2 pt-3">
-                <span
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--color-text-muted)]"
-                >
-                  <span
-                    className="h-1.5 w-1.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: accent }}
-                  />
-                  {session.groupTag || "All"}
-                </span>
-
                 {session.concurrent?.length > 0 && (
                   <div className="space-y-1 border-t border-white/10 pt-2">
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
