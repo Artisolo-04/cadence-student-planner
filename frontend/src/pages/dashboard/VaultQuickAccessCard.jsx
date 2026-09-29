@@ -1,3 +1,6 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
+import { Folder as EmptyVaultIcon } from "lucide-react";
 import {
   FolderOpen, ArrowRight, File, FileText, FileSpreadsheet, FileType, Link2, Image as ImageIcon,
 } from "lucide-react";
@@ -94,8 +97,8 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
 
         {loading ? (
           <p className="mt-3 text-xs text-[var(--color-text-muted)]">Loading…</p>
-        ) : items.length === 0 ? (
-          <p className="mt-3 text-xs text-[var(--color-text-muted)]">No files in your Vault yet.</p>
+        ) : items.length === 0 || EMPTY_PREVIEW ? (
+          <EmptyState variant="compact" className="flex-1" icon={EmptyVaultIcon} title="No files in your Vault yet" body="Upload notes or PDFs and they will show up here." />
         ) : (
           <div className="mt-4 flex min-h-0 flex-1 flex-col justify-between gap-1.5 border-t border-white/10 pt-3.5">
             {items.map((item) => (

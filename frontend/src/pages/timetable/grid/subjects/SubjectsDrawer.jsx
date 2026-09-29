@@ -1,3 +1,5 @@
+import EmptyState from "../../../../components/ui/EmptyState";
+import { BookOpen as EmptySubjectIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PanelRightClose } from "lucide-react";
 import SubjectChip from "./SubjectChip";
@@ -59,9 +61,7 @@ export default function SubjectsDrawer({ subjects, onClose }) {
               <SubjectChip key={subject.id} subject={subject} />
             ))}
             {subjects.length === 0 && (
-              <p className="px-1 py-4 text-center text-[12px] text-[var(--color-text-muted)]">
-                No subjects yet.
-              </p>
+              <EmptyState variant="tight" icon={EmptySubjectIcon} title="No subjects yet" body="Add one to start planning." />
             )}
           </div>
         </div>

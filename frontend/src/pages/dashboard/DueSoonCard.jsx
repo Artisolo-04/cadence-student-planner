@@ -1,3 +1,5 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
 import { useMemo } from "react";
 import { ClipboardList, AlertTriangle, ArrowRight, Radar, Clock, CheckCircle2, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -124,12 +126,8 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
             <p className="text-sm font-medium text-[var(--color-text)]">Couldn't load tasks</p>
             <p className="text-xs text-[var(--color-text-muted)]">Try refreshing the page.</p>
           </div>
-        ) : grandTotal === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-            <CheckCircle2 size={22} className="text-[var(--color-text-muted)]" />
-            <p className="text-sm font-medium text-[var(--color-text)]">All caught up</p>
-            <p className="text-xs text-[var(--color-text-muted)]">Nothing due right now.</p>
-          </div>
+        ) : grandTotal === 0 || EMPTY_PREVIEW ? (
+          <EmptyState variant="compact" className="flex-1" icon={CheckCircle2} title="All caught up" body="Nothing due right now." />
         ) : (
             <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-white/10 pt-3.5">
               {SECTIONS.map((section) => {

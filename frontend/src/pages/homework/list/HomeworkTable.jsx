@@ -1,3 +1,5 @@
+import EmptyState from "../../../components/ui/EmptyState";
+import { SearchX as EmptyFilterIcon } from "lucide-react";
 import HomeworkRow from "./HomeworkRow";
 import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 import useScrollFade from "../../../hooks/useScrollFade";
@@ -29,9 +31,7 @@ export default function HomeworkTable({ items, onEdit, onDelete, onToggleDone, o
             ))}
 
             {items.length === 0 && (
-              <p className="px-2.5 py-6 text-center text-sm text-[var(--color-text-muted)]">
-                No homework matches your filters.
-              </p>
+              <EmptyState variant="compact" icon={EmptyFilterIcon} title="No results" body="No homework matches your filters." />
             )}
           </div>
         </div>

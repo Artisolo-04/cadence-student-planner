@@ -1,3 +1,4 @@
+import EmptyState from "../../components/ui/EmptyState";
 import { useEffect, useRef, useState } from "react";
 import { Check, Coffee, Moon, Target } from "lucide-react";
 
@@ -196,11 +197,7 @@ export default function FocusTimeline({ week = [] }) {
         )}
 
         {!hasSessions && (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
-            <Target size={22} className="text-[var(--color-text-muted)]" />
-            <p className="text-sm font-medium text-[var(--color-text)]">Nothing scheduled today</p>
-            <p className="text-xs text-[var(--color-text-muted)]">Enjoy the free time.</p>
-          </div>
+          <EmptyState className="flex-1" icon={Target} title="Nothing scheduled today" body="Enjoy the free time." />
         )}
 
         {hasSessions && (

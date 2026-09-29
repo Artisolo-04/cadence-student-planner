@@ -1,3 +1,5 @@
+import EmptyState from "../../../components/ui/EmptyState";
+import { Inbox as EmptyBoardIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BoardCard from "./BoardCard";
@@ -77,15 +79,14 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
           <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-3 pb-2">
             <AnimatePresence mode="popLayout">
               {items.length === 0 ? (
-                <motion.p
+                <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="px-1 py-6 text-center text-xs text-[var(--color-text-muted)]"
                 >
-                  Nothing here.
-                </motion.p>
+                  <EmptyState variant="tight" className="py-6" icon={EmptyBoardIcon} title="Nothing here" body="No homework in this column." />
+                </motion.div>
               ) : (
                 items.map((item) => (
                   <div key={item.id} data-card-id={item.id}>

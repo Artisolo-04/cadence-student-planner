@@ -1,3 +1,5 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { CalendarOff as EmptyDayIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BarChart2 } from "lucide-react";
 
@@ -98,9 +100,7 @@ export default function DayTimeline({ sessions = [] }) {
             </div>
           </div>
         ) : (
-          <p className="mt-4 text-center text-xs text-[var(--color-text-muted)]">
-            Nothing scheduled today.
-          </p>
+          <EmptyState variant="compact" className="mt-2" icon={EmptyDayIcon} title="Nothing scheduled today" body="Enjoy the free time." />
         )}
       </div>
     </div>

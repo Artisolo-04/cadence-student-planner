@@ -1,3 +1,5 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { Hourglass as EmptyNextIcon } from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 
 function formatMinutesUntil(minutes) {
@@ -149,9 +151,7 @@ export default function NextUpTile({ session }) {
             </>
           )
         ) : (
-          <p className="mt-auto text-sm text-[var(--color-text-muted)]">
-            Nothing else scheduled today.
-          </p>
+          <EmptyState variant="tight" icon={EmptyNextIcon} title="You are free for now" body="No more sessions today." />
         )}
       </div>
     </div>
