@@ -5,7 +5,7 @@ import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
 import { useWorkspace } from "../../hooks/useWorkspace";
-import AnalyticsPanel from "../timetable/analytics/AnalyticsPanel";
+import AnalyticsPanel from "./AnalyticsPanel";
 
 export default function AnalyticsPage() {
   const navigate = useNavigate();

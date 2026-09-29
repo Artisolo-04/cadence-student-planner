@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import Modal from "../../../components/ui/Modal";
+import Modal from "../../components/ui/Modal";
 import ScheduleDetails from "./ScheduleDetails";
 import { accentFor, hoursToLabel, subjectTint } from "./chartTokens";
-import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
-import useScrollFade from "../../../hooks/useScrollFade";
+import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
+import useScrollFade from "../../hooks/useScrollFade";
 
 const SIZE = 160;
 const RADIUS = 68;

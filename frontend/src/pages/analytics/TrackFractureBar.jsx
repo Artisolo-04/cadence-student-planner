@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Modal from "../../../components/ui/Modal";
+import Modal from "../../components/ui/Modal";
 import ScheduleDetails from "./ScheduleDetails";
 
 export default function TrackFractureBar({
