@@ -4,7 +4,7 @@ import { AppearanceCard, TipsCard } from "./SettingsSidebar";
 
 export default function SettingsPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 lg:h-full lg:min-h-0">
       <div>
         <h1 className="text-2xl font-semibold text-[var(--color-text)]">Settings</h1>
         <p className="text-sm text-[var(--color-text-muted)]">
@@ -12,7 +12,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:flex-1 lg:min-h-0">
         <ProfileForm />
         <GroupSection />
         <AppearanceCard />
