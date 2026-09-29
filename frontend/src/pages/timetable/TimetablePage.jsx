@@ -1,3 +1,5 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
 import { useEffect, useRef, useState } from "react";
 import {
   Calendar, Plus, ArrowLeft, Pencil, Settings2, Check, Undo2, Redo2, BarChart3,
@@ -43,7 +45,7 @@ export default function TimetablePage() {
   useEffect(() => {
     if (workspacesLoading) return;
     if (view !== "loading") return;
-    setView(timetables.length === 0 ? "empty" : "list");
+    setView(timetables.length === 0 || EMPTY_PREVIEW ? "empty" : "list");
 
   }, [workspacesLoading]);
 
@@ -356,42 +358,17 @@ export default function TimetablePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5 py-24 text-center">
-      <div
-        className="flex items-center justify-center rounded-2xl"
-        style={{
-          width: "64px",
-          height: "64px",
-          background: "var(--color-surface-alt)",
-          border: "1px solid var(--color-border)",
-        }}
-      >
-        <Calendar size={26} style={{ color: "var(--color-text-muted)" }} />
-      </div>
-
-      <div style={{ maxWidth: "280px" }}>
-        <h2
-          className="text-base font-semibold"
-          style={{
-            color: "var(--color-text)",
-            letterSpacing: "-0.02em",
-            marginBottom: "6px",
-          }}
-        >
-          No timetable yet
-        </h2>
-        <p
-          className="text-sm leading-relaxed"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          Build your weekly schedule in a few quick steps.
-        </p>
-      </div>
-
-      <Button onClick={startCreate}>
-        <Plus size={15} />
-        Add timetable
-      </Button>
-    </div>
+    <EmptyState
+      className="h-full"
+      icon={Calendar}
+      title="No timetable yet"
+      body="Build your weekly schedule in a few quick steps."
+      action={
+        <Button onClick={startCreate}>
+          <Plus size={15} />
+          Add timetable
+        </Button>
+      }
+    />
   );
 }

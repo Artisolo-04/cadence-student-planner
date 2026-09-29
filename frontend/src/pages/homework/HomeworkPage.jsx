@@ -1,3 +1,5 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
 import { useEffect, useState } from "react";
 import { ClipboardList, Plus } from "lucide-react";
 import api from "../../lib/api";
@@ -24,7 +26,7 @@ export default function HomeworkPage() {
       ]);
       setHomework(homeworkRes.data);
       setSubjects(subjectsRes.data.subjects);
-      setView(homeworkRes.data.length === 0 ? "empty" : "list");
+      setView(homeworkRes.data.length === 0 || EMPTY_PREVIEW ? "empty" : "list");
     } catch (err) {
       console.error("Load homework error:", err);
       setView("empty");
@@ -95,21 +97,18 @@ export default function HomeworkPage() {
           onReorder={handleReorder}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-          <div className="rounded-full bg-[var(--color-surface-alt)] p-4">
-            <ClipboardList size={28} className="text-[var(--color-text-muted)]" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">No homework yet</h2>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">
-              Add your assignments and keep track of due dates.
-            </p>
-          </div>
-          <Button onClick={startCreate}>
-            <Plus size={16} />
-            Add homework
-          </Button>
-        </div>
+        <EmptyState
+          className="h-full"
+          icon={ClipboardList}
+          title="No homework yet"
+          body="Add your assignments and keep track of due dates."
+          action={
+            <Button onClick={startCreate}>
+              <Plus size={16} />
+              Add homework
+            </Button>
+          }
+        />
       )}
 
       <HomeworkFormModal

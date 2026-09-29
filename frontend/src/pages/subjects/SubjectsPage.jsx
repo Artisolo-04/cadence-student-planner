@@ -1,3 +1,5 @@
+import EmptyState from "../../components/ui/EmptyState";
+import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
 import { useEffect, useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
 import api from "../../lib/api";
@@ -26,7 +28,7 @@ export default function SubjectsPage() {
         params: activeId ? { timetableId: activeId } : undefined,
       });
       setSubjects(data.subjects);
-      setView(data.subjects.length === 0 ? "empty" : "list");
+      setView(data.subjects.length === 0 || EMPTY_PREVIEW ? "empty" : "list");
     } catch (err) {
       console.error("Load subjects error:", err);
       setView("empty");
@@ -84,21 +86,18 @@ export default function SubjectsPage() {
           onSelect={openDetail}
         />
       ) : (
-        <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-          <div className="rounded-full bg-[var(--color-surface-alt)] p-4">
-            <BookOpen size={28} className="text-[var(--color-text-muted)]" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-[var(--color-text)]">No subjects yet</h2>
-            <p className="text-sm text-[var(--color-text-muted)] mt-1">
-              Add the subjects you'll assign into your timetable.
-            </p>
-          </div>
-          <Button onClick={startCreate}>
-            <Plus size={16} />
-            Add subject
-          </Button>
-        </div>
+        <EmptyState
+          className="h-full"
+          icon={BookOpen}
+          title="No subjects yet"
+          body="Add the subjects you'll assign into your timetable."
+          action={
+            <Button onClick={startCreate}>
+              <Plus size={16} />
+              Add subject
+            </Button>
+          }
+        />
       )}
 
       <SubjectFormModal
