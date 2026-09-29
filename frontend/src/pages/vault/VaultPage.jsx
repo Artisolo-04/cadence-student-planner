@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FolderOpen, FolderPlus, Landmark, LayoutGrid, List } from "lucide-react";
+import { FolderOpen, FolderPlus, Landmark, LayoutGrid, List, SearchX } from "lucide-react";
 import api from "../../lib/api";
+import EmptyState from "../../components/ui/EmptyState";
+import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
 import { useVaultData } from "./useVaultData";
 import VaultFolderCard from "./VaultFolderCard";
 import AddVaultItemForm from "./components/AddVaultItemForm";
@@ -256,9 +258,24 @@ export default function VaultPage() {
           {loading ? (
             <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
           ) : (
-            <div className="flex flex-col gap-4">
-              {visibleGroups.length === 0 ? (
-                <p className="text-sm text-[var(--color-text-muted)]">{isFiltering ? "No workspaces match your search or filters." : emptyMessage}</p>
+            <div className={`flex flex-col gap-4 ${visibleGroups.length === 0 || EMPTY_PREVIEW ? "h-full" : ""}`}>
+              {visibleGroups.length === 0 || EMPTY_PREVIEW ? (
+                isFiltering ? (
+                  <EmptyState variant="compact" className="flex-1" icon={SearchX} title="No results" body="No workspaces match your search or filters." />
+                ) : (
+                  <EmptyState
+                    className="flex-1"
+                    icon={isUniversity ? Landmark : FolderOpen}
+                    title={isUniversity ? "No university tracks yet" : "No custom workspaces yet"}
+                    body={isUniversity ? "Link your subjects to a workspace to keep every document in one place." : "Create a folder to organize your own documents and links."}
+                    action={
+                      <Button type="button" onClick={() => setCreateFormOpen(true)}>
+                        <FolderPlus size={16} />
+                        New workspace
+                      </Button>
+                    }
+                  />
+                )
               ) : layoutMode === "grid" ? (
                 <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {visibleGroups.map((group) => (

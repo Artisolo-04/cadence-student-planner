@@ -76,16 +76,17 @@ export default function BoardColumn({ column, items, onEdit, onDelete, onStatusC
           onScroll={updateScrollFades}
           className="h-full overflow-y-auto rounded-xl scrollbar-hidden min-w-0 flex-1"
         >
-          <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="flex flex-col gap-3 pb-2">
+          <motion.div layout="position" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className={`flex flex-col gap-3 pb-2 ${items.length === 0 ? "min-h-full" : ""}`}>
             <AnimatePresence mode="popLayout">
               {items.length === 0 ? (
                 <motion.div
                   key="empty"
+                  className="flex flex-1"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <EmptyState variant="tight" className="py-6" icon={EmptyBoardIcon} title="Nothing here" body="No homework in this column." />
+                  <EmptyState variant="tight" className="flex-1" icon={EmptyBoardIcon} title="Nothing here" body="No homework in this column." />
                 </motion.div>
               ) : (
                 items.map((item) => (
