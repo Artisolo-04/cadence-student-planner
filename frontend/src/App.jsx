@@ -4,6 +4,7 @@ import Signup from "./pages/Signup";
 import ProfileSetup from "./pages/ProfileSetup";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import TimetablePage from "./pages/timetable/TimetablePage";
+import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import SubjectsPage from "./pages/subjects/SubjectsPage";
 import HomeworkPage from "./pages/homework/HomeworkPage";
 import SettingsPage from "./pages/settings/SettingsPage";
@@ -33,6 +34,7 @@ export default function App() {
       >
         <Route path="/" element={<DashboardPage />} />
         <Route path="/timetable" element={<TimetablePage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/subjects" element={<SubjectsPage />} />
         <Route path="/vault" element={<VaultPage />} />
         <Route path="/homework" element={<HomeworkPage />} />

@@ -2,16 +2,14 @@ import EmptyState from "../../components/ui/EmptyState";
 import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
 import { useEffect, useRef, useState } from "react";
 import {
-  Calendar, Plus, ArrowLeft, Pencil, Settings2, Check, Undo2, Redo2, BarChart3,
+  Calendar, Plus, ArrowLeft, Pencil, Settings2, Check, Undo2, Redo2,
 } from "lucide-react";
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
 import TimetableWizard from "./wizard/TimetableWizard";
 import TimetableGrid from "./grid/layout/TimetableGrid";
-import AnalyticsPanel from "./analytics/AnalyticsPanel";
 import ViewOptionsPanel from "./ViewOptionsPanel";
-import SegmentedControl from "../../components/ui/SegmentedControl";
 import useTimetableViewOptions from "../../hooks/useTimetableViewOptions";
 import { publishWorkspaceGroupChange } from "../../lib/workspaceGroupSync";
 import { useWorkspace } from "../../hooks/useWorkspace";
@@ -31,7 +29,6 @@ export default function TimetablePage() {
   const [wizardMode, setWizardMode] = useState("create");
   const [workspace, setWorkspace] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [activePanel, setActivePanel] = useState("grid");
   const editActionsRef = useRef({ undo: () => {}, redo: () => {} });
   const [editState, setEditState] = useState({ canUndo: false, canRedo: false });
   const { viewOptions, setViewOption } = useTimetableViewOptions(
@@ -64,7 +61,6 @@ export default function TimetablePage() {
       const { data } = await api.get(`/timetables/${id}`);
       setWorkspace(data);
       setIsEditMode(false);
-      setActivePanel("grid");
       setView("grid");
     } catch (err) {
       console.error("Load workspace detail error:", err);
@@ -79,7 +75,6 @@ export default function TimetablePage() {
   async function handleWizardComplete(detail) {
     setWorkspace(detail);
     setIsEditMode(false);
-    setActivePanel("grid");
     setView("grid");
     openedIdRef.current = detail.timetable.id;
 
@@ -125,7 +120,6 @@ export default function TimetablePage() {
   function handleBackToList() {
     setWorkspace(null);
     setIsEditMode(false);
-    setActivePanel("grid");
     setView("list");
   }
 
@@ -141,13 +135,6 @@ export default function TimetablePage() {
 
   function toggleEditMode() {
     setIsEditMode((current) => !current);
-  }
-
-  function handlePanelChange(id) {
-    setActivePanel(id);
-    if (id === "analytics") {
-      setIsEditMode(false);
-    }
   }
 
   function handleWizardCancel() {
@@ -185,7 +172,6 @@ export default function TimetablePage() {
   }
 
   if (view === "grid" && workspace) {
-    const isAnalytics = activePanel === "analytics";
     const standardActionClass = isEditMode
       ? "pointer-events-none opacity-0"
       : "pointer-events-auto opacity-100";
@@ -230,45 +216,13 @@ export default function TimetablePage() {
                 style={{ background: "var(--color-border)" }}
               />
 
-              <div className="sm:hidden">
-                <SegmentedControl
-                  ariaLabel="Timetable panel"
-                  variant="icon"
-                  options={[
-                    { id: "grid", label: "Grid View", Icon: Calendar },
-                    { id: "analytics", label: "Analytics", Icon: BarChart3 },
-                  ]}
-                  value={activePanel}
-                  onChange={handlePanelChange}
-                />
-              </div>
-              <div className="hidden sm:flex">
-                <SegmentedControl
-                  ariaLabel="Timetable panel"
-                  variant="labeled"
-                  options={[
-                    { id: "grid", label: "Grid View", Icon: Calendar },
-                    { id: "analytics", label: "Analytics", Icon: BarChart3 },
-                  ]}
-                  value={activePanel}
-                  onChange={handlePanelChange}
-                />
-              </div>
 
-              <div
-                className={`transition-all duration-200 ease-in-out ${
-                  isAnalytics
-                    ? "pointer-events-none opacity-40"
-                    : "pointer-events-auto opacity-100"
-                }`}
-              >
-                <ViewOptionsPanel
+              <ViewOptionsPanel
                   myGroup={workspace.timetable.my_group}
                   onMyGroupChange={handleMyGroupChange}
                   viewOptions={viewOptions}
                   onViewOptionChange={setViewOption}
                 />
-              </div>
             </div>
 
             <div
@@ -294,8 +248,8 @@ export default function TimetablePage() {
             >
               <Button
                 variant="primary"
-                onClick={() => { if (!isAnalytics) toggleEditMode(); }}
-                className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out ${isAnalytics ? "pointer-events-none opacity-40" : "pointer-events-auto opacity-100"}`}
+                onClick={toggleEditMode}
+                className={`!h-9 !w-9 !p-0 sm:!h-9 sm:!w-auto sm:!px-4 whitespace-nowrap transition-all duration-200 ease-in-out`}
               >
                 <Pencil size={15} />
                 <span className="hidden sm:inline">Edit</span>
@@ -339,10 +293,7 @@ export default function TimetablePage() {
         </header>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          {isAnalytics ? (
-            <AnalyticsPanel workspace={workspace} slots={workspace.slots} />
-          ) : (
-            <TimetableGrid
+          <TimetableGrid
               workspace={workspace}
               onWorkspaceChange={setWorkspace}
               myGroup={workspace.timetable.my_group}
@@ -351,7 +302,6 @@ export default function TimetablePage() {
               actionsRef={editActionsRef}
               onEditStateChange={setEditState}
             />
-          )}
         </div>
       </div>
     );
