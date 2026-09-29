@@ -1,3 +1,5 @@
+import EmptyState from "../../../components/ui/EmptyState";
+import { Calendar as EmptyScheduleIcon } from "lucide-react";
 import { Clock, MapPin, Users } from "lucide-react";
 import { formatDuration, formatTime } from "./subjectDetailUtils";
 import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
@@ -15,11 +17,13 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
           className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
           {entries.length === 0 ? (
-            <p className="text-sm text-[var(--color-text-muted)]">
-              {timetableId
-                ? "Not scheduled in this workspace."
-                : "Select a workspace to see scheduling."}
-            </p>
+            <EmptyState
+              variant="compact"
+              className="h-full"
+              icon={EmptyScheduleIcon}
+              title={timetableId ? "Not scheduled here" : "No workspace selected"}
+              body={timetableId ? "This subject has no sessions in this workspace." : "Select a workspace to see scheduling."}
+            />
           ) : (
             <div className="flex flex-col gap-3">
               {scheduleDays.map((day) => (

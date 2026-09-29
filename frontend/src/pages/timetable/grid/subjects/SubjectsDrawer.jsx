@@ -56,12 +56,12 @@ export default function SubjectsDrawer({ subjects, onClose }) {
           onScroll={updateScrollFades}
           className="h-full min-w-0 flex-1 overflow-y-auto rounded-xl px-1 scrollbar-hidden"
         >
-          <div className="flex flex-col gap-2">
+          <div className={`flex flex-col gap-2 ${subjects.length === 0 ? "min-h-full" : ""}`}>
             {subjects.map((subject) => (
               <SubjectChip key={subject.id} subject={subject} />
             ))}
             {subjects.length === 0 && (
-              <EmptyState variant="tight" icon={EmptySubjectIcon} title="No subjects yet" body="Add one to start planning." />
+              <EmptyState variant="compact" className="flex-1" icon={EmptySubjectIcon} title="No subjects yet" body="Add one to start planning." />
             )}
           </div>
         </div>

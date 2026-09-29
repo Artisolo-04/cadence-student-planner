@@ -1,3 +1,5 @@
+import EmptyState from "../../../components/ui/EmptyState";
+import { ClipboardList as EmptyHomeworkIcon } from "lucide-react";
 import { Plus } from "lucide-react";
 import Checkbox from "../../../components/ui/Checkbox";
 import Input from "../../../components/ui/Input";
@@ -51,7 +53,7 @@ export default function HomeworkSection({
           className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
           {homework.length === 0 ? (
-            <p className="text-sm text-[var(--color-text-muted)]">No homework linked yet.</p>
+            <EmptyState variant="compact" className="h-full" icon={EmptyHomeworkIcon} title="No homework yet" body="Add a task above to link it to this subject." />
           ) : (
             <ul className="flex flex-col gap-2">
               {homework.map((hw) => {

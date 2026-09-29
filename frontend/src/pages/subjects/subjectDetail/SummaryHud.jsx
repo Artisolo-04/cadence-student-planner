@@ -1,3 +1,5 @@
+import EmptyState from "../../../components/ui/EmptyState";
+import { Clock as EmptyNextIcon } from "lucide-react";
 import { CalendarClock, Gauge, ListChecks } from "lucide-react";
 
 function NextSessionCard({ nextSession }) {
@@ -15,9 +17,7 @@ function NextSessionCard({ nextSession }) {
           )}
         </p>
       ) : (
-        <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">
-          No upcoming sessions scheduled.
-        </p>
+        <EmptyState variant="tight" className="mt-1" icon={EmptyNextIcon} title="No upcoming sessions" body="Nothing planned for this subject." />
       )}
     </div>
   );
