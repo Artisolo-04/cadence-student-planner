@@ -10,7 +10,7 @@ export default function HomeworkTable({ items, onEdit, onDelete, onToggleDone, o
   const { scrollRef, showTopFade, showBottomFade, updateScrollFades } = useScrollFade(items);
 
   return (
-    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 backdrop-blur-xl">
+    <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4 backdrop-blur-xl">
       <div className="relative min-h-0 flex flex-1 p-0 sm:p-2">
         <div
           ref={scrollRef}

@@ -4,10 +4,10 @@ import { AppearanceCard, TipsCard } from "./SettingsSidebar";
 
 export default function SettingsPage() {
   return (
-    <div className="flex flex-col gap-6 lg:h-full lg:min-h-0">
+    <div className="flex flex-col gap-5 lg:h-full lg:min-h-0">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--color-text)]">Settings</h1>
-        <p className="text-sm text-[var(--color-text-muted)]">
+        <h1 className="text-lg font-semibold text-[var(--color-text)]">Settings</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Manage your profile and how your timetables are personalized.
         </p>
       </div>

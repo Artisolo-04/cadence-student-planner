@@ -198,7 +198,7 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col gap-4">
+    <div className="flex h-full w-full min-h-0 flex-col gap-5">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
         <div>
           <h2 className="text-lg font-semibold text-[var(--color-text)]">Vault Workspace</h2>
