@@ -38,7 +38,7 @@ async function createEntryHandler(req, res) {
 
     await ensureBaselineSnapshot(req.params.id);
 
-    const { mainEntry, deletedIds, createdFragments } = await createEntry(req.params.id, {
+    const { mainEntry, deletedIds, createdFragments, skipped, reason, coveredBy } = await createEntry(req.params.id, {
       slotId,
       endSlotId: endSlotId ?? slotId,
       dayOfWeek,
@@ -46,6 +46,17 @@ async function createEntryHandler(req, res) {
       groupTag,
       room: room?.trim() ? room.trim() : null,
     });
+
+    if (skipped) {
+      return res.status(200).json({
+        skipped: true,
+        reason,
+        entry: coveredBy,
+        deletedIds: [],
+        createdFragments: [],
+        currentVersion: timetable.current_version,
+      });
+    }
 
     const currentVersion = await recordSnapshot(req.params.id);
 
@@ -95,7 +106,7 @@ async function updateEntryHandler(req, res) {
 
     await ensureBaselineSnapshot(req.params.id);
 
-    const { mainEntry, deletedIds, createdFragments } = await updateEntry(
+    const { mainEntry, deletedIds, createdFragments, skipped, reason, coveredBy } = await updateEntry(
       req.params.id,
       req.params.entryId,
       {
@@ -107,6 +118,17 @@ async function updateEntryHandler(req, res) {
         room: room?.trim() ? room.trim() : null,
       }
     );
+
+    if (skipped) {
+      return res.status(200).json({
+        skipped: true,
+        reason,
+        entry: coveredBy,
+        deletedIds: [],
+        createdFragments: [],
+        currentVersion: timetable.current_version,
+      });
+    }
 
     const currentVersion = await recordSnapshot(req.params.id);
 
@@ -193,7 +215,10 @@ async function batchUpdateEntries(req, res) {
 
     await ensureBaselineSnapshot(req.params.id);
     const result = await applyBatch(req.params.id, normalizedOps);
-    const newVersion = await recordSnapshot(req.params.id);
+    const allSkipped = (result.skipped?.length ?? 0) === normalizedOps.length;
+      const newVersion = allSkipped
+        ? timetable.current_version
+        : await recordSnapshot(req.params.id);
 
     res.json({ ...result, currentVersion: newVersion });
   } catch (err) {
