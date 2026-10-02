@@ -27,10 +27,24 @@ function LandingPulse({ color }) {
 function ResizeGhost({ cellEl, previewSpan, rowHeight }) {
   if (!cellEl) return null;
   const rect = cellEl.getBoundingClientRect();
+  const height = rowHeight * previewSpan;
+  const root = cellEl.closest("[data-timetable-grid-root]");
+  const rootRect = root ? root.getBoundingClientRect() : null;
+  const headerEl = root?.firstElementChild?.firstElementChild;
+  const visibleTop = rootRect ? rootRect.top + (headerEl?.offsetHeight ?? 0) : rect.top;
+  const visibleBottom = rootRect ? rootRect.bottom : rect.top + height;
+  const clipTop = Math.max(0, visibleTop - rect.top);
+  const clipBottom = Math.max(0, rect.top + height - visibleBottom);
   return createPortal(
     <div
       className="pointer-events-none fixed z-40 rounded-lg ring-2 ring-[var(--color-accent)] bg-[var(--color-accent)]/10"
-      style={{ left: rect.left, top: rect.top, width: rect.width, height: rowHeight * previewSpan }}
+      style={{
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height,
+        clipPath: `inset(${clipTop > 0 ? clipTop : -4}px -4px ${clipBottom > 0 ? clipBottom : -4}px -4px)`,
+      }}
     />,
     document.body
   );
