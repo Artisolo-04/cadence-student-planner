@@ -23,6 +23,9 @@ const VISIBLE_DAYS_MOBILE = 3;
 
 const MOBILE_TIME_COL_W = 60;
 
+const MAX_VISIBLE_ROWS = 8;
+const MIN_ROW_PX = 56;
+
 export default function TimetableGrid({
   workspace,
   onWorkspaceChange,
@@ -49,6 +52,7 @@ export default function TimetableGrid({
   const scrollRef = useRef(null);
   const headerCellRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [viewportH, setViewportH] = useState(0);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
   const [dayColWidth, setDayColWidth] = useState(() => {
@@ -106,6 +110,30 @@ export default function TimetableGrid({
       window.removeEventListener("resize", updateScrollFades);
     };
   }, []);
+
+  const slotCount = orderedSlots.length;
+  const overflowing = slotCount > MAX_VISIBLE_ROWS && viewportH > 0;
+  const fixedRowH = overflowing
+    ? Math.max(MIN_ROW_PX, (viewportH - headerHeight) / MAX_VISIBLE_ROWS)
+    : null;
+  const rowsTemplate = overflowing
+    ? `auto repeat(${slotCount}, ${fixedRowH}px)`
+    : `auto repeat(${slotCount}, minmax(min-content, 1fr))`;
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const measure = () => setViewportH(el.clientHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(updateScrollFades);
+    return () => cancelAnimationFrame(frame);
+  }, [overflowing, fixedRowH, slotCount]);
 
   const nowDow = now.getDay();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -219,12 +247,12 @@ export default function TimetableGrid({
             style={{ scrollbarGutter: "auto" }}
           >
             <div
-              className="grid h-full w-max sm:w-full text-sm [--time-col-w:60px] sm:[--time-col-w:150px]" // 60px here must match MOBILE_TIME_COL_W above
+              className={`grid ${overflowing ? "" : "h-full"} w-max sm:w-full text-sm [--time-col-w:60px] sm:[--time-col-w:150px]`}
               style={{
                 gridTemplateColumns: `var(--time-col-w) repeat(${
                   orderedDays.length * 2
                 }, minmax(${dayColWidth > 0 ? `${dayColWidth / 2}px` : "0px"}, 1fr))`,
-                gridTemplateRows: `auto repeat(${orderedSlots.length}, minmax(min-content, 1fr))`,
+                gridTemplateRows: rowsTemplate,
               }}
             >
               <GridHeaderRow orderedDays={orderedDays} nowDow={nowDow} headerCellRef={headerCellRef} />

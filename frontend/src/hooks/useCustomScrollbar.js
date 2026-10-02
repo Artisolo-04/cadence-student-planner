@@ -35,7 +35,12 @@ export function useCustomScrollbar(scrollRef) {
     resizeObserver.observe(el);
 
     const mutationObserver = new MutationObserver(updateThumb);
-    mutationObserver.observe(el, { childList: true, subtree: true });
+    mutationObserver.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style"],
+    });
 
     return () => {
       el.removeEventListener("scroll", updateThumb);
