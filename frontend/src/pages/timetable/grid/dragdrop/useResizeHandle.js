@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { startEdgeAutoScroll } from "./edgeAutoScroll";
 import { resizeDeltaToSpan, computeEndSlotId, getSpanCount, getSlotIndex } from "../layout/slotSpanUtils";
 
 export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
@@ -8,23 +9,30 @@ export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
   const [isPersisting, setIsPersisting] = useState(false);
   const [rowHeight, setRowHeight] = useState(56);
   const [cellEl, setCellEl] = useState(null);
+  const [, setScrollTick] = useState(0);
   const dragState = useRef(null);
   const previewSpanRef = useRef(null);
   const isPersistingRef = useRef(false);
 
-  const onPointerMove = useCallback((e) => {
+  const applyPointer = useCallback((clientY) => {
     if (!dragState.current) return;
-    const { startY, rowHeight: rh, originalSpan, maxSpanFromGrid } = dragState.current;
-    const raw = resizeDeltaToSpan(e.clientY - startY, rh, originalSpan);
+    const state = dragState.current;
+    state.lastY = clientY;
+    const { startY, rowHeight: rh, originalSpan, maxSpanFromGrid, scrollEl, startScroll } = state;
+    const scrollDelta = scrollEl ? scrollEl.scrollTop - startScroll : 0;
+    const raw = resizeDeltaToSpan(clientY - startY + scrollDelta, rh, originalSpan);
     const next = Math.min(raw, maxSpanFromGrid);
     previewSpanRef.current = next;
     setPreviewSpan(next);
   }, []);
 
+  const onPointerMove = useCallback((e) => applyPointer(e.clientY), [applyPointer]);
+
   const onPointerUp = useCallback(async () => {
     window.removeEventListener("pointermove", onPointerMove);
     const state = dragState.current;
     dragState.current = null;
+    state?.autoScroll?.stop();
     if (!state) return;
 
     if (state.handleEl && state.handleEl.hasPointerCapture?.(state.pointerId)) {
@@ -67,7 +75,26 @@ export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
       const rh = originalSpan > 0 ? measuredHeight / originalSpan : measuredHeight;
       const startIdx = getSlotIndex(orderedSlots, entry.start_slot_id);
       const maxSpanFromGrid = startIdx === -1 ? originalSpan : orderedSlots.length - startIdx;
-      dragState.current = { startY: e.clientY, rowHeight: rh, originalSpan, maxSpanFromGrid, handleEl, pointerId: e.pointerId };
+      const scrollEl = document.querySelector("[data-timetable-grid-root]");
+        const autoScroll = startEdgeAutoScroll({
+          onTick: () => {
+            if (!dragState.current) return;
+            applyPointer(dragState.current.lastY);
+            setScrollTick((t) => t + 1);
+          },
+        });
+        dragState.current = {
+          startY: e.clientY,
+          lastY: e.clientY,
+          rowHeight: rh,
+          originalSpan,
+          maxSpanFromGrid,
+          handleEl,
+          pointerId: e.pointerId,
+          scrollEl,
+          startScroll: scrollEl?.scrollTop ?? 0,
+          autoScroll,
+        };
       previewSpanRef.current = originalSpan;
       setCellEl(el);
       setRowHeight(rh);
@@ -77,7 +104,7 @@ export function useResizeHandle({ entry, orderedSlots, resizeEntry }) {
       window.addEventListener("pointermove", onPointerMove);
       window.addEventListener("pointerup", onPointerUp, { once: true });
     },
-    [entry, orderedSlots, onPointerMove, onPointerUp]
+    [entry, orderedSlots, onPointerMove, onPointerUp, applyPointer]
   );
 
   return {

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { DndContext, DragOverlay, pointerWithin } from "@dnd-kit/core";
+import { DndContext, DragOverlay, MeasuringStrategy, pointerWithin } from "@dnd-kit/core";
 import { sortDaysByWeekOrder } from "../../../../lib/days";
 import SubjectPickerModal from "../subjects/SubjectPickerModal";
 import SubjectsDrawer from "../subjects/SubjectsDrawer";
@@ -214,6 +214,7 @@ export default function TimetableGrid({
     <DndContext
       sensors={sensors}
       collisionDetection={pointerWithin}
+      measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
       autoScroll={false}
       onDragStart={handleDragStart}
       onDragMove={handleDragMove}

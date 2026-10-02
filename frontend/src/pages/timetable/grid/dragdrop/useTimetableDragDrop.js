@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { getSpanCount } from "../layout/slotSpanUtils";
+import { startEdgeAutoScroll } from "./edgeAutoScroll";
 import { computeDragChipDimensions } from "../overlay/overlayGeometry";
 import {
   CANCEL_FADE_ANIMATION,
@@ -21,9 +22,13 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
   const [dragSourceEntryId, setDragSourceEntryId] = useState(null);
   const [overCell, setOverCell] = useState(null);
   const landingTimeoutRef = useRef(null);
+  const autoScrollRef = useRef(null);
 
   useEffect(() => {
-    return () => window.clearTimeout(landingTimeoutRef.current);
+    return () => {
+      window.clearTimeout(landingTimeoutRef.current);
+      autoScrollRef.current?.stop();
+    };
   }, []);
 
   const sensors = useSensors(
@@ -47,6 +52,16 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
 
     if (Number.isNaN(slotId) || Number.isNaN(dayOfWeek)) return null;
     return { slotId, dayOfWeek, groupTag };
+  }
+
+  function beginAutoScroll() {
+    autoScrollRef.current?.stop();
+    autoScrollRef.current = startEdgeAutoScroll();
+  }
+
+  function endAutoScroll() {
+    autoScrollRef.current?.stop();
+    autoScrollRef.current = null;
   }
 
   function resetDragState() {
@@ -114,6 +129,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
 
     setDragSpan(Math.max(1, span));
     setDragSourceEntryId(sourceEntryId);
+    beginAutoScroll();
     setOverCell(null);
     setDropAnimation(() => CANCEL_FADE_ANIMATION);
     lockPageScroll();
@@ -127,6 +143,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
     setDropAnimation(() => CANCEL_FADE_ANIMATION);
     resetDragState();
     unlockPageScroll();
+    endAutoScroll();
   }
 
   function handleDragEnd(event) {
@@ -181,6 +198,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
 
     setDropAnimation(() => animation);
     window.setTimeout(unlockPageScroll, animation.duration + 20);
+    endAutoScroll();
     resetDragState();
   }
 
