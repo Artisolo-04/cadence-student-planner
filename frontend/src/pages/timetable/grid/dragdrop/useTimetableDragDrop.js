@@ -1,3 +1,4 @@
+import { pinGridScroll } from "./scrollToChange";
 import { useEffect, useRef, useState } from "react";
 import { PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { getSpanCount } from "../layout/slotSpanUtils";
@@ -197,6 +198,7 @@ export function useTimetableDragDrop({ orderedSlots, orderedDays, entries, onDro
       : CANCEL_FADE_ANIMATION;
 
     setDropAnimation(() => animation);
+    pinGridScroll(animation.duration + 120);
     window.setTimeout(unlockPageScroll, animation.duration + 20);
     endAutoScroll();
     resetDragState();

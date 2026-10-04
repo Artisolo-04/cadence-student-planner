@@ -11,6 +11,7 @@ import { createMagneticModifier } from "../dragdrop/dragAnimations";
 import { useTimetableDragDrop } from "../dragdrop/useTimetableDragDrop";
 import { useTimetableEntries } from "../entries/useTimetableEntries";
 import { useDragOverlayGeometry } from "../dragdrop/useDragOverlayGeometry";
+import { revealChange } from "../dragdrop/scrollToChange";
 import { WEEKDAY_FULL } from "./weekdayConstants";
 import { slotIndexToGridRow } from "../overlay/overlayGeometry";
 import { GridHeaderRow } from "./GridHeaderRow";
@@ -175,8 +176,31 @@ export default function TimetableGrid({
     maxVersion,
   });
 
+  const revealRef = useRef(null);
+
+  const withReveal = (action) => async (...args) => {
+    const mine = { prev: entries, expires: Date.now() + 8000 };
+    revealRef.current = mine;
+    try {
+      return await action(...args);
+    } finally {
+      // only clear OUR pending reveal, never a newer one
+      setTimeout(() => {
+        if (revealRef.current === mine) revealRef.current = null;
+      }, 1500);
+    }
+  };
+
+  useEffect(() => {
+    const p = revealRef.current;
+    if (!p || p.prev === entries) return;
+    if (Date.now() > p.expires) { revealRef.current = null; return; }
+    // consume ONLY if there is a real visible difference
+    if (revealChange(p.prev, entries, orderedSlots)) revealRef.current = null;
+  }, [entries]);
+
   if (actionsRef) {
-    actionsRef.current = { undo, redo };
+    actionsRef.current = { undo: withReveal(undo), redo: withReveal(redo) };
   }
 
   useEffect(() => {

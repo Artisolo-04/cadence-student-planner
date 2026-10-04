@@ -101,6 +101,11 @@ function SubjectLabel({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      data-entry-card=""
+      data-slot-id={slotId}
+      data-day={dayOfWeek}
+      data-group={dragGroupTag || groupTag || "all"}
+      data-subject-id={entry.subject_id}
       key={`${entry.subject_id}-${groupTag || "all"}-${entry.room || ""}`}
       style={{
         "--subject-color": entry.subject_color,
