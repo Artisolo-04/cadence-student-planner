@@ -1,5 +1,5 @@
 const { coalesceWithExistingNeighbors } = require("./sqlHelpers");
-const { subtractRanges } = require("./intervalMath");
+const { subtractRanges, coalesceFragmentSpecs } = require("./intervalMath");
 
 async function findCoveringAllEntry(client, timetableId, op, excludeEntryId, iStart, iEnd) {
   const r = await client.query(
