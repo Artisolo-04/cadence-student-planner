@@ -245,7 +245,7 @@ async function applyBatch(timetableId, operations) {
     const created = [];
     const updated = [];
     const deletedIds = [];
-      const skipped = [];
+    const skipped = [];
 
     for (const op of operations) {
       if (op.op === "delete") {
@@ -288,18 +288,18 @@ async function applyBatch(timetableId, operations) {
         );
 
         if (resolved.skipped) {
-            skipped.push({
-              op: op.op,
-              tempId: op.tempId ?? null,
-              entryId: op.entryId ?? null,
-              reason: resolved.reason,
-              coveredBy: resolved.coveredBy,
-            });
-            continue;
-          }
-          const { mainEntry, deletedIds: fragDeleted, createdFragments } = resolved;
+          skipped.push({
+            op: op.op,
+            tempId: op.tempId ?? null,
+            entryId: op.entryId ?? null,
+            reason: resolved.reason,
+            coveredBy: resolved.coveredBy,
+          });
+          continue;
+        }
+        const { mainEntry, deletedIds: fragDeleted, createdFragments } = resolved;
 
-          deletedIds.push(...fragDeleted);
+        deletedIds.push(...fragDeleted);
         createdFragments.forEach((f) => created.push({ tempId: null, entry: f }));
 
         if (op.op === "create") {

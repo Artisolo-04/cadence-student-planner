@@ -216,9 +216,9 @@ async function batchUpdateEntries(req, res) {
     await ensureBaselineSnapshot(req.params.id);
     const result = await applyBatch(req.params.id, normalizedOps);
     const allSkipped = (result.skipped?.length ?? 0) === normalizedOps.length;
-      const newVersion = allSkipped
-        ? timetable.current_version
-        : await recordSnapshot(req.params.id);
+    const newVersion = allSkipped
+      ? timetable.current_version
+      : await recordSnapshot(req.params.id);
 
     res.json({ ...result, currentVersion: newVersion });
   } catch (err) {
