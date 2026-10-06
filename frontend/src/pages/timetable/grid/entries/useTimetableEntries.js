@@ -5,7 +5,6 @@ import { useSubjects } from "./useSubjects";
 import { applyEntryBatch } from "./entryPersistence";
 import { reconcileBatchResult } from "./liveGridState";
 import { createResizeEntry } from "./resizeEntry";
-import { findCoveringAllEntry } from "./coverage";
 
 function createTempId() {
   return globalThis.crypto?.randomUUID?.() ??
@@ -173,20 +172,6 @@ export function useTimetableEntries({
           room,
         };
 
-    if (
-      findCoveringAllEntry(entries, orderedSlots, {
-        subjectId,
-        dayOfWeek: operation.dayOfWeek,
-        slotId: operation.slotId,
-        endSlotId: operation.endSlotId,
-        room: operation.room ?? null,
-        excludeEntryId: operation.op === "update" ? operation.entryId : null,
-      })
-    ) {
-      closePicker();
-      return;
-    }
-
     try {
       await submitBatch([operation]);
       closePicker();
@@ -248,19 +233,6 @@ export function useTimetableEntries({
       groupTag,
       room: sourceEntry?.room ?? sourceCell?.room ?? null,
     };
-
-    if (
-      findCoveringAllEntry(entries, orderedSlots, {
-        subjectId,
-        dayOfWeek,
-        slotId: fields.slotId,
-        endSlotId: fields.endSlotId,
-        room: fields.room,
-        excludeEntryId: sourceEntry?.id ?? null,
-      })
-    ) {
-      return;
-    }
 
     const operation = sourceEntry
       ? { op: "update", entryId: sourceEntry.id, ...fields }
