@@ -93,6 +93,9 @@ export function useTimetableEntries({
 
       try {
         const result = await applyEntryBatch(timetable.id, operations);
+        if ((result.skipped?.length ?? 0) >= operations.length) {
+          return result;
+        }
         const nextEntries = reconcileBatchResult(entries, result);
 
         replaceEntries(nextEntries, result.currentVersion, true);
