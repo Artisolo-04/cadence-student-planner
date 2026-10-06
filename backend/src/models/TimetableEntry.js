@@ -245,6 +245,7 @@ async function applyBatch(timetableId, operations) {
     const created = [];
     const updated = [];
     const deletedIds = [];
+      const skipped = [];
 
     for (const op of operations) {
       if (op.op === "delete") {
@@ -271,7 +272,7 @@ async function applyBatch(timetableId, operations) {
           );
         }
 
-        const { mainEntry, deletedIds: fragDeleted, createdFragments } = await resolveAndWrite(
+        const resolved = await resolveAndWrite(
           client, timetableId, slotMap,
           {
             kind: op.op,
@@ -286,7 +287,19 @@ async function applyBatch(timetableId, operations) {
           iStart, iEnd
         );
 
-        deletedIds.push(...fragDeleted);
+        if (resolved.skipped) {
+            skipped.push({
+              op: op.op,
+              tempId: op.tempId ?? null,
+              entryId: op.entryId ?? null,
+              reason: resolved.reason,
+              coveredBy: resolved.coveredBy,
+            });
+            continue;
+          }
+          const { mainEntry, deletedIds: fragDeleted, createdFragments } = resolved;
+
+          deletedIds.push(...fragDeleted);
         createdFragments.forEach((f) => created.push({ tempId: null, entry: f }));
 
         if (op.op === "create") {
@@ -337,6 +350,7 @@ async function applyBatch(timetableId, operations) {
     await client.query("COMMIT");
     return {
       created: hydratedCreated,
+      skipped,
       updated: hydratedUpdated,
       deletedIds,
     };

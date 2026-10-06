@@ -1,12 +1,46 @@
 const { coalesceWithExistingNeighbors } = require("./sqlHelpers");
 const { subtractRanges } = require("./intervalMath");
 
+async function findCoveringAllEntry(client, timetableId, op, excludeEntryId, iStart, iEnd) {
+  const r = await client.query(
+    `SELECT e.id, e.subject_id, e.group_tag, e.room, e.day_of_week,
+            e.slot_id AS start_slot_id, e.end_slot_id
+     FROM timetable_entries e
+     JOIN timetable_slots ss ON ss.id = e.slot_id
+     JOIN timetable_slots es ON es.id = e.end_slot_id
+     WHERE e.timetable_id = $1
+       AND e.day_of_week = $2
+       AND e.group_tag = 'all'
+       AND e.subject_id = $3
+       AND ($4::int IS NULL OR e.id != $4)
+       AND ss.sort_order <= $5
+       AND es.sort_order >= $6
+       AND ($7::text IS NULL OR e.room IS NOT DISTINCT FROM $7::text)
+     LIMIT 1`,
+    [timetableId, op.dayOfWeek, op.subjectId, excludeEntryId, iStart, iEnd, op.room ?? null]
+  );
+  return r.rows[0] ?? null;
+}
+
 async function resolveAndWrite(client, timetableId, slotMap, op, iStart, iEnd) {
   const excludeEntryId = op.kind === "update" ? op.entryId : null;
+
+  const coveredBy = await findCoveringAllEntry(client, timetableId, op, excludeEntryId, iStart, iEnd);
+  if (coveredBy) {
+    return {
+      mainEntry: null,
+      deletedIds: [],
+      createdFragments: [],
+      skipped: true,
+      reason: "covered_by_all",
+      coveredBy,
+    };
+  }
 
   const deletedIds = [];
   const fragmentSpecs = [];
   const mergeFragmentSpecs = [];
+  const coveredRanges = [];
 
   if (op.groupTag === "g1" || op.groupTag === "g2") {
     const siblingTag = op.groupTag === "g1" ? "g2" : "g1";
@@ -135,11 +169,21 @@ async function resolveAndWrite(client, timetableId, slotMap, op, iStart, iEnd) {
       });
     }
     if (c.group_tag === "all" && op.groupTag !== "all") {
-      const siblingTag = op.groupTag === "g1" ? "g2" : "g1";
-      fragmentSpecs.push({
-        subjectId: c.subject_id, groupTag: siblingTag, room: c.room,
-        startSort: overlapStart, endSort: overlapEnd,
-      });
+      const sameAsOp =
+        c.subject_id === op.subjectId && (op.room == null || c.room === op.room);
+      if (sameAsOp) {
+        fragmentSpecs.push({
+          subjectId: c.subject_id, groupTag: "all", room: c.room,
+          startSort: overlapStart, endSort: overlapEnd,
+        });
+        coveredRanges.push({ start: overlapStart, end: overlapEnd });
+      } else {
+        const siblingTag = op.groupTag === "g1" ? "g2" : "g1";
+        fragmentSpecs.push({
+          subjectId: c.subject_id, groupTag: siblingTag, room: c.room,
+          startSort: overlapStart, endSort: overlapEnd,
+        });
+      }
     }
 
     await client.query(`DELETE FROM timetable_entries WHERE id = $1`, [c.id]);
@@ -166,7 +210,7 @@ async function resolveAndWrite(client, timetableId, slotMap, op, iStart, iEnd) {
 
   const remainingRanges = subtractRanges(
     iStart, iEnd,
-    mergeCreatedEntries.map((m) => ({ start: m.startSort, end: m.endSort })).sort((a, b) => a.start - b.start)
+    [...mergeCreatedEntries.map((m) => ({ start: m.startSort, end: m.endSort })), ...coveredRanges].sort((a, b) => a.start - b.start)
   );
 
   let mainEntry = null;
