@@ -21,6 +21,7 @@ export function TimeSlotRow({
   viewOptions,
   openCell,
 }) {
+  const isNowSlot = isCurrentSlot(slot);
   return (
     <Fragment>
       <div
@@ -28,14 +29,14 @@ export function TimeSlotRow({
         style={{ gridColumn: 1, gridRow }}
         className={`sticky left-0 z-20 flex h-full items-center justify-center overflow-hidden border-r border-[var(--color-border)] px-1 sm:px-3 ${
           isLastRow ? "" : "border-b"
-        } bg-[var(--color-surface)] transition-all duration-500 ease-in-out`}
+        } ${isNowSlot ? "bg-[color-mix(in_srgb,var(--color-accent)_12%,var(--color-surface))]" : "bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-surface))]"} transition-all duration-500 ease-in-out`}
       >
         <div className="flex items-center justify-center gap-2 py-1">
           {slot.label && (
-            <span className="relative hidden h-8 w-8 sm:flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/[0.04] text-[11px] font-semibold text-[var(--color-text-muted)] shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] backdrop-blur-md backdrop-saturate-150">
+            <span className="relative hidden h-8 w-8 sm:flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--color-primary)]/25 bg-[var(--color-primary)]/10 text-[11px] font-bold text-[var(--color-primary)]">
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent"
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[var(--color-primary)]/15 to-transparent"
               />
               <span className="relative z-10">{slot.label}</span>
             </span>
