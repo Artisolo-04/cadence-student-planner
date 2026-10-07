@@ -32,7 +32,7 @@ export default function SubjectsDrawer({ subjects, onClose }) {
 
   return (
     <aside className="flex h-full w-64 shrink-0 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset,0_20px_40px_-24px_rgba(0,0,0,0.6)]">
-      <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] px-4 py-3">
+      <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-surface))] px-4 py-3">
         <div>
           <h3 className="text-sm font-semibold text-[var(--color-text)]">Subjects</h3>
           <p className="text-[11px] text-[var(--color-text-muted)]">Drag onto a cell</p>
