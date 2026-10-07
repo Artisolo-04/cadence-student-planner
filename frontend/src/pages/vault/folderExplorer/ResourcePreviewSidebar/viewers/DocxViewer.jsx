@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import mammoth from "mammoth";
+import DOMPurify from "dompurify";
 import { Loader2, FileWarning } from "lucide-react";
 import { resolveAssetUrl } from "../resolveAssetUrl";
 import useScrollFade from "../../../../../hooks/useScrollFade";
@@ -28,7 +29,7 @@ export default function DocxViewer({ item }) {
         const arrayBuffer = await res.arrayBuffer();
         const { value } = await mammoth.convertToHtml({ arrayBuffer });
         if (!cancelled) {
-          setHtml(value);
+          setHtml(DOMPurify.sanitize(value));
           setStatus("ready");
         }
       } catch {
