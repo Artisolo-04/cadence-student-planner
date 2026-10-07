@@ -272,7 +272,7 @@ export default function TimetableGrid({
             style={{ scrollbarGutter: "auto" }}
           >
             <div
-              className={`grid ${overflowing ? "" : "h-full"} w-max sm:w-full text-sm [--time-col-w:60px] sm:[--time-col-w:150px]`}
+              className={`grid ${overflowing ? "" : "h-full"} w-max sm:w-full text-sm [--time-col-w:60px] sm:[--time-col-w:170px]`}
               style={{
                 gridTemplateColumns: `var(--time-col-w) repeat(${
                   orderedDays.length * 2

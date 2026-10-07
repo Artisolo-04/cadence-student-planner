@@ -40,11 +40,12 @@ export function TimeSlotRow({
               <span className="relative z-10">{slot.label}</span>
             </span>
           )}
-          <div className="flex flex-col items-center gap-1 leading-none">
+          <div className="flex flex-col items-center gap-1 whitespace-nowrap leading-none sm:flex-row sm:gap-1.5">
             <span className="text-[13px] font-semibold text-[var(--color-text)] tabular-nums">
               {slot.start_time.slice(0, 5)}
             </span>
-            <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums">
+            <span aria-hidden="true" className="hidden text-[13px] text-[var(--color-text-muted)] sm:inline">-</span>
+            <span className="text-[11px] text-[var(--color-text-muted)] tabular-nums sm:text-[13px]">
               {slot.end_time.slice(0, 5)}
             </span>
           </div>
