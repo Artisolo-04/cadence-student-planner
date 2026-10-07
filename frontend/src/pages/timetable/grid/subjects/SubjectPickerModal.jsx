@@ -37,6 +37,11 @@ export default function SubjectPickerModal({
   const [groupTag, setGroupTag] = useState("all");
   const [room, setRoom] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState(null);
+  // Freeze title and footer while the modal fades out, so they don't jump when activeCell becomes null.
+  const lastShown = useRef({ cellLabel: "", hasCurrent: false });
+  if (open) lastShown.current = { cellLabel, hasCurrent: currentSubjectId != null };
+  const shownLabel = open ? cellLabel : lastShown.current.cellLabel;
+  const shownHasCurrent = open ? currentSubjectId != null : lastShown.current.hasCurrent;
 
   useEffect(() => {
     if (open) {
@@ -97,11 +102,11 @@ export default function SubjectPickerModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={cellLabel || "Assign subject"}
+      title={shownLabel || "Assign subject"}
       mobileFullscreen
       footer={
         <>
-          {currentSubjectId != null && (
+          {shownHasCurrent && (
             <Button
               type="button"
               variant="secondary"

@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { DndContext, DragOverlay, MeasuringStrategy, pointerWithin } from "@dnd-kit/core";
 import { sortDaysByWeekOrder } from "../../../../lib/days";
 import SubjectPickerModal from "../subjects/SubjectPickerModal";
+import ClosePickerOnExit from "./ClosePickerOnExit";
 import SubjectsDrawer from "../subjects/SubjectsDrawer";
 import { SubjectChipContent } from "../subjects/SubjectChip";
 import { toMinutes, entryKey } from "../cell/cellDisplayUtils";
@@ -344,6 +345,7 @@ export default function TimetableGrid({
             }`}
           />
 
+          <ClosePickerOnExit active={!isEditMode && Boolean(activeCell)} onClose={closePicker} />
           <SubjectPickerModal
             open={Boolean(activeCell)}
             onClose={closePicker}
@@ -392,7 +394,11 @@ export default function TimetableGrid({
           } ${
             isEditMode ? "opacity-100" : "opacity-0"
           }`}
-          style={{ width: isEditMode ? "16rem" : "0rem" }}
+          style={{
+            width: isEditMode ? "16rem" : "0rem",
+            // wait for the picker modal fade-out (180ms) before collapsing the sidebar
+            transitionDelay: !isEditMode && activeCell ? "200ms" : "0ms",
+          }}
         >
           <div className="h-full w-64">
             <SubjectsDrawer subjects={subjects} />
