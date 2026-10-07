@@ -104,7 +104,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                     aria-label={`Open ${timetable.name}`}
                   />
 
-                  <div className="relative z-10 flex items-start justify-between">
+                  <div className="pointer-events-none relative z-10 flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <span
                         className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
@@ -149,7 +149,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                         setError("");
                         setSelectedTimetable(timetable);
                       }}
-                      className="relative z-20 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                      className="pointer-events-auto relative z-20 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                       aria-label={`Delete ${timetable.name}`}
                       title="Delete timetable"
                     >
@@ -157,7 +157,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                     </button>
                   </div>
 
-                  <span className="relative z-10 pr-7 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
+                  <span className="pointer-events-none relative z-10 pr-7 text-base font-semibold leading-snug text-[var(--color-text)] line-clamp-2">
                     {timetable.name}
                   </span>
                 </article>
