@@ -26,6 +26,15 @@ async function ensureBaselineSnapshot(timetableId) {
   }
 }
 
+function normalizeEntries(rows) {
+  return (rows || [])
+    .map((r) =>
+      [r.slot_id, r.end_slot_id, r.day_of_week, r.group_tag, r.subject_id, r.room ?? null].join("|")
+    )
+    .sort()
+    .join(";");
+}
+
 async function recordSnapshot(timetableId) {
   const client = await pool.connect();
   try {
@@ -39,17 +48,32 @@ async function recordSnapshot(timetableId) {
       throw new Error("Timetable not found");
     }
     const currentVersion = ttResult.rows[0].current_version;
-    const newVersion = currentVersion + 1;
-
-    await client.query(
-      `DELETE FROM timetable_snapshots WHERE timetable_id = $1 AND version > $2`,
-      [timetableId, currentVersion]
-    );
 
     const entries = await client.query(
       `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
        FROM timetable_entries WHERE timetable_id = $1`,
       [timetableId]
+    );
+
+    const current = await client.query(
+      `SELECT entries_json FROM timetable_snapshots
+       WHERE timetable_id = $1 AND version = $2`,
+      [timetableId, currentVersion]
+    );
+
+    if (
+      current.rows.length > 0 &&
+      normalizeEntries(current.rows[0].entries_json) === normalizeEntries(entries.rows)
+    ) {
+      await client.query("COMMIT");
+      return currentVersion;
+    }
+
+    const newVersion = currentVersion + 1;
+
+    await client.query(
+      `DELETE FROM timetable_snapshots WHERE timetable_id = $1 AND version > $2`,
+      [timetableId, currentVersion]
     );
 
     await client.query(
