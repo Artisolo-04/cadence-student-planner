@@ -98,8 +98,9 @@ export function useTimetableEntries({
         }
         const nextEntries = reconcileBatchResult(entries, result);
 
-        replaceEntries(nextEntries, result.currentVersion, true);
-        history.recordMutation(result.currentVersion);
+        const versionChanged = result.currentVersion !== timetable.current_version;
+        replaceEntries(nextEntries, result.currentVersion, versionChanged);
+        if (versionChanged) history.recordMutation(result.currentVersion);
 
         return result;
       } catch (error) {
@@ -109,7 +110,7 @@ export function useTimetableEntries({
         history.release();
       }
     },
-    [entries, history, replaceEntries, timetable.id]
+    [entries, history, replaceEntries, timetable.id, timetable.current_version]
   );
 
   const resizeEntry = useMemo(
