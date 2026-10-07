@@ -105,42 +105,31 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
                   />
 
                   <div className="pointer-events-none relative z-10 flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
-                        style={{
-                          backgroundImage:
-                            "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 40%, black 20%) 0%, color-mix(in srgb, var(--color-primary) 15%, black 45%) 100%)",
-                          boxShadow:
-                            "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
-                        }}
-                        aria-hidden="true"
-                      >
+                    <div className="flex items-start gap-2">
                         <span
+                          className={`relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border transition-colors duration-300 ${
+                            isActive
+                              ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
+                              : "border-[var(--color-primary)]/25 bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))] text-[var(--color-primary)]"
+                          }`}
                           aria-hidden="true"
-                          className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
-                        />
-                        <CalendarDays size={16} className="relative z-10 text-[var(--color-primary)] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
-                      </span>
-
-                      {isActive && (
-                        <span
-                          className="relative z-10 inline-flex h-9 w-fit items-center gap-1.5 overflow-hidden rounded-md px-2.5 text-[11px] font-semibold tracking-wide text-[var(--color-surface)]"
-                          style={{
-                            backgroundImage:
-                              "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 100%, white 8%) 0%, var(--color-primary) 100%)",
-                            boxShadow:
-                              "0 1px 0 0 rgba(255,255,255,0.2) inset, 0 -1px 3px 0 rgba(0,0,0,0.25) inset, 0 4px 10px -4px color-mix(in srgb, var(--color-primary) 60%, transparent)",
-                          }}
                         >
                           <span
                             aria-hidden="true"
-                            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/15 to-transparent"
+                            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[var(--color-primary)]/15 to-transparent"
                           />
-                          <span className="relative z-10 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-surface)]" />
-                          <span className="relative z-10">Active</span>
+                          <CalendarDays size={16} className="relative z-10" />
                         </span>
-                      )}
+
+                        {isActive && (
+                          <span className="relative z-10 inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--color-primary)]/30 bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))] px-2.5 text-[11px] font-semibold tracking-wide text-[var(--color-primary)]">
+                            <span className="relative flex h-2 w-2">
+                              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--color-primary)] opacity-60" />
+                              <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--color-primary)]" />
+                            </span>
+                            Active
+                          </span>
+                        )}
                     </div>
 
                     <button
