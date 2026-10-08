@@ -35,10 +35,10 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
 
   return (
     <div
-      className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 p-4 backdrop-blur-xl gap-2"
+      className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl gap-2"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 16%, transparent) 0%, transparent 70%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 14%, transparent) 0%, transparent 70%)",
       }}
     >
       <div className="flex shrink-0 items-center justify-between">
@@ -64,13 +64,10 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="flex flex-col gap-1 rounded-lg border-white/10 bg-white/[0.03] px-1.5 py-2"
+            className="flex flex-col gap-1 rounded-lg border border-white/10 px-1.5 py-2 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+            style={{ backgroundImage: `linear-gradient(150deg, color-mix(in srgb, ${stat.color} 22%, transparent) 0%, color-mix(in srgb, ${stat.color} 6%, transparent) 100%)` }}
           >
             <span className="flex items-center justify-center gap-1">
-              <span
-                className="h-1.5 w-1.5 shrink-0 rounded-[2px]"
-                style={{ backgroundColor: stat.color }}
-              />
               <span className="font-mono text-sm font-semibold text-[var(--color-text)]">
                 {stat.value}
               </span>
