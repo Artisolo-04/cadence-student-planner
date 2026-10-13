@@ -150,13 +150,13 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
                       </div>
                     )}
 
-                    <div className="flex min-h-0 flex-1 flex-col justify-between gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col justify-start gap-2">
                       {items.map((item) => {
                         const vaultMatch = vaultMatchByItemId.get(item.id);
                         return (
                           <div
                             key={item.id}
-                            className="flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-md px-3 py-1.5"
+                            className="flex min-h-0 min-w-0 max-h-[4.5rem] flex-1 items-center gap-3 rounded-md px-3 py-1.5"
                             style={{
                               backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
                             }}
