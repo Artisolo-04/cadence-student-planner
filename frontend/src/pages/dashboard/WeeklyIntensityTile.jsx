@@ -54,7 +54,7 @@ export default function WeeklyIntensityTile({ data }) {
     ctx.scale(dpr, dpr);
 
     const barColor = readColor("--color-primary", "#2fa39a");
-    const trackColor = "rgba(255,255,255,0.06)";
+    const trackColor = readColor("--color-fill-3", "rgba(255,255,255,0.06)");
 
     const gap = 8;
     const barWidth = (width - gap * (data.length - 1)) / data.length;
@@ -104,10 +104,10 @@ export default function WeeklyIntensityTile({ data }) {
 
   return (
     <div
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 14%, transparent) 0%, transparent 70%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-tint) 14%, transparent) 0%, transparent 70%)",
       }}
     >
       <div className="flex items-center justify-between">

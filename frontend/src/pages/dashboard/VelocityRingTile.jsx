@@ -30,15 +30,15 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
   const stats = [
     { label: "Completed", value: done, pct: donePct, color: "var(--color-primary)" },
     { label: "Overdue", value: overdue, pct: overduePct, color: "var(--color-danger)" },
-    { label: "Pending", value: pending, pct: pendingPct, color: "rgba(255,255,255,0.35)" },
+    { label: "Pending", value: pending, pct: pendingPct, color: "var(--color-text-muted)" },
   ];
 
   return (
     <div
-      className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl gap-2"
+      className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl gap-2"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 14%, transparent) 0%, transparent 70%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-tint) 14%, transparent) 0%, transparent 70%)",
       }}
     >
       <div className="flex shrink-0 items-center justify-between">
@@ -64,7 +64,7 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="flex flex-col gap-1 rounded-lg border border-white/10 px-1.5 py-2 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+            className="flex flex-col gap-1 rounded-lg border border-[var(--color-line)] px-1.5 py-2 backdrop-blur-md shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
             style={{ backgroundImage: `linear-gradient(150deg, color-mix(in srgb, ${stat.color} 22%, transparent) 0%, color-mix(in srgb, ${stat.color} 6%, transparent) 100%)` }}
           >
             <span className="flex items-center justify-center gap-1">
@@ -75,7 +75,7 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
             <span className="text-center text-[8px] uppercase tracking-wide text-[var(--color-text-muted)]">
               {stat.label}
             </span>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--color-fill-3)]">
               <div
                 className="h-full rounded-full transition-[width] duration-700"
                 style={{

@@ -35,10 +35,10 @@ export default function DayTimeline({ sessions = [] }) {
 
   return (
     <div
-      className="relative h-full min-h-0 flex-1 overflow-hidden rounded-2xl border border-white/10 p-4 backdrop-blur-xl"
+      className="relative h-full min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-4 backdrop-blur-xl"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
       }}
     >
       <div
@@ -80,7 +80,7 @@ export default function DayTimeline({ sessions = [] }) {
                         : {
                             maxHeight: "2px",
                             height: "2px",
-                            backgroundColor: "rgba(255,255,255,0.06)",
+                            backgroundColor: "var(--color-fill-3)",
                           }
                     }
                   />

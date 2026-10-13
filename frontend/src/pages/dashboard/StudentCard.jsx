@@ -35,10 +35,10 @@ export default function StudentCard({ user, profile, groupTag }) {
 
   return (
     <div
-      className="relative flex w-full h-full overflow-hidden rounded-2xl border border-white/10 backdrop-blur-xl"
+      className="relative flex w-full h-full overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] backdrop-blur-xl"
       style={{
         backgroundImage:
-          "linear-gradient(140deg, color-mix(in srgb, var(--color-primary) 26%, transparent) 0%, color-mix(in srgb, var(--color-accent) 12%, transparent) 60%, transparent 100%)",
+          "linear-gradient(140deg, color-mix(in srgb, var(--color-primary) 26%, transparent) 0%, color-mix(in srgb, var(--color-tint) 12%, transparent) 60%, transparent 100%)",
       }}
     >
       <div
@@ -69,7 +69,7 @@ export default function StudentCard({ user, profile, groupTag }) {
 
         <div className="mt-3 flex flex-1 items-center gap-5">
           <span
-            className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/15 text-2xl font-semibold text-[var(--color-primary)] shadow-lg"
+            className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--color-line-strong)] text-2xl font-semibold text-[var(--color-primary)] shadow-lg"
             style={{
               backgroundImage:
                 "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 40%, black 20%) 0%, color-mix(in srgb, var(--color-primary) 15%, black 45%) 100%)",
@@ -107,7 +107,7 @@ export default function StudentCard({ user, profile, groupTag }) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-end justify-between border-t border-white/10 pt-3">
+        <div className="mt-4 flex items-end justify-between border-t border-[var(--color-line)] pt-3">
           <div>
             <p className="text-[9px] uppercase tracking-wider text-[var(--color-text-muted)]">
               Student ID

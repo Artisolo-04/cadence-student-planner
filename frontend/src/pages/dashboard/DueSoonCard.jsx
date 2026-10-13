@@ -41,7 +41,7 @@ const SECTIONS = [
     label: "Future",
     icon: Clock,
     dot: "var(--color-text-muted)",
-    badgeClass: "border-white/10 bg-white/[0.04] text-[var(--color-text-muted)]",
+    badgeClass: "border-[var(--color-line)] bg-[var(--color-fill-2)] text-[var(--color-text-muted)]",
   },
 ];
 
@@ -87,10 +87,10 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
 
   return (
     <div
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
       }}
     >
       <div
@@ -129,7 +129,7 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
         ) : grandTotal === 0 || EMPTY_PREVIEW ? (
           <EmptyState variant="compact" className="flex-1" icon={CheckCircle2} title="All caught up" body="Nothing due right now." />
         ) : (
-            <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-white/10 pt-3.5">
+            <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-[var(--color-line)] pt-3.5">
               {SECTIONS.map((section) => {
                 const items = buckets[section.key];
                 if (!items || items.length === 0) return null;

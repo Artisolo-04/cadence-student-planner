@@ -126,10 +126,10 @@ export default function FocusTimeline({ week = [] }) {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
       }}
     >
       <div className="relative z-10 flex h-full flex-col">
@@ -139,7 +139,7 @@ export default function FocusTimeline({ week = [] }) {
         </div>
 
         {week.length > 0 && (
-          <div className="mt-3 grid grid-cols-7 gap-1 rounded-lg border border-white/15 bg-white/[0.02] p-1">
+          <div className="mt-3 grid grid-cols-7 gap-1 rounded-lg border border-[var(--color-line-strong)] bg-[var(--color-fill-1)] p-1">
             {week.map((d) => {
               const isSelected = d.day === selected?.day;
               return (
@@ -151,8 +151,8 @@ export default function FocusTimeline({ week = [] }) {
                     isSelected
                       ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
                       : d.isToday
-                      ? "text-[var(--color-primary)] hover:bg-white/[0.08]"
-                      : "text-[var(--color-text-muted)] hover:bg-white/[0.08]"
+                      ? "text-[var(--color-primary)] hover:bg-[var(--color-fill-4)]"
+                      : "text-[var(--color-text-muted)] hover:bg-[var(--color-fill-4)]"
                   }`}
                 >
                   {d.label}
@@ -170,7 +170,7 @@ export default function FocusTimeline({ week = [] }) {
               </span>
               {freeMinutes > 0 && <span>{formatGap(freeMinutes)} free</span>}
             </div>
-            <div className="relative mt-1.5 flex h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="relative mt-1.5 flex h-2 w-full overflow-hidden rounded-full bg-[var(--color-fill-3)]">
               {scrubberSegments.map((seg) =>
                 seg.type === "session" ? (
                   <div
@@ -181,7 +181,7 @@ export default function FocusTimeline({ week = [] }) {
                 ) : (
                   <div
                     key={seg.key}
-                    className="h-full bg-white/10"
+                    className="h-full bg-[var(--color-fill-4)]"
                     style={{ width: `${seg.widthPct}%` }}
                   />
                 )
@@ -207,7 +207,7 @@ export default function FocusTimeline({ week = [] }) {
             style={
               maskImage ? { maskImage, WebkitMaskImage: maskImage } : {}
             }
-            className="scrollbar-cadence relative mt-4 flex-1 min-h-0 overflow-y-auto border-t border-white/10 pl-1 pr-1 pt-4 transition-[mask-image] duration-150"
+            className="scrollbar-cadence relative mt-4 flex-1 min-h-0 overflow-y-auto border-t border-[var(--color-line)] pl-1 pr-1 pt-4 transition-[mask-image] duration-150"
           >
             {timelineGroups.map((group, gi) => {
               const start = toMinutes(group.start);
@@ -241,7 +241,7 @@ export default function FocusTimeline({ week = [] }) {
                   }
                 : {
                     backgroundColor: "transparent",
-                    borderColor: "rgba(255,255,255,0.16)",
+                    borderColor: "var(--color-line-strong)",
                     color: "var(--color-text-muted)",
                   };
 
@@ -256,7 +256,7 @@ export default function FocusTimeline({ week = [] }) {
                     </span>
 
                     {!isLast && (
-                      <div className="relative my-1 w-[2px] flex-1 overflow-hidden rounded-full bg-white/10">
+                      <div className="relative my-1 w-[2px] flex-1 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
                         <div
                           className="absolute inset-x-0 top-0 rounded-full transition-[height] duration-500"
                           style={{
@@ -273,7 +273,7 @@ export default function FocusTimeline({ week = [] }) {
                     <div
                       className={
                         isSplit
-                          ? "flex flex-col gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-2"
+                          ? "flex flex-col gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-fill-1)] p-2"
                           : ""
                       }
                     >
@@ -293,7 +293,7 @@ export default function FocusTimeline({ week = [] }) {
                               style={
                                 isCurrent
                                   ? {
-                                      backgroundColor: "rgba(255,255,255,0.06)",
+                                      backgroundColor: "var(--color-fill-3)",
                                       boxShadow: [
                                         `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
                                         `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
@@ -325,8 +325,8 @@ export default function FocusTimeline({ week = [] }) {
                                             color: session.color,
                                           }
                                         : {
-                                            borderColor: "rgba(255,255,255,0.15)",
-                                            backgroundColor: "rgba(255,255,255,0.04)",
+                                            borderColor: "var(--color-line-strong)",
+                                            backgroundColor: "var(--color-fill-2)",
                                             color: "var(--color-text-muted)",
                                           }
                                     }
@@ -365,7 +365,7 @@ export default function FocusTimeline({ week = [] }) {
 
                               {isCurrent && (
                                 <>
-                                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+                                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
                                     <div
                                       className="h-full rounded-full"
                                       style={{ width: `${progress}%`, backgroundColor: session.color }}
@@ -379,7 +379,7 @@ export default function FocusTimeline({ week = [] }) {
                             </div>
 
                             {isNotLastInGroup && (
-                              <div className="mx-1 border-t border-white/[0.08]" />
+                              <div className="mx-1 border-t border-[var(--color-line)]" />
                             )}
                           </div>
                         );
@@ -387,7 +387,7 @@ export default function FocusTimeline({ week = [] }) {
                     </div>
 
                     {gap != null && gap >= 15 && (
-                      <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-white/15 px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)]">
+                      <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-[var(--color-line-strong)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)]">
                         {gap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
                         {formatGap(gap)} free
                       </div>

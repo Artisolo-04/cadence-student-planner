@@ -4,7 +4,7 @@ export default function SessionCard({ session, isCurrent }) {
   return (
     <div
       className={`relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 transition-colors ${
-        isCurrent ? "bg-white/[0.06]" : "hover:bg-white/[0.03]"
+        isCurrent ? "bg-[var(--color-fill-3)]" : "hover:bg-[var(--color-fill-1)]"
       }`}
       style={
         isCurrent
@@ -25,7 +25,7 @@ export default function SessionCard({ session, isCurrent }) {
       </div>
 
       <span
-        className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10"
+        className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--color-line)]"
         style={{
           backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${session.color} 35%, black 20%) 0%, color-mix(in srgb, ${session.color} 12%, black 45%) 100%)`,
         }}

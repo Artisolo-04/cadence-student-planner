@@ -84,6 +84,27 @@
   --color-chrome-border: #1a2f2d;
 }
 
+:root {
+  --color-line: rgba(16, 32, 31, 0.12);
+  --color-line-strong: rgba(16, 32, 31, 0.18);
+  --color-fill-1: rgba(16, 32, 31, 0.04);
+  --color-fill-2: rgba(16, 32, 31, 0.05);
+  --color-fill-3: rgba(16, 32, 31, 0.07);
+  --color-fill-4: rgba(16, 32, 31, 0.10);
+}
+
+.dark {
+  --color-line: rgba(255, 255, 255, 0.10);
+  --color-line-strong: rgba(255, 255, 255, 0.15);
+  --color-fill-1: rgba(255, 255, 255, 0.03);
+  --color-fill-2: rgba(255, 255, 255, 0.04);
+  --color-fill-3: rgba(255, 255, 255, 0.06);
+  --color-fill-4: rgba(255, 255, 255, 0.10);
+}
+
+:root { --color-tint: var(--color-primary); }
+.dark { --color-tint: var(--color-accent); }
+
 @theme inline {
   --color-bg: var(--color-bg);
   --color-surface: var(--color-surface);

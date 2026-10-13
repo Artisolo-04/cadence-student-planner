@@ -52,7 +52,7 @@ function VaultFileCard({ item, onOpen }) {
       <button
         type="button"
         onClick={() => onOpen?.(item)}
-        className="flex shrink-0 items-center gap-1 rounded border border-white/10 px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
+        className="flex shrink-0 items-center gap-1 rounded border border-[var(--color-line)] px-2 py-0.5 font-mono text-[10px] font-semibold tracking-wider text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
       >
         VIEW
         <ArrowRight size={10} />
@@ -67,10 +67,10 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
 
   return (
     <div
-      className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
-          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-accent) 8%, transparent) 60%, transparent 100%)",
+          "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
       }}
     >
       <div
@@ -100,7 +100,7 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
         ) : items.length === 0 || EMPTY_PREVIEW ? (
           <EmptyState variant="compact" className="flex-1" icon={EmptyVaultIcon} title="No files in your Vault yet" body="Upload notes or PDFs and they will show up here." />
         ) : (
-          <div className="mt-4 flex min-h-0 flex-1 flex-col justify-between gap-1.5 border-t border-white/10 pt-3.5">
+          <div className="mt-4 flex min-h-0 flex-1 flex-col justify-between gap-1.5 border-t border-[var(--color-line)] pt-3.5">
             {items.map((item) => (
               <VaultFileCard key={item.id} item={item} onOpen={onOpen} />
             ))}

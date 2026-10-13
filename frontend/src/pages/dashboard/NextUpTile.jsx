@@ -27,7 +27,7 @@ export default function NextUpTile({ session }) {
 
   return (
     <div
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 p-5 backdrop-blur-xl"
+      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage: `linear-gradient(150deg, color-mix(in srgb, ${accent} 22%, transparent) 0%, color-mix(in srgb, var(--color-primary) 10%, transparent) 60%, transparent 100%)`,
       }}
@@ -49,14 +49,14 @@ export default function NextUpTile({ session }) {
             <div className="flex items-center gap-2">
               {!(session.concurrent?.length > 0 && !session.hasGroupFilter) && (
                 <>
-                  <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
+                  <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-[var(--color-line)] bg-[var(--color-fill-2)] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[var(--color-text-muted)]">
                     <span
                       className="h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: accent }}
                     />
                     {session.groupTag || "All"}
                   </span>
-                  <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[11px] font-semibold text-[var(--color-text-muted)]">
+                  <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-[var(--color-line)] bg-[var(--color-fill-2)] px-2 py-1 font-mono text-[11px] font-semibold text-[var(--color-text-muted)]">
                     {session.start?.slice(0, 5)}–{session.end?.slice(0, 5)}
                   </span>
                 </>
@@ -83,7 +83,7 @@ export default function NextUpTile({ session }) {
               {[session, ...session.concurrent].map((s) => (
                 <div
                   key={s.key}
-                  className="flex min-w-0 flex-col gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] p-3"
+                  className="flex min-w-0 flex-col gap-1.5 rounded-xl border border-[var(--color-line)] bg-[var(--color-fill-1)] p-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5">
@@ -91,7 +91,7 @@ export default function NextUpTile({ session }) {
                         className="h-1.5 w-1.5 shrink-0 rounded-full"
                         style={{ backgroundColor: s.color }}
                       />
-                      <span className="shrink-0 rounded border border-white/10 px-1 text-[9px] font-bold uppercase tracking-wide text-[var(--color-text)]">
+                      <span className="shrink-0 rounded border border-[var(--color-line)] px-1 text-[9px] font-bold uppercase tracking-wide text-[var(--color-text)]">
                         {s.groupTag || "All"}
                       </span>
                     </div>
@@ -126,7 +126,7 @@ export default function NextUpTile({ session }) {
 
               <div className="mt-auto space-y-2 pt-3">
                 {session.concurrent?.length > 0 && (
-                  <div className="space-y-1 border-t border-white/10 pt-2">
+                  <div className="space-y-1 border-t border-[var(--color-line)] pt-2">
                     <p className="text-[9px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                       Also at this time
                     </p>
@@ -139,7 +139,7 @@ export default function NextUpTile({ session }) {
                           className="h-1.5 w-1.5 shrink-0 rounded-full"
                           style={{ backgroundColor: extra.color }}
                         />
-                        <span className="shrink-0 rounded border border-white/10 px-1 text-[9px] font-bold uppercase text-[var(--color-text)]">
+                        <span className="shrink-0 rounded border border-[var(--color-line)] px-1 text-[9px] font-bold uppercase text-[var(--color-text)]">
                           {extra.groupTag || "All"}
                         </span>
                         <span className="truncate">{extra.subjectName}</span>
