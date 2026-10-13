@@ -1,4 +1,5 @@
 import { Folder, Trash2 } from "lucide-react";
+import IconTile from "../../components/ui/IconTile";
 
 const EXTENSION_LABELS = {
   pdf: "PDF",
@@ -166,25 +167,7 @@ export default function VaultFolderCard({
       <div className="relative z-10 flex flex-col gap-4 p-2 md:p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span
-              className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/15 backdrop-blur-md"
-              style={{
-                backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accent} 40%, black 20%) 0%, color-mix(in srgb, ${accent} 15%, black 45%) 100%)`,
-                boxShadow:
-                  "0 1px 0 0 rgba(255,255,255,0.15) inset, 0 -1px 3px 0 rgba(0,0,0,0.35) inset, 0 2px 6px -2px rgba(0,0,0,0.4)",
-              }}
-              aria-hidden="true"
-            >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-md bg-gradient-to-b from-white/10 to-transparent"
-              />
-              <Folder
-                size={16}
-                style={{ color: accent }}
-                className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
-              />
-            </span>
+            <IconTile icon={Folder} color={accent} />
             <span
               title={title}
               className="block w-full min-w-0 truncate text-base font-semibold leading-snug text-[var(--color-text)]"

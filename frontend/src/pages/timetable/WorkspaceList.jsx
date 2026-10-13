@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, CalendarDays, Plus, Trash2 } from "lucide-react";
+import IconTile from "../../components/ui/IconTile";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
@@ -106,20 +107,7 @@ export default function WorkspaceList({ timetables, onOpen, onAddNew, onDelete }
 
                   <div className="pointer-events-none relative z-10 flex items-start justify-between">
                     <div className="flex items-start gap-2">
-                        <span
-                          className={`relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border transition-colors duration-300 ${
-                            isActive
-                              ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-[var(--color-primary-fg)]"
-                              : "border-[var(--color-primary)]/25 bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))] text-[var(--color-primary)]"
-                          }`}
-                          aria-hidden="true"
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[var(--color-primary)]/15 to-transparent"
-                          />
-                          <CalendarDays size={16} className="relative z-10" />
-                        </span>
+                        <IconTile icon={CalendarDays} />
 
                         {isActive && (
                           <span className="relative z-10 inline-flex h-7 items-center gap-1.5 rounded-md border border-[var(--color-primary)]/30 bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-surface))] px-2.5 text-[11px] font-semibold tracking-wide text-[var(--color-primary)]">
