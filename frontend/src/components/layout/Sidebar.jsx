@@ -39,7 +39,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`shrink-0 border-r border-[var(--color-border)] p-2 hidden md:flex md:flex-col justify-between transition-all duration-200 ease-in-out ${
+      className={`shrink-0 border-r border-[var(--color-chrome-border)] bg-[var(--color-chrome)] p-2 hidden md:flex md:flex-col justify-between transition-all duration-200 ease-in-out ${
         collapsed ? "w-14 px-2" : "w-52 px-2"
       }`}
     >
@@ -53,7 +53,7 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="pt-2 border-t border-[var(--color-border)]">
+      <div className="pt-2 border-t border-[var(--color-chrome-border)]">
         <WorkspaceContextSwitcher />
 
         {collapsed ? (

@@ -94,9 +94,7 @@ export default function BottomNav() {
   return (
     <>
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around
-          border-t border-[var(--color-border)] bg-[var(--color-surface)]
-          px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex items-center justify-around border-t border-[var(--color-chrome-border)] bg-[var(--color-chrome)] px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]"
       >
         {primaryItems.map((item) => (
           <NavItemLink key={item.path} item={item} />
