@@ -1,6 +1,8 @@
 import EmptyState from "../../components/ui/EmptyState";
+import SegmentedControl from "../../components/ui/SegmentedControl";
+import Tooltip from "../../components/ui/Tooltip";
 import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ClipboardList, AlertTriangle, ArrowRight, Radar, Clock, CheckCircle2, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VaultMatchLink from "./VaultMatchLink";
@@ -47,13 +49,15 @@ const SECTIONS = [
 
 const DISPLAY_LIMIT = 3;
 
+const TAB_LABELS = { overdue: "Overdue", active: "Active", future: "Future" };
+
 function limitBucketsForDisplay(buckets, max) {
   if (!buckets) return buckets;
-  let left = max;
+  // per-bucket cap
   const out = { ...buckets };
   for (const key of ["overdue", "active", "future"]) {
-    out[key] = (buckets[key] || []).slice(0, left);
-    left -= out[key].length;
+    out[key] = (buckets[key] || []).slice(0, max);
+    
   }
   return out;
 }
@@ -73,31 +77,36 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
     }
     return map;
   }, [buckets, vaultFiles]);
-
-  const shownCount = buckets
-    ? buckets.overdue.length + buckets.active.length + buckets.future.length
-    : 0;
   const grandTotal = buckets
     ? (buckets.overdueTotal ?? 0) + (buckets.activeTotal ?? 0) + (buckets.futureTotal ?? 0)
     : 0;
 
-  const activeSectionCount = SECTIONS.filter(
-    (section) => buckets && buckets[section.key] && buckets[section.key].length > 0
-  ).length;
+    const [selectedTab, setSelectedTab] = useState(null);
+    // default = most urgent non-empty bucket
+    const defaultTab = SECTIONS.find((s) => (buckets?.[s.key]?.length ?? 0) > 0)?.key ?? "overdue";
+    const tab = selectedTab ?? defaultTab;
+    const activeSection = SECTIONS.find((s) => s.key === tab) ?? SECTIONS[0];
+    const tabItems = buckets?.[tab] ?? [];
+    const tabTotal = buckets?.[`${tab}Total`] ?? 0;
+    const tabOptions = SECTIONS.map((s) => {
+      const count = buckets?.[`${s.key}Total`] ?? 0;
+      return { id: s.key, label: TAB_LABELS[s.key], Icon: s.icon, count };
+    });
 
   return (
     <div
-      className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
+      className="relative flex h-full flex-col rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
       }}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20 blur-3xl"
-        style={{ backgroundColor: "var(--color-primary)" }}
-      />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
+          <div
+            className="absolute -right-10 -top-10 h-36 w-36 rounded-full opacity-20 blur-3xl"
+            style={{ backgroundColor: "var(--color-primary)" }}
+          />
+        </div>
 
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
         <div className="flex items-center justify-between">
@@ -107,14 +116,44 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
           </div>
 
           {!loading && grandTotal > 0 && (
+              <div className="flex items-center gap-3">
+                <div
+                  role="tablist"
+                  aria-label="Intercept queue"
+                  className="hidden items-center gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] p-0.5 lg:flex"
+                >
+                  {tabOptions.map(({ id, label, Icon, count }) => {
+                    const active = tab === id;
+                    return (
+                      <Tooltip key={id} label={label} side="top">
+                        <button
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          aria-label={`${label}, ${count}`}
+                          onClick={() => setSelectedTab(id)}
+                          className={`flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 transition-colors duration-150 ${
+                            active
+                              ? "bg-[var(--color-primary)] text-[var(--color-primary-fg)] shadow-sm"
+                              : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
+                          }`}
+                        >
+                          <Icon size={14} strokeWidth={2.25} />
+                          <span className="text-[10px] font-bold tabular-nums">{count}</span>
+                        </button>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
             <button
               type="button"
               onClick={() => navigate("/homework")}
               className="flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
             >
-              {grandTotal > shownCount ? `+${grandTotal - shownCount} more` : "View all"}
+              {tabTotal > tabItems.length ? `+${tabTotal - tabItems.length} more` : "View all"}
               <ArrowRight size={12} />
             </button>
+              </div>
           )}
         </div>
 
@@ -130,60 +169,50 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
           <EmptyState variant="compact" className="flex-1" icon={CheckCircle2} title="All caught up" body="Nothing due right now." />
         ) : (
             <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-[var(--color-line)] pt-3.5">
-              {SECTIONS.map((section) => {
-                const items = buckets[section.key];
-                if (!items || items.length === 0) return null;
-                const Icon = section.icon;
-                const accent = section.dot;
+              <SegmentedControl
+                size="sm"
+                ariaLabel="Intercept queue"
+                value={tab}
+                onChange={setSelectedTab}
+                options={tabOptions.map(({ id, label, count }) => ({ id, label: `${label} · ${count}` }))}
+                className="w-full lg:hidden [&>button]:flex-1"
+              />
 
-                return (
-                  <div key={section.key} className="flex min-h-0 flex-1 flex-col gap-2">
-                    {activeSectionCount > 1 && (
-                      <div className="flex items-center gap-1.5">
-                        <Icon size={11} style={{ color: accent }} />
+              {tabItems.length === 0 ? (
+                <EmptyState variant="compact" className="flex-1" icon={activeSection.icon} title={`No ${TAB_LABELS[tab].toLowerCase()} tasks`} body="Nothing in this list right now." />
+              ) : (
+                <div className="grid min-h-0 flex-1 grid-rows-3 gap-1.5">
+                  {tabItems.map((item) => {
+                    const vaultMatch = vaultMatchByItemId.get(item.id);
+                    return (
+                      <div
+                        key={item.id}
+                        className="flex h-full min-h-0 min-w-0 items-center gap-3 rounded-md px-3 py-2"
+                        style={{
+                          backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${activeSection.dot} 14%, transparent) 0%, transparent 70%)`,
+                        }}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[13px] font-medium leading-tight text-[var(--color-text)]" title={item.title}>
+                            {item.title}
+                          </p>
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <span className="mt-0.5 truncate text-[11px] leading-tight text-[var(--color-text-muted)]">
+                              {item.subject_name || "No subject"}
+                            </span>
+                            <VaultMatchLink file={vaultMatch} onOpen={onOpenFile} />
+                          </div>
+                        </div>
                         <span
-                          className="text-[10px] font-bold uppercase tracking-wider"
-                          style={{ color: accent }}
+                          className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-[10px] font-bold ${activeSection.badgeClass}`}
                         >
-                          {section.label}
+                          {urgencyLabel(item.due_date)}
                         </span>
                       </div>
-                    )}
-
-                    <div className="flex min-h-0 flex-1 flex-col justify-start gap-2">
-                      {items.map((item) => {
-                        const vaultMatch = vaultMatchByItemId.get(item.id);
-                        return (
-                          <div
-                            key={item.id}
-                            className="flex min-h-0 min-w-0 max-h-[4.5rem] flex-1 items-center gap-3 rounded-md px-3 py-1.5"
-                            style={{
-                              backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
-                            }}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-[var(--color-text)]" title={item.title}>
-                                {item.title}
-                              </p>
-                              <div className="flex min-w-0 items-center gap-1.5">
-                                <span className="truncate text-xs text-[var(--color-text-muted)]">
-                                  {item.subject_name || "No subject"}
-                                </span>
-                                <VaultMatchLink file={vaultMatch} onOpen={onOpenFile} />
-                              </div>
-                            </div>
-                            <span
-                              className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded border px-2 py-0.5 text-[10px] font-bold ${section.badgeClass}`}
-                            >
-                              {urgencyLabel(item.due_date)}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              )}
             </div>
         )}
       </div>

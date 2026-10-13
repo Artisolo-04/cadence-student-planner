@@ -27,7 +27,7 @@ function VaultFileCard({ item, onOpen }) {
 
   return (
     <div
-      className="flex min-h-0 min-w-0 max-h-[4.5rem] flex-1 items-center gap-3 rounded-md px-3 py-1.5"
+      className="flex h-full min-h-0 min-w-0 items-center gap-3 rounded-md px-3 py-1.5"
       style={{
         backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
       }}
@@ -100,7 +100,7 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
         ) : items.length === 0 || EMPTY_PREVIEW ? (
           <EmptyState variant="compact" className="flex-1" icon={EmptyVaultIcon} title="No files in your Vault yet" body="Upload notes or PDFs and they will show up here." />
         ) : (
-          <div className="mt-4 flex min-h-0 flex-1 flex-col justify-start gap-1.5 border-t border-[var(--color-line)] pt-3.5">
+          <div className="mt-4 grid min-h-0 flex-1 grid-rows-3 gap-1.5 border-t border-[var(--color-line)] pt-3.5">
             {items.map((item) => (
               <VaultFileCard key={item.id} item={item} onOpen={onOpen} />
             ))}

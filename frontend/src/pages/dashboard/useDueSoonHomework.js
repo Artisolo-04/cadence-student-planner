@@ -40,14 +40,10 @@ function bucketHomework(list, totalLimit) {
   active.sort(byDueDateAsc);
   future.sort(byDueDateAsc);
 
-  // Fill up to totalLimit items across the whole queue, priority order:
-  // overdue first, then active, then future — never per-bucket, always global.
-  let remaining = totalLimit;
-  const takeOverdue = overdue.slice(0, remaining);
-  remaining -= takeOverdue.length;
-  const takeActive = active.slice(0, remaining);
-  remaining -= takeActive.length;
-  const takeFuture = future.slice(0, remaining);
+  // Per-bucket limit: each tab gets up to `totalLimit` items.
+    const takeOverdue = overdue.slice(0, totalLimit);
+    const takeActive = active.slice(0, totalLimit);
+    const takeFuture = future.slice(0, totalLimit);
 
   return {
     overdue: takeOverdue,
