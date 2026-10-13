@@ -13,9 +13,9 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
     
       <div
         style={{
-          backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accentColor} 16%, transparent) 0%, color-mix(in srgb, var(--color-accent) 5%, transparent) 55%, transparent 100%)`,
+          backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accentColor} 16%, transparent) 0%, color-mix(in srgb, var(--color-tint) 5%, transparent) 55%, transparent 100%)`,
         }}
-        className={`group relative hidden sm:grid ${gridClass} items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-3 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)] hover:shadow-[0_10px_30px_-12px_color-mix(in_srgb,var(--color-primary)_35%,transparent)]`}
+        className={`group row-elevated relative hidden sm:grid ${gridClass} items-center gap-4 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-fill-1)] px-3.5 py-3 backdrop-blur-xl transition-all duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)] hover:shadow-[0_10px_30px_-12px_color-mix(in_srgb,var(--color-primary)_35%,transparent)]`}
       >
         <div
           aria-hidden="true"
@@ -34,7 +34,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
 
         <div className="relative z-10 flex items-center">
           <span
-            className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-[11px] font-medium backdrop-blur-md"
+            className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-2 py-1 text-[11px] font-medium backdrop-blur-md"
             style={{ color: priority.color }}
           >
             <Flag size={12} />
@@ -76,7 +76,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
               <span className="truncate">{item.subject_name}</span>
             </span>
           ) : (
-            <span className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-2 py-1 text-[11px] font-medium text-[var(--color-text-muted)]/70">
+            <span className="inline-flex w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-[var(--color-line-strong)] bg-[var(--color-fill-1)] px-2 py-1 text-[11px] font-medium text-[var(--color-text-muted)]">
               <span
                 className="h-1.5 w-1.5 shrink-0 rounded-full border border-dashed border-current opacity-60"
                 aria-hidden="true"
@@ -91,7 +91,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
             className={`inline-flex w-fit items-center gap-2 whitespace-nowrap rounded-lg border px-2 py-1 text-[11px] font-medium backdrop-blur-md ${
               overdue
                 ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
-                : "border-white/10 bg-white/[0.03] text-[var(--color-text-muted)]"
+                : "border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)]"
             }`}
           >
             {overdue ? <AlertTriangle size={12} /> : <Clock size={12} />}
@@ -114,7 +114,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
           <button
             type="button"
             onClick={() => onEdit(item)}
-            className="rounded-lg border border-white/10 bg-white/[0.03] p-1.5 text-[var(--color-text-muted)] backdrop-blur-md transition-colors hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
+            className="rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] p-1.5 text-[var(--color-text-muted)] backdrop-blur-md transition-colors hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
             aria-label={`Edit ${item.title}`}
             title="Edit"
           >
@@ -123,7 +123,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
           <button
             type="button"
             onClick={() => onDelete(item)}
-            className="rounded-lg border border-white/10 bg-white/[0.03] p-1.5 text-[var(--color-text-muted)] backdrop-blur-md transition-colors hover:border-[var(--color-danger)]/40 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
+            className="rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] p-1.5 text-[var(--color-text-muted)] backdrop-blur-md transition-colors hover:border-[var(--color-danger)]/40 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
             aria-label={`Delete ${item.title}`}
             title="Delete"
           >
@@ -134,9 +134,9 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
 
       <article
         style={{
-          backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accentColor} 16%, transparent) 0%, color-mix(in srgb, var(--color-accent) 5%, transparent) 55%, transparent 100%)`,
+          backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accentColor} 16%, transparent) 0%, color-mix(in srgb, var(--color-tint) 5%, transparent) 55%, transparent 100%)`,
         }}
-        className="relative flex flex-col gap-3 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl sm:hidden"
+        className="row-elevated relative flex flex-col gap-3 overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-fill-1)] p-3.5 backdrop-blur-xl sm:hidden"
       >
         <div
           aria-hidden="true"
@@ -164,7 +164,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
                 <span className="truncate">{item.subject_name}</span>
               </span>
             ) : (
-              <span className="inline-flex h-[26px] w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-2 text-[11px] font-medium text-[var(--color-text-muted)]/70">
+              <span className="inline-flex h-[26px] w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-[var(--color-line-strong)] bg-[var(--color-fill-1)] px-2 text-[11px] font-medium text-[var(--color-text-muted)]">
                 <span
                   className="h-1.5 w-1.5 shrink-0 rounded-full border border-dashed border-current opacity-60"
                   aria-hidden="true"
@@ -173,7 +173,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
               </span>
             )}
             <span
-              className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium"
+              className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-2 text-[11px] font-medium"
               style={{ color: priority.color }}
             >
               <Flag size={11} />
@@ -184,7 +184,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
             <button
               type="button"
               onClick={() => onEdit(item)}
-              className="flex h-[26px] w-[26px] items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[var(--color-text-muted)] backdrop-blur-md transition-colors active:border-[var(--color-primary)]/40 active:bg-[var(--color-primary)]/10 active:text-[var(--color-primary)]"
+              className="flex h-[26px] w-[26px] items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)] backdrop-blur-md transition-colors active:border-[var(--color-primary)]/40 active:bg-[var(--color-primary)]/10 active:text-[var(--color-primary)]"
               aria-label={`Edit ${item.title}`}
               title="Edit"
             >
@@ -193,7 +193,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
             <button
               type="button"
               onClick={() => onDelete(item)}
-              className="flex h-[26px] w-[26px] items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-[var(--color-text-muted)] backdrop-blur-md transition-colors active:border-[var(--color-danger)]/40 active:bg-[var(--color-danger)]/10 active:text-[var(--color-danger)]"
+              className="flex h-[26px] w-[26px] items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)] backdrop-blur-md transition-colors active:border-[var(--color-danger)]/40 active:bg-[var(--color-danger)]/10 active:text-[var(--color-danger)]"
               aria-label={`Delete ${item.title}`}
               title="Delete"
             >
@@ -230,7 +230,7 @@ export default function HomeworkRow({ item, gridClass, onEdit, onDelete, onToggl
             className={`inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border px-2 text-[11px] font-medium ${
               overdue
                 ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
-                : "border-white/10 bg-white/[0.03] text-[var(--color-text-muted)]"
+                : "border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)]"
             }`}
           >
             {overdue ? <AlertTriangle size={11} /> : <Clock size={11} />}

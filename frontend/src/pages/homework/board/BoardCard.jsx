@@ -66,11 +66,11 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
       transition={transition}
       style={{
         backgroundImage:
-          "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, color-mix(in srgb, var(--color-accent) 6%, transparent) 55%, transparent 100%)",
+          "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, color-mix(in srgb, var(--color-tint) 6%, transparent) 55%, transparent 100%)",
         pointerEvents: isLeaving ? "none" : "auto",
         willChange: "transform, filter, opacity",
       }}
-      className="group relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
+      className="group row-elevated relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-fill-1)] p-3.5 backdrop-blur-xl transition-colors duration-300 ease-out hover:border-[color-mix(in_srgb,var(--color-primary)_55%,transparent)] hover:shadow-[0_0_28px_-8px_color-mix(in_srgb,var(--color-primary)_40%,transparent)]"
     >
       <div
         aria-hidden="true"
@@ -106,7 +106,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
               <span className="truncate">{item.subject_name}</span>
             </span>
           ) : (
-            <span className="inline-flex h-[26px] w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-white/15 bg-white/[0.02] px-2 text-[11px] font-medium text-[var(--color-text-muted)]/70">
+            <span className="inline-flex h-[26px] w-fit items-center gap-1.5 whitespace-nowrap rounded-lg border border-dashed border-[var(--color-line-strong)] bg-[var(--color-fill-1)] px-2 text-[11px] font-medium text-[var(--color-text-muted)]">
               <span
                 className="h-1.5 w-1.5 shrink-0 rounded-full border border-dashed border-current opacity-60"
                 aria-hidden="true"
@@ -115,7 +115,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
             </span>
           )}
           <span
-            className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium"
+            className="inline-flex h-[26px] w-fit items-center gap-1 whitespace-nowrap rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-2 text-[11px] font-medium"
             style={{ color: priority.color }}
           >
             <Flag size={11} />
@@ -128,7 +128,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
           size="icon"
           onClick={() => onEdit(item)}
           style={{ height: "26px", width: "26px" }}
-          className="shrink-0 rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-md hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
+          className="shrink-0 rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] backdrop-blur-md hover:border-[var(--color-primary)]/40 hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
           aria-label={`Edit ${item.title}`}
           title="Edit"
         >
@@ -142,7 +142,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
               onDelete(item);
             }}
             style={{ height: "26px", width: "26px" }}
-            className="shrink-0 rounded-lg border border-white/10 bg-white/[0.03] backdrop-blur-md hover:border-[var(--color-danger)]/40 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
+            className="shrink-0 rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] backdrop-blur-md hover:border-[var(--color-danger)]/40 hover:bg-[var(--color-danger)]/10 hover:text-[var(--color-danger)]"
             aria-label={`Delete ${item.title}`}
             title="Delete"
           >
@@ -163,7 +163,7 @@ export default function BoardCard({ item, onEdit, onDelete, onStatusChange, reve
           className={`inline-flex h-[26px] w-fit items-center whitespace-nowrap rounded-lg border px-2 text-[11px] font-medium ${
             overdue
               ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
-              : "border-white/10 bg-white/[0.03] text-[var(--color-text-muted)]"
+              : "border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)]"
           }`}
         >
           {overdue && <AlertTriangle size={11} className="mr-1" />}
