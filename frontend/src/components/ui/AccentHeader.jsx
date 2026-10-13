@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import IconTile from "./IconTile";
 
 export function AccentHeaderShell({ accent, children, className = "" }) {
   return (
@@ -15,17 +16,8 @@ export function AccentHeaderShell({ accent, children, className = "" }) {
   );
 }
 
-export function AccentIconBox({ accent, icon: Icon, size = 18 }) {
-  return (
-    <span
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)]"
-      style={{
-        backgroundImage: `linear-gradient(155deg, color-mix(in srgb, ${accent} 40%, black 20%) 0%, color-mix(in srgb, ${accent} 15%, black 45%) 100%)`,
-      }}
-    >
-      <Icon size={size} style={{ color: accent }} />
-    </span>
-  );
+export function AccentIconBox({ accent, icon }) {
+  return <IconTile icon={icon} color={accent} />;
 }
 
 export function HeaderCloseButton({ onClose, ariaLabel = "Close", size = 18 }) {

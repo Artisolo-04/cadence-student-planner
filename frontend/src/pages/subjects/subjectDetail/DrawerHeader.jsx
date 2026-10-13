@@ -1,5 +1,6 @@
 import { BookOpen, Calendar, ListChecks, CalendarDays } from "lucide-react";
-import { AccentHeaderShell, AccentIconBox, HeaderCloseButton } from "../../../components/ui/AccentHeader";
+import { AccentHeaderShell, HeaderCloseButton } from "../../../components/ui/AccentHeader";
+import IconTile from "../../../components/ui/IconTile";
 
 function MetricBadge({ icon: Icon, label }) {
   return (
@@ -20,7 +21,7 @@ export default function DrawerHeader({
   return (
     <AccentHeaderShell accent={subject.color}>
       <div className="relative z-10 flex min-w-0 flex-1 items-center gap-3">
-        <AccentIconBox accent={subject.color} icon={BookOpen} />
+        <IconTile icon={BookOpen} color={subject.color} />
         <div className="min-w-0 flex-1">
           <h3
             title={subject.name}
