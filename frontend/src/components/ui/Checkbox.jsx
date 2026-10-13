@@ -16,7 +16,7 @@ export default function Checkbox({ label, id, checked, onChange, className = "",
           {...rest}
         />
         <span
-          className="h-5 w-5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)]
+          className="h-5 w-5 rounded-md border border-[var(--color-line-strong)] bg-[var(--color-surface)]
             peer-checked:bg-[var(--color-primary)] peer-checked:border-[var(--color-primary)]
             peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-ring)]
             transition-colors flex items-center justify-center pointer-events-none"

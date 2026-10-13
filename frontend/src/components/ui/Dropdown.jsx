@@ -115,7 +115,7 @@ export default function Dropdown({
   }
 
   const triggerClasses = isSm
-    ? "w-auto inline-flex items-center gap-8 whitespace-nowrap rounded-lg border border-white/10 bg-white/[0.03] px-2 text-[11px] font-medium text-[var(--color-text-muted)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+    ? "w-auto inline-flex items-center gap-8 whitespace-nowrap rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-2 text-[11px] font-medium text-[var(--color-text-muted)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
     : "w-full flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
 
   const triggerStyle = isSm
