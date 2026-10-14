@@ -32,7 +32,7 @@ export default function FilterDrawer({
       <div
         aria-hidden="true"
         onClick={onClose}
-        className={`absolute inset-0 z-30 bg-black/40 transition-opacity duration-300 ease-out ${
+        className={`absolute inset-0 z-30 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ease-out ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -41,11 +41,10 @@ export default function FilterDrawer({
         role="dialog"
         aria-label="Homework filters"
         aria-hidden={!open}
-        className="absolute inset-y-0 right-0 z-40 w-full max-w-sm transition-transform duration-300 ease-out"
-        style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
+        className={`absolute inset-0 z-40 w-full p-1.5 sm:p-3 transition-[opacity,transform] duration-300 ease-out sm:left-auto sm:max-w-sm ${open ? "opacity-100 sm:translate-x-0" : "pointer-events-none opacity-0 sm:translate-x-full sm:opacity-100"}`}
       >
-          <div className="relative flex h-full flex-col overflow-hidden rounded-l-2xl border-l border-[var(--color-line)] bg-[var(--color-surface)] shadow-2xl shadow-black/50">
-          <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-[var(--color-line)] px-5 pb-4 pt-5">
+          <div className={`relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-drawer)] transition-shadow duration-300 ${open ? "drawer-elevated" : ""}`}>
+          <div className="relative z-10 flex shrink-0 items-center justify-between border-b border-[var(--color-line)] px-3 pb-3 pt-3 sm:px-5 sm:pb-4 sm:pt-5">
             <div className="flex items-center gap-2">
               <Sparkles size={14} className="text-[var(--color-primary)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
@@ -76,9 +75,10 @@ export default function FilterDrawer({
             </div>
           </div>
 
-          <div className="relative z-10 flex-1 overflow-y-auto px-5 py-5 ">
-            <div className="flex flex-col divide-y divide-[var(--color-line)] w-full h-full items-center justify-between">
-              <div className="pb-4 w-full">
+          <div className="relative flex min-h-0 flex-1">
+<div className="scrollbar-hidden min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3 sm:px-5 sm:py-5">
+            <div className="flex flex-col gap-5 sm:gap-0 sm:divide-y divide-[var(--color-line)] w-full min-h-full items-center justify-between">
+              <div className="pb-0 sm:pb-4 w-full">
                 <SubjectsField
                   subjects={subjects}
                   selectedIds={filters.subjectIds}
@@ -86,7 +86,7 @@ export default function FilterDrawer({
                 />
               </div>
 
-              <div className="py-4 w-full">
+              <div className="py-0 sm:py-4 w-full">
                 <SectionLabel>Priority</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {PRIORITY_OPTIONS.map((p) => (
@@ -101,7 +101,7 @@ export default function FilterDrawer({
                 </div>
               </div>
 
-              <div className="py-4 w-full">
+              <div className="py-0 sm:py-4 w-full">
                 <SectionLabel>Status</SectionLabel>
                 <div className="flex flex-wrap gap-2">
                   {STATUS_OPTIONS_FILTER.map((s) => (
@@ -116,7 +116,7 @@ export default function FilterDrawer({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 pt-4 w-full">
+              <div className="grid grid-cols-1 gap-4 pt-0 sm:pt-4 w-full">
                 <div>
                   <SectionLabel>Due date</SectionLabel>
                   <Dropdown
@@ -139,6 +139,7 @@ export default function FilterDrawer({
               </div>
             </div>
           </div>
+</div>
         </div>
       </div>
     </>

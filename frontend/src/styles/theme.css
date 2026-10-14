@@ -299,3 +299,18 @@
 @layer components {
   .row-elevated { box-shadow: var(--shadow-row); }
 }
+
+/* ───────── Side drawer ───────── */
+:root {
+  --color-drawer: color-mix(in srgb, var(--color-surface) 93%, var(--color-primary));
+  --shadow-overlay: 0 16px 40px -12px color-mix(in srgb, var(--color-text) 25%, transparent);
+}
+.dark {
+  --color-drawer: var(--color-surface);
+  --shadow-overlay: 0 16px 48px -12px color-mix(in srgb, var(--color-chrome) 80%, transparent);
+}
+
+@layer components {
+  .drawer-elevated { box-shadow: var(--shadow-overlay); }
+}
+
