@@ -123,7 +123,7 @@ export default function SubjectList({ subjects, onAddNew, onEdit, onDelete, onSe
                           e.stopPropagation();
                           onEdit(subject);
                         }}
-                        className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-white/10 hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+                        className="rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
                         aria-label={`Edit ${subject.name}`}
                         title="Edit subject"
                       >
