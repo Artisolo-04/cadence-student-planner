@@ -1,4 +1,5 @@
 import EmptyState from "../../components/ui/EmptyState";
+import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
 import { useEffect, useRef, useState } from "react";
 import { Check, Coffee, Moon, Target } from "lucide-react";
 
@@ -201,201 +202,204 @@ export default function FocusTimeline({ week = [] }) {
         )}
 
         {hasSessions && (
-          <div
-            ref={scrollRef}
-            onScroll={updateScrollFades}
-            style={
-              maskImage ? { maskImage, WebkitMaskImage: maskImage } : {}
-            }
-            className="scrollbar-cadence relative mt-4 flex-1 min-h-0 overflow-y-auto border-t border-[var(--color-line)] pl-1 pr-1 pt-4 transition-[mask-image] duration-150"
-          >
-            {timelineGroups.map((group, gi) => {
-              const start = toMinutes(group.start);
-              const end = toMinutes(group.end);
-              const isCurrent = showLive && nowMin >= start && nowMin < end;
-              const isPast = showLive && end <= nowMin;
-              const progress = isCurrent
-                ? Math.min(100, Math.max(0, ((nowMin - start) / (end - start)) * 100))
-                : 0;
-              const minutesLeft = isCurrent ? Math.max(0, end - nowMin) : 0;
-              const isLast = gi === timelineGroups.length - 1;
-              const isSplit = group.items.length > 1;
+          <div className="mt-4 flex min-h-0 flex-1 border-t border-[var(--color-line)] pt-2">
+            <div
+              ref={scrollRef}
+              onScroll={updateScrollFades}
+              style={
+                maskImage ? { maskImage, WebkitMaskImage: maskImage } : {}
+              }
+              className="scrollbar-hidden relative min-w-0 flex-1 overflow-y-auto pl-1 pr-1 pt-1 transition-[mask-image] duration-150"
+            >
+              {timelineGroups.map((group, gi) => {
+                const start = toMinutes(group.start);
+                const end = toMinutes(group.end);
+                const isCurrent = showLive && nowMin >= start && nowMin < end;
+                const isPast = showLive && end <= nowMin;
+                const progress = isCurrent
+                  ? Math.min(100, Math.max(0, ((nowMin - start) / (end - start)) * 100))
+                  : 0;
+                const minutesLeft = isCurrent ? Math.max(0, end - nowMin) : 0;
+                const isLast = gi === timelineGroups.length - 1;
+                const isSplit = group.items.length > 1;
 
-              const nextGroup = timelineGroups[gi + 1];
-              const gap = nextGroup ? toMinutes(nextGroup.start) - end : null;
+                const nextGroup = timelineGroups[gi + 1];
+                const gap = nextGroup ? toMinutes(nextGroup.start) - end : null;
 
-              const nodeAccent = isSplit ? "var(--color-primary)" : group.items[0].color;
+                const nodeAccent = isSplit ? "var(--color-primary)" : group.items[0].color;
 
-              const nodeStyle = isCurrent
-                ? {
-                    backgroundColor: nodeAccent,
-                    borderColor: nodeAccent,
-                    color: "#fff",
-                    boxShadow: `0 0 0 4px color-mix(in srgb, ${nodeAccent} 25%, transparent)`,
-                  }
-                : isPast
-                ? {
-                    backgroundColor: "var(--color-primary)",
-                    borderColor: "var(--color-primary)",
-                    color: "var(--color-primary-fg)",
-                  }
-                : {
-                    backgroundColor: "transparent",
-                    borderColor: "var(--color-line-strong)",
-                    color: "var(--color-text-muted)",
-                  };
+                const nodeStyle = isCurrent
+                  ? {
+                      backgroundColor: nodeAccent,
+                      borderColor: nodeAccent,
+                      color: "#fff",
+                      boxShadow: `0 0 0 4px color-mix(in srgb, ${nodeAccent} 25%, transparent)`,
+                    }
+                  : isPast
+                  ? {
+                      backgroundColor: "var(--color-primary)",
+                      borderColor: "var(--color-primary)",
+                      color: "var(--color-primary-fg)",
+                    }
+                  : {
+                      backgroundColor: "transparent",
+                      borderColor: "var(--color-line-strong)",
+                      color: "var(--color-text-muted)",
+                    };
 
-              return (
-                <div key={`${group.start}-${group.end}`} className="flex gap-2">
-                  <div className="flex flex-col items-center">
-                    <span
-                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 font-mono text-[9px] font-bold transition-colors duration-300"
-                      style={nodeStyle}
-                    >
-                      {isPast ? <Check size={10} strokeWidth={3} /> : `S${gi + 1}`}
-                    </span>
+                return (
+                  <div key={`${group.start}-${group.end}`} className="flex gap-2">
+                    <div className="flex flex-col items-center">
+                      <span
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 font-mono text-[9px] font-bold transition-colors duration-300"
+                        style={nodeStyle}
+                      >
+                        {isPast ? <Check size={10} strokeWidth={3} /> : `S${gi + 1}`}
+                      </span>
 
-                    {!isLast && (
-                      <div className="relative my-1 w-[2px] flex-1 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
-                        <div
-                          className="absolute inset-x-0 top-0 rounded-full transition-[height] duration-500"
-                          style={{
-                            height: isPast ? "100%" : isCurrent ? `${progress}%` : "0%",
-                            backgroundColor: isCurrent ? nodeAccent : "var(--color-primary)",
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className={`min-w-0 flex-1 ${isLast ? "pb-0.5" : "pb-4"}`}>
-                    {}
-                    <div
-                      className={
-                        isSplit
-                          ? "flex flex-col gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-fill-1)] p-2"
-                          : ""
-                      }
-                    >
-                      {group.items.map((session, idx) => {
-                          const badgeLabel =
-                            session.groupTag && session.groupTag !== "all"
-                              ? session.groupTag
-                              : "All";
-                        const isNotLastInGroup = isSplit && idx < group.items.length - 1;
-
-                        return (
-                          <div key={session.key}>
-                            <div
-                              className={`min-w-0 w-full rounded-lg ${isCurrent ? "px-2 py-1.5" : "py-0.5"} ${
-                                isPast ? "opacity-50" : ""
-                              }`}
-                              style={
-                                isCurrent
-                                  ? {
-                                      backgroundColor: "var(--color-fill-3)",
-                                      boxShadow: [
-                                        `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
-                                        `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
-                                      ].join(", "),
-                                    }
-                                  : undefined
-                              }
-                            >
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="flex items-center gap-1.5">
-                                  {isSplit && (
-                                    <span
-                                      className="h-1.5 w-1.5 shrink-0 rounded-full"
-                                      style={{ backgroundColor: session.color }}
-                                    />
-                                  )}
-                                  <p className="font-mono text-[11px] text-[var(--color-text-muted)]">
-                                    {group.start.slice(0, 5)}–{group.end.slice(0, 5)}
-                                  </p>
-                                </span>
-                                <span className="flex shrink-0 items-center gap-1">
-                                  <span
-                                    className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
-                                    style={
-                                      isSplit
-                                        ? {
-                                            borderColor: `color-mix(in srgb, ${session.color} 40%, transparent)`,
-                                            backgroundColor: `color-mix(in srgb, ${session.color} 14%, transparent)`,
-                                            color: session.color,
-                                          }
-                                        : {
-                                            borderColor: "var(--color-line-strong)",
-                                            backgroundColor: "var(--color-fill-2)",
-                                            color: "var(--color-text-muted)",
-                                          }
-                                    }
-                                  >
-                                    {badgeLabel}
-                                  </span>
-                                  {isCurrent && (
-                                    <span
-                                      className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
-                                      style={{
-                                        borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
-                                        backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,
-                                        color: session.color,
-                                      }}
-                                    >
-                                      now
-                                    </span>
-                                  )}
-                                </span>
-                              </div>
-
-                              <p
-                                className={`mt-0.5 truncate text-sm ${
-                                  isCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
-                                }`}
-                              >
-                                {session.subjectName}
-                              </p>
-
-                              {(session.teacher || session.room) && (
-                                <p className="truncate text-[11px] text-[var(--color-text-muted)]">
-                                  {session.teacher}
-                                  {session.room ? ` · ${session.room}` : ""}
-                                </p>
-                              )}
-
-                              {isCurrent && (
-                                <>
-                                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
-                                    <div
-                                      className="h-full rounded-full"
-                                      style={{ width: `${progress}%`, backgroundColor: session.color }}
-                                    />
-                                  </div>
-                                  <p className="mt-1 font-mono text-[11px] font-medium" style={{ color: session.color }}>
-                                    {minutesLeft}m left
-                                  </p>
-                                </>
-                              )}
-                            </div>
-
-                            {isNotLastInGroup && (
-                              <div className="mx-1 border-t border-[var(--color-line)]" />
-                            )}
-                          </div>
-                        );
-                      })}
+                      {!isLast && (
+                        <div className="relative my-1 w-[2px] flex-1 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
+                          <div
+                            className="absolute inset-x-0 top-0 rounded-full transition-[height] duration-500"
+                            style={{
+                              height: isPast ? "100%" : isCurrent ? `${progress}%` : "0%",
+                              backgroundColor: isCurrent ? nodeAccent : "var(--color-primary)",
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    {gap != null && gap >= 15 && (
-                      <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-[var(--color-line-strong)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)]">
-                        {gap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
-                        {formatGap(gap)} free
+                    <div className={`min-w-0 flex-1 ${isLast ? "pb-0.5" : "pb-4"}`}>
+                      {}
+                      <div
+                        className={
+                          isSplit
+                            ? "flex flex-col gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-fill-1)] p-2"
+                            : ""
+                        }
+                      >
+                        {group.items.map((session, idx) => {
+                            const badgeLabel =
+                              session.groupTag && session.groupTag !== "all"
+                                ? session.groupTag
+                                : "All";
+                          const isNotLastInGroup = isSplit && idx < group.items.length - 1;
+
+                          return (
+                            <div key={session.key}>
+                              <div
+                                className={`min-w-0 w-full rounded-lg ${isCurrent ? "px-2 py-1.5" : "py-0.5"} ${
+                                  isPast ? "opacity-50" : ""
+                                }`}
+                                style={
+                                  isCurrent
+                                    ? {
+                                        backgroundColor: "var(--color-fill-3)",
+                                        boxShadow: [
+                                          `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
+                                          `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
+                                        ].join(", "),
+                                      }
+                                    : undefined
+                                }
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="flex items-center gap-1.5">
+                                    {isSplit && (
+                                      <span
+                                        className="h-1.5 w-1.5 shrink-0 rounded-full"
+                                        style={{ backgroundColor: session.color }}
+                                      />
+                                    )}
+                                    <p className="font-mono text-[11px] text-[var(--color-text-muted)]">
+                                      {group.start.slice(0, 5)}–{group.end.slice(0, 5)}
+                                    </p>
+                                  </span>
+                                  <span className="flex shrink-0 items-center gap-1">
+                                    <span
+                                      className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                                      style={
+                                        isSplit
+                                          ? {
+                                              borderColor: `color-mix(in srgb, ${session.color} 40%, transparent)`,
+                                              backgroundColor: `color-mix(in srgb, ${session.color} 14%, transparent)`,
+                                              color: session.color,
+                                            }
+                                          : {
+                                              borderColor: "var(--color-line-strong)",
+                                              backgroundColor: "var(--color-fill-2)",
+                                              color: "var(--color-text-muted)",
+                                            }
+                                      }
+                                    >
+                                      {badgeLabel}
+                                    </span>
+                                    {isCurrent && (
+                                      <span
+                                        className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
+                                        style={{
+                                          borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
+                                          backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,
+                                          color: session.color,
+                                        }}
+                                      >
+                                        now
+                                      </span>
+                                    )}
+                                  </span>
+                                </div>
+
+                                <p
+                                  className={`mt-0.5 truncate text-sm ${
+                                    isCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
+                                  }`}
+                                >
+                                  {session.subjectName}
+                                </p>
+
+                                {(session.teacher || session.room) && (
+                                  <p className="truncate text-[11px] text-[var(--color-text-muted)]">
+                                    {session.teacher}
+                                    {session.room ? ` · ${session.room}` : ""}
+                                  </p>
+                                )}
+
+                                {isCurrent && (
+                                  <>
+                                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
+                                      <div
+                                        className="h-full rounded-full"
+                                        style={{ width: `${progress}%`, backgroundColor: session.color }}
+                                      />
+                                    </div>
+                                    <p className="mt-1 font-mono text-[11px] font-medium" style={{ color: session.color }}>
+                                      {minutesLeft}m left
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+
+                              {isNotLastInGroup && (
+                                <div className="mx-1 border-t border-[var(--color-line)]" />
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
+
+                      {gap != null && gap >= 15 && (
+                        <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-[var(--color-line-strong)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)]">
+                          {gap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
+                          {formatGap(gap)} free
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <CustomScrollbar scrollRef={scrollRef} />
           </div>
         )}
       </div>
