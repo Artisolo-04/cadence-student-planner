@@ -23,3 +23,18 @@ body {
     animation: cadence-focus-breathe 3.6s ease-in-out infinite;
   }
 }
+
+/* Focus timeline glass: cool in light mode, lifted in dark mode. */
+.focus-timeline {
+  --focus-active-tint: 7%;
+  --focus-active-glow: 30%;
+  --focus-active-base: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary) 12%);
+  --focus-active-sheen: 30%;
+}
+
+.dark .focus-timeline {
+  --focus-active-tint: 12%;
+  --focus-active-glow: 34%;
+  --focus-active-base: color-mix(in srgb, var(--color-surface) 86%, white 14%);
+  --focus-active-sheen: 12%;
+}

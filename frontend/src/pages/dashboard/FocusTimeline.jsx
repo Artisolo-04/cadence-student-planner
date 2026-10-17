@@ -138,7 +138,7 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
 
   return (
     <div
-      className="relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
+      className="focus-timeline relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
@@ -328,15 +328,17 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                             <div key={session.key}>
                               <div
                                 className={`min-w-0 w-full rounded-lg ${sessionIsCurrent ? "px-2 py-1.5" : "py-0.5"} ${
-                                  sessionIsPast ? "opacity-50" : ""
+                                  sessionIsPast ? "opacity-65" : ""
                                 }`}
                                 style={
                                   sessionIsCurrent
                                     ? {
-                                        backgroundColor: "var(--color-fill-3)",
+                                        backgroundColor: `color-mix(in srgb, ${session.color} var(--focus-active-tint), var(--focus-active-base))`,
+                                        backgroundImage: `linear-gradient(135deg, color-mix(in srgb, white var(--focus-active-sheen), transparent), transparent 58%)`,
+                                        backdropFilter: "blur(10px)",
                                         boxShadow: [
-                                          `inset 0 0 24px -6px color-mix(in srgb, ${session.color} 55%, transparent)`,
-                                          `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, transparent)`,
+                                          `inset 0 0 22px -12px color-mix(in srgb, ${session.color} var(--focus-active-glow), transparent)`,
+                                          `inset 0 0 0 1px color-mix(in srgb, ${session.color} 30%, var(--color-line))`,
                                         ].join(", "),
                                       }
                                     : undefined
@@ -366,8 +368,8 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                                       style={
                                         isSplit
                                           ? {
-                                              borderColor: `color-mix(in srgb, ${session.color} 40%, transparent)`,
-                                              backgroundColor: `color-mix(in srgb, ${session.color} 14%, transparent)`,
+                                              borderColor: `color-mix(in srgb, ${session.color} 42%, var(--color-line))`,
+                                              backgroundColor: `color-mix(in srgb, ${session.color} 16%, var(--focus-active-base))`,
                                               color: session.color,
                                             }
                                           : {
@@ -383,8 +385,8 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                                       <span
                                         className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
                                         style={{
-                                          borderColor: `color-mix(in srgb, ${session.color} 45%, transparent)`,
-                                          backgroundColor: `color-mix(in srgb, ${session.color} 18%, transparent)`,
+                                          borderColor: `color-mix(in srgb, ${session.color} 45%, var(--color-line))`,
+                                          backgroundColor: `color-mix(in srgb, ${session.color} 22%, var(--focus-active-base))`,
                                           color: session.color,
                                         }}
                                       >
