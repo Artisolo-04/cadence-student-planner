@@ -268,6 +268,24 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                       color: "var(--color-text-muted)",
                     };
 
+                const sessionsByGroup = new Map();
+                group.items.forEach((session) => {
+                  const groupKey = session.groupTag ?? "all";
+                  if (!sessionsByGroup.has(groupKey)) sessionsByGroup.set(groupKey, []);
+                  sessionsByGroup.get(groupKey).push(session);
+                });
+                const displaySessions = [...sessionsByGroup.values()].flatMap((lane) => {
+                  const orderedLane = [...lane].sort(
+                    (a, b) =>
+                      toMinutes(a.start) - toMinutes(b.start) ||
+                      toMinutes(a.end) - toMinutes(b.end)
+                  );
+                  return orderedLane.map((session, index) => ({
+                    session,
+                    nextSession: orderedLane[index + 1] ?? null,
+                  }));
+                });
+
                 return (
                   <div key={`${group.start}-${group.end}`} className="flex gap-2">
                     <div className="flex flex-col items-center">
@@ -300,7 +318,7 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                             : ""
                         }
                       >
-                        {group.items.map((session, idx) => {
+                        {displaySessions.map(({ session, nextSession }, idx) => {
                           const sessionStart = toMinutes(session.start);
                           const sessionEnd = toMinutes(session.end);
                           const sessionIsCurrent =
@@ -322,7 +340,25 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                               session.groupTag && session.groupTag !== "all"
                                 ? session.groupTag
                                 : "All";
-                          const isNotLastInGroup = isSplit && idx < group.items.length - 1;
+                          const sessionGap = nextSession
+                            ? toMinutes(nextSession.start) - sessionEnd
+                            : null;
+                          const nextSessionStart = nextSession
+                            ? toMinutes(nextSession.start)
+                            : null;
+                          const isActiveSessionGap = Boolean(
+                            showLive &&
+                              sessionGap > 0 &&
+                              nowMin >= sessionEnd &&
+                              nowMin < nextSessionStart
+                          );
+                          const sessionGapProgress = isActiveSessionGap
+                            ? Math.min(
+                                100,
+                                Math.max(0, ((nowMin - sessionEnd) / sessionGap) * 100)
+                              )
+                            : 0;
+                          const isNotLastInGroup = Boolean(nextSession);
 
                           return (
                             <div key={session.key}>
@@ -426,9 +462,44 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                                 )}
                               </div>
 
-                              {isNotLastInGroup && (
+                              {sessionGap > 0 ? (
+                                <div className="mt-2 w-full">
+                                  <div
+                                    className={`flex w-full items-center justify-between gap-3 rounded-md border border-dashed border-[var(--color-line-strong)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)] ${
+                                      isActiveSessionGap
+                                        ? "animate-cadence-focus-breathe border-[var(--color-primary)] text-[var(--color-primary)]"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span className="inline-flex min-w-0 items-center gap-1">
+                                      {sessionGap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
+                                      <span>{isActiveSessionGap ? "Break now" : "Break"}</span>
+                                    </span>
+                                    <span className="shrink-0 text-right">
+                                      {isActiveSessionGap
+                                        ? `${formatGap(nextSessionStart - nowMin)} left · ${formatGap(sessionGap)} total`
+                                        : `${formatGap(sessionGap)} free`}
+                                    </span>
+                                  </div>
+                                  {isActiveSessionGap && (
+                                    <div
+                                      className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[var(--color-fill-4)]"
+                                      role="progressbar"
+                                      aria-label="Break time elapsed"
+                                      aria-valuemin={0}
+                                      aria-valuemax={100}
+                                      aria-valuenow={Math.round(sessionGapProgress)}
+                                    >
+                                      <div
+                                        className="h-full rounded-full bg-[var(--color-primary)] transition-[width] duration-500 motion-reduce:transition-none"
+                                        style={{ width: `${sessionGapProgress}%` }}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              ) : isNotLastInGroup ? (
                                 <div className="mx-1 border-t border-[var(--color-line)]" />
-                              )}
+                              ) : null}
                             </div>
                           );
                         })}
