@@ -61,7 +61,7 @@ export default function DashboardPage() {
           <NextUpTile session={nextSession} now={now} />
         </div>
 
-        <div className="flex-1 min-h-0">
+        <div className="lg:flex-1 lg:min-h-0">
           <InterceptVaultStack buckets={buckets} loading={dueSoonLoading} />
         </div>
       </main>

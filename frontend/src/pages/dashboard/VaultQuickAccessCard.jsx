@@ -18,7 +18,7 @@ const ICON_BY_BADGE = {
   URL: Link2, LINK: Link2,
 };
 
-function VaultFileCard({ item, onOpen }) {
+function VaultFileCard({ item, onOpen, fillAvailable }) {
   const meta = getResourceMeta(item);
   const accent = `var(${meta.accentVar})`;
   const Icon = meta.kind === "url" ? Link2 : ICON_BY_BADGE[String(meta.badge).toUpperCase()] || File;
@@ -27,7 +27,9 @@ function VaultFileCard({ item, onOpen }) {
 
   return (
     <div
-      className="flex h-full min-h-0 min-w-0 items-center gap-3 rounded-md px-3 py-1.5"
+      className={`flex min-w-0 items-center gap-3 rounded-md px-3 py-1.5 ${
+          fillAvailable ? "lg:h-full lg:min-h-0" : ""
+        }`}
       style={{
         backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${accent} 10%, transparent) 0%, transparent 70%)`,
       }}
@@ -67,7 +69,7 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
 
   return (
     <div
-      className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
+      className="relative flex flex-col overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl lg:h-full lg:min-h-0"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
@@ -79,7 +81,7 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
         style={{ backgroundColor: "var(--color-primary)" }}
       />
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      <div className="relative z-10 flex flex-col lg:min-h-0 lg:flex-1">
         <div className="flex shrink-0 items-center justify-between">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
             <FolderOpen size={12} />
@@ -100,9 +102,18 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
         ) : items.length === 0 || EMPTY_PREVIEW ? (
           <EmptyState variant="compact" className="flex-1" icon={EmptyVaultIcon} title="No files in your Vault yet" body="Upload notes or PDFs and they will show up here." />
         ) : (
-          <div className="mt-4 grid min-h-0 flex-1 grid-rows-3 gap-1.5 border-t border-[var(--color-line)] pt-3.5">
+          <div
+              className="mt-4 flex flex-col gap-1.5 border-t border-[var(--color-line)] pt-3.5 lg:grid lg:min-h-0 lg:flex-1"
+              style={{
+                gridTemplateRows:
+                  items.length > 1
+                    ? `repeat(${items.length}, minmax(0, 1fr))`
+                    : "auto",
+                alignContent: items.length > 1 ? "stretch" : "start",
+              }}
+            >
             {items.map((item) => (
-              <VaultFileCard key={item.id} item={item} onOpen={onOpen} />
+              <VaultFileCard key={item.id} item={item} onOpen={onOpen} fillAvailable={items.length > 1} />
             ))}
           </div>
         )}

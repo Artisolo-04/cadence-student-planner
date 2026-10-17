@@ -95,7 +95,7 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
 
   return (
     <div
-      className="relative flex h-full flex-col rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
+      className="relative flex flex-col rounded-2xl lg:h-full border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-primary) 18%, transparent) 0%, color-mix(in srgb, var(--color-tint) 8%, transparent) 60%, transparent 100%)",
@@ -108,7 +108,7 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
           />
         </div>
 
-      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+      <div className="relative z-10 flex flex-col lg:min-h-0 lg:flex-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--color-primary)]">
             <ClipboardList size={12} />
@@ -168,7 +168,7 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
         ) : grandTotal === 0 || EMPTY_PREVIEW ? (
           <EmptyState variant="compact" className="flex-1" icon={CheckCircle2} title="All caught up" body="Nothing due right now." />
         ) : (
-            <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-[var(--color-line)] pt-3.5">
+            <div className="mt-4 flex flex-col gap-3 border-t border-[var(--color-line)] pt-3.5 lg:min-h-0 lg:flex-1">
               <SegmentedControl
                 size="sm"
                 ariaLabel="Intercept queue"
@@ -181,13 +181,24 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
               {tabItems.length === 0 ? (
                 <EmptyState variant="compact" className="flex-1" icon={activeSection.icon} title={`No ${TAB_LABELS[tab].toLowerCase()} tasks`} body="Nothing in this list right now." />
               ) : (
-                <div className="grid min-h-0 flex-1 grid-rows-3 gap-1.5">
+                <div
+                  className="flex flex-col gap-1.5 lg:grid lg:min-h-0 lg:flex-1"
+                  style={{
+                    gridTemplateRows:
+                      tabItems.length > 1
+                        ? `repeat(${tabItems.length}, minmax(0, 1fr))`
+                        : "auto",
+                    alignContent: tabItems.length > 1 ? "stretch" : "start",
+                  }}
+                >
                   {tabItems.map((item) => {
                     const vaultMatch = vaultMatchByItemId.get(item.id);
                     return (
                       <div
                         key={item.id}
-                        className="flex h-full min-h-0 min-w-0 items-center gap-3 rounded-md px-3 py-2"
+                        className={`flex min-w-0 items-center gap-3 rounded-md px-3 py-2 ${
+                            tabItems.length > 1 ? "lg:h-full lg:min-h-0" : ""
+                          }`}
                         style={{
                           backgroundImage: `linear-gradient(135deg, color-mix(in srgb, ${activeSection.dot} 14%, transparent) 0%, transparent 70%)`,
                         }}
