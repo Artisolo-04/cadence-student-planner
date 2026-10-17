@@ -19,8 +19,7 @@ function formatGap(minutes) {
   return `${m}m`;
 }
 
-export default function FocusTimeline({ week = [] }) {
-  const [now, setNow] = useState(() => new Date());
+export default function FocusTimeline({ week = [], now = new Date() }) {
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
   const [showBottomFade, setShowBottomFade] = useState(false);
@@ -31,11 +30,6 @@ export default function FocusTimeline({ week = [] }) {
   useEffect(() => {
     if (selectedDay == null && todayEntry) setSelectedDay(todayEntry.day);
   }, [todayEntry, selectedDay]);
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 30000);
-    return () => clearInterval(id);
-  }, []);
 
   function updateScrollFades() {
     const element = scrollRef.current;
@@ -62,41 +56,70 @@ export default function FocusTimeline({ week = [] }) {
   const nowMin = showLive ? now.getHours() * 60 + now.getMinutes() : null;
   const hasSessions = sessions && sessions.length > 0;
 
-  const dayStart = hasSessions ? toMinutes(sessions[0].start) : null;
-  const dayEnd = hasSessions ? toMinutes(sessions[sessions.length - 1].end) : null;
+  const orderedSessions = [...sessions].sort(
+    (a, b) =>
+      toMinutes(a.start) - toMinutes(b.start) ||
+      toMinutes(b.end) - toMinutes(a.end)
+  );
+
+  const dayStart = hasSessions ? toMinutes(orderedSessions[0].start) : null;
+  const dayEnd = hasSessions
+    ? Math.max(...orderedSessions.map((session) => toMinutes(session.end)))
+    : null;
   const dayTotal = hasSessions ? Math.max(1, dayEnd - dayStart) : 1;
 
   const doneCount =
     hasSessions && showLive
-      ? sessions.filter((s) => toMinutes(s.end) <= nowMin).length
+      ? orderedSessions.filter((session) => toMinutes(session.end) <= nowMin).length
       : 0;
 
-  let freeMinutes = 0;
-  const scrubberSegments = [];
+  const timelineGroups = [];
   if (hasSessions) {
-    sessions.forEach((session, i) => {
-      const start = toMinutes(session.start);
-      const end = toMinutes(session.end);
-      scrubberSegments.push({
-        type: "session",
-        key: session.key,
-        color: session.color,
-        widthPct: ((end - start) / dayTotal) * 100,
-      });
-      const next = sessions[i + 1];
-      if (next) {
-        const gapMin = toMinutes(next.start) - end;
-        if (gapMin > 0) {
-          freeMinutes += gapMin;
-          scrubberSegments.push({
-            type: "gap",
-            key: `${session.key}-gap`,
-            widthPct: (gapMin / dayTotal) * 100,
-          });
-        }
+    orderedSessions.forEach((session) => {
+      const lastGroup = timelineGroups[timelineGroups.length - 1];
+      const sessionStart = toMinutes(session.start);
+      const sessionEnd = toMinutes(session.end);
+      const lastGroupEnd = lastGroup ? toMinutes(lastGroup.end) : null;
+
+      if (lastGroup && sessionStart < lastGroupEnd) {
+        lastGroup.items.push(session);
+        if (sessionEnd > lastGroupEnd) lastGroup.end = session.end;
+      } else {
+        timelineGroups.push({
+          start: session.start,
+          end: session.end,
+          items: [session],
+        });
       }
     });
   }
+
+  let freeMinutes = 0;
+  const scrubberSegments = [];
+  timelineGroups.forEach((group, index) => {
+    const start = toMinutes(group.start);
+    const end = toMinutes(group.end);
+    const nextGroup = timelineGroups[index + 1];
+
+    scrubberSegments.push({
+      type: "session",
+      key: group.items.map((session) => session.key).join("-"),
+      color: group.items.length > 1 ? "var(--color-primary)" : group.items[0].color,
+      widthPct: ((end - start) / dayTotal) * 100,
+    });
+
+    if (nextGroup) {
+      const gapMin = toMinutes(nextGroup.start) - end;
+      if (gapMin > 0) {
+        freeMinutes += gapMin;
+        scrubberSegments.push({
+          type: "gap",
+          key: `${group.end}-${nextGroup.start}-gap`,
+          widthPct: (gapMin / dayTotal) * 100,
+        });
+      }
+    }
+  });
 
   const nowPct =
     hasSessions && showLive && nowMin >= dayStart && nowMin <= dayEnd
@@ -112,18 +135,6 @@ export default function FocusTimeline({ week = [] }) {
           : "black 100%"
       })`
     : undefined;
-
-  const timelineGroups = [];
-  if (hasSessions) {
-    sessions.forEach((session) => {
-      const lastGroup = timelineGroups[timelineGroups.length - 1];
-      if (lastGroup && lastGroup.start === session.start && lastGroup.end === session.end) {
-        lastGroup.items.push(session);
-      } else {
-        timelineGroups.push({ start: session.start, end: session.end, items: [session] });
-      }
-    });
-  }
 
   return (
     <div
@@ -226,6 +237,16 @@ export default function FocusTimeline({ week = [] }) {
                 const nextGroup = timelineGroups[gi + 1];
                 const gap = nextGroup ? toMinutes(nextGroup.start) - end : null;
 
+                const isActiveGap = Boolean(
+                  showLive &&
+                    nextGroup &&
+                    nowMin >= end &&
+                    nowMin < toMinutes(nextGroup.start)
+                );
+                const gapProgress = isActiveGap
+                  ? Math.min(100, Math.max(0, ((nowMin - end) / gap) * 100))
+                  : 0;
+
                 const nodeAccent = isSplit ? "var(--color-primary)" : group.items[0].color;
 
                 const nodeStyle = isCurrent
@@ -280,6 +301,23 @@ export default function FocusTimeline({ week = [] }) {
                         }
                       >
                         {group.items.map((session, idx) => {
+                          const sessionStart = toMinutes(session.start);
+                          const sessionEnd = toMinutes(session.end);
+                          const sessionIsCurrent =
+                            showLive && nowMin >= sessionStart && nowMin < sessionEnd;
+                          const sessionIsPast = showLive && sessionEnd <= nowMin;
+                          const sessionProgress = sessionIsCurrent
+                            ? Math.min(
+                                100,
+                                Math.max(
+                                  0,
+                                  ((nowMin - sessionStart) / (sessionEnd - sessionStart)) * 100
+                                )
+                              )
+                            : 0;
+                          const sessionMinutesLeft = sessionIsCurrent
+                            ? Math.max(0, sessionEnd - nowMin)
+                            : 0;
                             const badgeLabel =
                               session.groupTag && session.groupTag !== "all"
                                 ? session.groupTag
@@ -289,11 +327,11 @@ export default function FocusTimeline({ week = [] }) {
                           return (
                             <div key={session.key}>
                               <div
-                                className={`min-w-0 w-full rounded-lg ${isCurrent ? "px-2 py-1.5" : "py-0.5"} ${
-                                  isPast ? "opacity-50" : ""
+                                className={`min-w-0 w-full rounded-lg ${sessionIsCurrent ? "px-2 py-1.5" : "py-0.5"} ${
+                                  sessionIsPast ? "opacity-50" : ""
                                 }`}
                                 style={
-                                  isCurrent
+                                  sessionIsCurrent
                                     ? {
                                         backgroundColor: "var(--color-fill-3)",
                                         boxShadow: [
@@ -313,10 +351,16 @@ export default function FocusTimeline({ week = [] }) {
                                       />
                                     )}
                                     <p className="font-mono text-[11px] text-[var(--color-text-muted)]">
-                                      {group.start.slice(0, 5)}–{group.end.slice(0, 5)}
+                                      {session.start.slice(0, 5)}–{session.end.slice(0, 5)}
                                     </p>
                                   </span>
                                   <span className="flex shrink-0 items-center gap-1">
+                                    <span
+                                      className="inline-flex shrink-0 items-center rounded-md border border-[var(--color-line-strong)] bg-[var(--color-fill-2)] px-1.5 py-0.5 font-mono text-[9px] text-[var(--color-text-muted)]"
+                                      title="Session duration"
+                                    >
+                                      {formatGap(sessionEnd - sessionStart)}
+                                    </span>
                                     <span
                                       className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
                                       style={
@@ -335,7 +379,7 @@ export default function FocusTimeline({ week = [] }) {
                                     >
                                       {badgeLabel}
                                     </span>
-                                    {isCurrent && (
+                                    {sessionIsCurrent && (
                                       <span
                                         className="inline-flex items-center rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide"
                                         style={{
@@ -352,7 +396,7 @@ export default function FocusTimeline({ week = [] }) {
 
                                 <p
                                   className={`mt-0.5 truncate text-sm ${
-                                    isCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
+                                    sessionIsCurrent ? "font-semibold text-[var(--color-text)]" : "text-[var(--color-text-muted)]"
                                   }`}
                                 >
                                   {session.subjectName}
@@ -365,16 +409,16 @@ export default function FocusTimeline({ week = [] }) {
                                   </p>
                                 )}
 
-                                {isCurrent && (
+                                {sessionIsCurrent && (
                                   <>
                                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-fill-4)]">
                                       <div
                                         className="h-full rounded-full"
-                                        style={{ width: `${progress}%`, backgroundColor: session.color }}
+                                        style={{ width: `${sessionProgress}%`, backgroundColor: session.color }}
                                       />
                                     </div>
                                     <p className="mt-1 font-mono text-[11px] font-medium" style={{ color: session.color }}>
-                                      {minutesLeft}m left
+                                      {formatGap(sessionMinutesLeft)} left
                                     </p>
                                   </>
                                 )}
@@ -388,10 +432,40 @@ export default function FocusTimeline({ week = [] }) {
                         })}
                       </div>
 
-                      {gap != null && gap >= 15 && (
-                        <div className="mt-2 inline-flex items-center gap-1 rounded-md border border-dashed border-[var(--color-line-strong)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)]">
-                          {gap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
-                          {formatGap(gap)} free
+                      {gap != null && gap > 0 && (
+                        <div className="mt-2 w-full">
+                          <div
+                            className={`flex w-full items-center justify-between gap-3 rounded-md border border-dashed border-[var(--color-line-strong)] px-2 py-1 font-mono text-[10px] text-[var(--color-text-muted)] ${
+                              isActiveGap
+                                ? "animate-cadence-focus-breathe border-[var(--color-primary)] text-[var(--color-primary)]"
+                                : ""
+                            }`}
+                          >
+                            <span className="inline-flex min-w-0 items-center gap-1">
+                              {gap >= 180 ? <Moon size={10} /> : <Coffee size={10} />}
+                              <span>{isActiveGap ? "Break now" : "Break"}</span>
+                            </span>
+                            <span className="shrink-0 text-right">
+                              {isActiveGap
+                                ? `${formatGap(toMinutes(nextGroup.start) - nowMin)} left · ${formatGap(gap)} total`
+                                : `${formatGap(gap)} free`}
+                            </span>
+                          </div>
+                          {isActiveGap && (
+                            <div
+                              className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[var(--color-fill-4)]"
+                              role="progressbar"
+                              aria-label="Break time elapsed"
+                              aria-valuemin={0}
+                              aria-valuemax={100}
+                              aria-valuenow={Math.round(gapProgress)}
+                            >
+                              <div
+                                className="h-full rounded-full bg-[var(--color-primary)] transition-[width] duration-500 motion-reduce:transition-none"
+                                style={{ width: `${gapProgress}%` }}
+                              />
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

@@ -17,10 +17,10 @@ function toMinutes(hhmm) {
   return h * 60 + (m || 0);
 }
 
-export default function NextUpTile({ session }) {
+export default function NextUpTile({ session, now = new Date() }) {
   const minutesUntil = session
     ? toMinutes(session.start) -
-      (new Date().getHours() * 60 + new Date().getMinutes())
+      (now.getHours() * 60 + now.getMinutes())
     : null;
 
   const accent = session?.color || "var(--color-primary)";

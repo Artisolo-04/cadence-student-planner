@@ -6,3 +6,20 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
 }
+
+@keyframes cadence-focus-breathe {
+  0%, 100% {
+    background-color: color-mix(in srgb, var(--color-primary) 3%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 8%, transparent);
+  }
+  50% {
+    background-color: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 18%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-cadence-focus-breathe {
+    animation: cadence-focus-breathe 3.6s ease-in-out infinite;
+  }
+}

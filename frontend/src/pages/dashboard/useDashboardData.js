@@ -15,8 +15,7 @@ function getTodayIndex() {
   return new Date().getDay();
 }
 
-function timeNowMinutes() {
-  const now = new Date();
+function timeNowMinutes(now = new Date()) {
   return now.getHours() * 60 + now.getMinutes();
 }
 
@@ -36,7 +35,7 @@ export const DAY_LABELS = [
   "Saturday",
 ];
 
-export function useDashboardData() {
+export function useDashboardData(now = new Date()) {
   const {
     timetables,
     activeId,
@@ -271,7 +270,7 @@ export function useDashboardData() {
       slotsById[slot.id] = slot;
     });
 
-    const minutesByDay = {};
+    const intervalsByDay = {};
     visibleEntries.forEach((entry) => {
       const day = Number(entry.day_of_week ?? entry.dayOfWeek);
       const startSlotId =
@@ -280,10 +279,38 @@ export function useDashboardData() {
       const startSlot = slotsById[startSlotId];
       const endSlot = slotsById[endSlotId] ?? startSlot;
       if (!startSlot || !endSlot) return;
+
       const start = toMinutes(startSlot.start_time ?? startSlot.startTime);
       const end = toMinutes(endSlot.end_time ?? endSlot.endTime);
-      if (start == null || end == null) return;
-      minutesByDay[day] = (minutesByDay[day] || 0) + Math.max(0, end - start);
+      if (start == null || end == null || end <= start) return;
+
+      if (!intervalsByDay[day]) intervalsByDay[day] = [];
+      intervalsByDay[day].push({ start, end });
+    });
+
+    const minutesByDay = {};
+    Object.entries(intervalsByDay).forEach(([day, intervals]) => {
+      intervals.sort((a, b) => a.start - b.start || a.end - b.end);
+
+      let rangeStart = null;
+      let rangeEnd = null;
+      let totalMinutes = 0;
+
+      intervals.forEach((interval) => {
+        if (rangeStart == null) {
+          rangeStart = interval.start;
+          rangeEnd = interval.end;
+        } else if (interval.start <= rangeEnd) {
+          rangeEnd = Math.max(rangeEnd, interval.end);
+        } else {
+          totalMinutes += rangeEnd - rangeStart;
+          rangeStart = interval.start;
+          rangeEnd = interval.end;
+        }
+      });
+
+      if (rangeStart != null) totalMinutes += rangeEnd - rangeStart;
+      minutesByDay[Number(day)] = totalMinutes;
     });
 
     const order = [1, 2, 3, 4, 5, 6, 0]; // Mon -> Sun
@@ -352,7 +379,7 @@ export function useDashboardData() {
     });
   }, [visibleEntries, slots, subjectsById]);
 
-  const nowMin = timeNowMinutes();
+  const nowMin = timeNowMinutes(now);
 
   const currentKey = todaySessions.find(
     (session) =>

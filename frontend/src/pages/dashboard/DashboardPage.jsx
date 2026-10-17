@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useDashboardData } from "./useDashboardData";
 import { useDueSoonHomework } from "./useDueSoonHomework";
@@ -9,6 +10,13 @@ import VelocityRingTile from "./VelocityRingTile";
 import WeeklyIntensityTile from "./WeeklyIntensityTile";
 
 export default function DashboardPage() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(id);
+  }, []);
+
   const { user, profile } = useAuth();
 
   const {
@@ -19,7 +27,7 @@ export default function DashboardPage() {
     weeklyIntensity,
     weekAgenda,
     nextSession,
-  } = useDashboardData();
+  } = useDashboardData(now);
 
   const { buckets, stats: homeworkStats, loading: dueSoonLoading } = useDueSoonHomework(5);
 
@@ -50,7 +58,7 @@ export default function DashboardPage() {
 
       <main className="flex flex-col gap-4 min-h-0 lg:overflow-hidden">
         <div className="shrink-0">
-          <NextUpTile session={nextSession} />
+          <NextUpTile session={nextSession} now={now} />
         </div>
 
         <div className="flex-1 min-h-0">
@@ -59,7 +67,7 @@ export default function DashboardPage() {
       </main>
 
       <aside className="min-h-[28rem] lg:min-h-0 lg:overflow-hidden">
-        <FocusTimeline week={weekAgenda} />
+        <FocusTimeline week={weekAgenda} now={now} />
       </aside>
     </div>
   );
