@@ -293,7 +293,7 @@ export default function FocusTimeline({ week = [], now = new Date() }) {
                         className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 font-mono text-[9px] font-bold transition-colors duration-300"
                         style={nodeStyle}
                       >
-                        {isPast ? <Check size={10} strokeWidth={3} /> : `S${gi + 1}`}
+                        {isPast ? <Check size={10} strokeWidth={3} /> : `#${gi + 1}`}
                       </span>
 
                       {!isLast && (
