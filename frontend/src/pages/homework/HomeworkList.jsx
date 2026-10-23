@@ -21,7 +21,7 @@ export default function HomeworkList({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const { filters, setFilter, toggleInList, reset, filtered, activeCount } = useHomeworkFilters(homework);
+  const { filters, setFilter, toggleInList, reset, filtered, activeCount, dueCounts } = useHomeworkFilters(homework);
   async function handleDelete() {
     if (!selectedItem) return;
     setError("");
@@ -47,6 +47,7 @@ export default function HomeworkList({
         setFilter={setFilter}
         activeCount={activeCount}
         open={filtersOpen}
+        dueCounts={dueCounts}
         onToggle={() => setFiltersOpen((o) => !o)}
       />
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl">
@@ -80,6 +81,7 @@ export default function HomeworkList({
           reset={reset}
           activeCount={activeCount}
           subjects={subjects}
+          dueCounts={dueCounts}
         />
       </div>
       <DeleteHomeworkModal

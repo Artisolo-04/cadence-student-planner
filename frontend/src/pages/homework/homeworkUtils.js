@@ -29,7 +29,7 @@ export const DUE_FILTERS = [
   { value: "all", label: "Any due date" },
   { value: "overdue", label: "Overdue" },
   { value: "today", label: "Due today" },
-  { value: "week", label: "Due this week" },
+  { value: "week", label: "Next 7 days" },
   { value: "none", label: "No due date" },
 ];
 

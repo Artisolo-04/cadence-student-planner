@@ -28,7 +28,7 @@ function isDueToday(dueDate) {
 function isDueThisWeek(dueDate) {
   const today = startOfToday();
   const weekEnd = new Date(today);
-  weekEnd.setDate(weekEnd.getDate() + 7);
+  weekEnd.setDate(weekEnd.getDate() + 6);
   const due = parseDueDate(dueDate);
   return due >= today && due <= weekEnd;
 }
@@ -49,7 +49,7 @@ export default function useHomeworkFilters(homework) {
   }
 
   function reset() {
-    setFilters(DEFAULT_FILTERS);
+    setFilters((current) => ({ ...DEFAULT_FILTERS, sort: current.sort }));
   }
 
   const filtered = useMemo(() => {
@@ -90,12 +90,32 @@ export default function useHomeworkFilters(homework) {
     return result;
   }, [homework, filters]);
 
+  const dueCounts = useMemo(() => {
+    const search = filters.search.trim().toLowerCase();
+    const base = homework.filter((item) => {
+      if (search) {
+        const haystack = `${item.title} ${item.notes || ""} ${item.subject_name || ""}`.toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
+      if (filters.subjectIds.length && !filters.subjectIds.includes(item.subject_id)) return false;
+      if (filters.priorities.length && !filters.priorities.includes(item.priority)) return false;
+      if (filters.statuses.length && !filters.statuses.includes(item.status)) return false;
+      return true;
+    });
+    return {
+      all: base.length,
+      overdue: base.filter((i) => i.status !== "done" && parseDueDate(i.due_date) < startOfToday()).length,
+      today: base.filter((i) => isDueToday(i.due_date)).length,
+      week: base.filter((i) => isDueThisWeek(i.due_date)).length,
+      none: base.filter((i) => !i.due_date).length,
+    };
+  }, [homework, filters.search, filters.subjectIds, filters.priorities, filters.statuses]);
+
   const activeCount =
-    (filters.search ? 1 : 0) +
     filters.subjectIds.length +
     filters.priorities.length +
     filters.statuses.length +
     (filters.due !== "all" ? 1 : 0);
 
-  return { filters, setFilter, toggleInList, reset, filtered, activeCount };
+  return { filters, setFilter, toggleInList, reset, filtered, activeCount, dueCounts };
 }

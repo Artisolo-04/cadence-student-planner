@@ -1,6 +1,5 @@
 import { Sparkles, X } from "lucide-react";
-import Dropdown from "../../../components/ui/Dropdown";
-import { DUE_FILTERS, SORT_OPTIONS } from "../homeworkUtils";
+import DueSelect from "./DueSelect";
 import FilterChip from "./FilterChip";
 import SectionLabel from "./SectionLabel";
 import SubjectsField from "./SubjectsField";
@@ -26,6 +25,7 @@ export default function FilterDrawer({
   reset,
   activeCount,
   subjects,
+  dueCounts,
 }) {
   return (
     <>
@@ -116,26 +116,9 @@ export default function FilterDrawer({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 pt-0 sm:pt-4 w-full">
-                <div>
-                  <SectionLabel>Due date</SectionLabel>
-                  <Dropdown
-                    id="filter-due"
-                    value={filters.due}
-                    onChange={(e) => setFilter("due", e.target.value)}
-                    options={DUE_FILTERS}
-                  />
-                </div>
-
-                <div>
-                  <SectionLabel>Sort by</SectionLabel>
-                  <Dropdown
-                    id="filter-sort"
-                    value={filters.sort}
-                    onChange={(e) => setFilter("sort", e.target.value)}
-                    options={SORT_OPTIONS}
-                  />
-                </div>
+              <div className="pt-0 sm:hidden w-full">
+                <SectionLabel>Due date</SectionLabel>
+                <DueSelect inline value={filters.due} onChange={(v) => setFilter("due", v)} counts={dueCounts} />
               </div>
             </div>
           </div>
