@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { comparePriority } from "../homeworkUtils";
+import { useSearchParams } from "react-router-dom";
+import { STATUS_OPTIONS, comparePriority, isDueLater, isDueNextWeek, isDueToday, isOverdue } from "../homeworkUtils";
 
 const DEFAULT_FILTERS = {
   search: "",
@@ -10,31 +11,16 @@ const DEFAULT_FILTERS = {
   sort: "due_date-asc",
 };
 
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function parseDueDate(dueDate) {
-  const iso = String(dueDate).slice(0, 10);
-  return new Date(`${iso}T00:00:00`);
-}
-
-function isDueToday(dueDate) {
-  return parseDueDate(dueDate).getTime() === startOfToday().getTime();
-}
-
-function isDueThisWeek(dueDate) {
-  const today = startOfToday();
-  const weekEnd = new Date(today);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-  const due = parseDueDate(dueDate);
-  return due >= today && due <= weekEnd;
-}
+const DUE_VALUES = ["overdue", "today", "week", "later", "none"];
+const STATUS_VALUES = STATUS_OPTIONS.map((o) => o.value);
 
 export default function useHomeworkFilters(homework) {
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [searchParams] = useSearchParams();
+  const [filters, setFilters] = useState(() => {
+    const due = searchParams.get("due");
+    const statuses = (searchParams.get("status") || "").split(",").filter((s) => STATUS_VALUES.includes(s));
+    return { ...DEFAULT_FILTERS, due: DUE_VALUES.includes(due) ? due : DEFAULT_FILTERS.due, statuses };
+  });
 
   function setFilter(key, value) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -64,9 +50,10 @@ export default function useHomeworkFilters(homework) {
       if (filters.priorities.length && !filters.priorities.includes(item.priority)) return false;
       if (filters.statuses.length && !filters.statuses.includes(item.status)) return false;
 
-      if (filters.due === "overdue" && !(item.status !== "done" && parseDueDate(item.due_date) < startOfToday())) return false;
+      if (filters.due === "overdue" && !isOverdue(item.due_date, item.status)) return false;
       if (filters.due === "today" && !isDueToday(item.due_date)) return false;
-      if (filters.due === "week" && !isDueThisWeek(item.due_date)) return false;
+      if (filters.due === "week" && !isDueNextWeek(item.due_date)) return false;
+      if (filters.due === "later" && !isDueLater(item.due_date)) return false;
       if (filters.due === "none" && item.due_date) return false;
 
       return true;
@@ -104,9 +91,10 @@ export default function useHomeworkFilters(homework) {
     });
     return {
       all: base.length,
-      overdue: base.filter((i) => i.status !== "done" && parseDueDate(i.due_date) < startOfToday()).length,
+      overdue: base.filter((i) => isOverdue(i.due_date, i.status)).length,
       today: base.filter((i) => isDueToday(i.due_date)).length,
-      week: base.filter((i) => isDueThisWeek(i.due_date)).length,
+      week: base.filter((i) => isDueNextWeek(i.due_date)).length,
+      later: base.filter((i) => isDueLater(i.due_date)).length,
       none: base.filter((i) => !i.due_date).length,
     };
   }, [homework, filters.search, filters.subjectIds, filters.priorities, filters.statuses]);

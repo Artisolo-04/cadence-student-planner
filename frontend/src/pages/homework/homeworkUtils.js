@@ -30,6 +30,7 @@ export const DUE_FILTERS = [
   { value: "overdue", label: "Overdue" },
   { value: "today", label: "Due today" },
   { value: "week", label: "Next 7 days" },
+  { value: "later", label: "Later" },
   { value: "none", label: "No due date" },
 ];
 
@@ -60,4 +61,35 @@ export function isOverdue(dueDate, status) {
   const isoDate = String(dueDate).slice(0, 10);
   const due = new Date(`${isoDate}T00:00:00`);
   return due < today;
+}
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function daysUntilDue(dueDate) {
+  const iso = String(dueDate).slice(0, 10);
+  return Math.round((new Date(`${iso}T00:00:00`) - startOfToday()) / 86400000);
+}
+
+export function isDueToday(dueDate) {
+  return daysUntilDue(dueDate) === 0;
+}
+
+export function isDueNextWeek(dueDate) {
+  const days = daysUntilDue(dueDate);
+  return days >= 0 && days <= 6;
+}
+
+export function isDueLater(dueDate) {
+  return !(daysUntilDue(dueDate) < 7);
+}
+
+export function pendingBucket(item) {
+  if (item.status === "done") return null;
+  if (isOverdue(item.due_date, item.status)) return "overdue";
+  if (isDueNextWeek(item.due_date)) return "active";
+  return "future";
 }

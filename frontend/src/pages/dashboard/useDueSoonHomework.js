@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../lib/api";
-import { isOverdue } from "../homework/homeworkUtils";
-
-function diffDaysFromToday(dueDate) {
-  const isoDate = String(dueDate).slice(0, 10);
-  const due = new Date(`${isoDate}T00:00:00`);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.round((due - today) / 86400000);
-}
+import { isOverdue, pendingBucket } from "../homework/homeworkUtils";
 
 function bucketHomework(list, totalLimit) {
   const overdue = [];
@@ -16,18 +8,10 @@ function bucketHomework(list, totalLimit) {
   const future = [];
 
   list.forEach((item) => {
-    if (item.status === "done") return;
-    if (!item.due_date) {
-      future.push(item);
-      return;
-    }
-    if (isOverdue(item.due_date, item.status)) {
-      overdue.push(item);
-      return;
-    }
-    const diff = diffDaysFromToday(item.due_date);
-    if (diff <= 2) active.push(item);
-    else future.push(item);
+    const bucket = pendingBucket(item);
+    if (bucket === "overdue") overdue.push(item);
+    else if (bucket === "active") active.push(item);
+    else if (bucket === "future") future.push(item);
   });
 
   const byDueDateAsc = (a, b) => {
@@ -40,15 +24,10 @@ function bucketHomework(list, totalLimit) {
   active.sort(byDueDateAsc);
   future.sort(byDueDateAsc);
 
-  // Per-bucket limit: each tab gets up to `totalLimit` items.
-    const takeOverdue = overdue.slice(0, totalLimit);
-    const takeActive = active.slice(0, totalLimit);
-    const takeFuture = future.slice(0, totalLimit);
-
   return {
-    overdue: takeOverdue,
-    active: takeActive,
-    future: takeFuture,
+    overdue: overdue.slice(0, totalLimit),
+    active: active.slice(0, totalLimit),
+    future: future.slice(0, totalLimit),
     overdueTotal: overdue.length,
     activeTotal: active.length,
     futureTotal: future.length,
