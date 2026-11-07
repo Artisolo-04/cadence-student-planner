@@ -13,7 +13,7 @@ const TONES = {
   },
   muted: {
     badge: "bg-[var(--color-border)]/40 text-[var(--color-text-muted)]",
-    button: "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]",
+    button: "border-[var(--color-text-muted)] bg-[var(--color-text-muted)]/10 text-[var(--color-text)]",
   },
 };
 
