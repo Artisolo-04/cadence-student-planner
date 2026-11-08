@@ -53,11 +53,44 @@ async function updateSubject(id, userId, { name, color, teacher }) {
 }
 
 async function deleteSubject(id, userId) {
-  const result = await pool.query(
-    "DELETE FROM subjects WHERE id = $1 AND user_id = $2 RETURNING id",
-    [id, userId]
-  );
-  return result.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const subjectResult = await client.query(
+      "SELECT id FROM subjects WHERE id = $1 AND user_id = $2 FOR UPDATE",
+      [id, userId]
+    );
+    if (!subjectResult.rows[0]) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    const filesResult = await client.query(
+      `SELECT url_path
+       FROM subject_resources
+       WHERE user_id = $1 AND subject_id = $2
+         AND resource_type IN ('pdf', 'docx', 'xlsx', 'txt')`,
+      [userId, id]
+    );
+
+    const deletedResult = await client.query(
+      "DELETE FROM subjects WHERE id = $1 AND user_id = $2 RETURNING id",
+      [id, userId]
+    );
+
+    await client.query("COMMIT");
+    return { ...deletedResult.rows[0], vaultFiles: filesResult.rows };
+  } catch (err) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackErr) {
+      console.error("DELETE SUBJECT ROLLBACK FAILED:", rollbackErr);
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function findSubjectDetail(id, userId, timetableId = null) {

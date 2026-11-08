@@ -8,6 +8,7 @@ const {
 } = require("../models/Subject");
 
 const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+const { unlinkOwnedVaultFile } = require("../utils/vaultFiles");
 
 function parseTimetableId(raw) {
   if (raw == null || raw === "") return { timetableId: null, invalid: false };
@@ -108,10 +109,15 @@ async function removeSubject(req, res) {
   try {
     const id = parseSubjectId(req.params.id);
     if (!id) return res.status(404).json({ error: "Subject not found" });
+
     const deleted = await deleteSubject(id, req.userId);
-    if (!deleted) {
-      return res.status(404).json({ error: "Subject not found" });
-    }
+    if (!deleted) return res.status(404).json({ error: "Subject not found" });
+
+    await Promise.all(
+      (deleted.vaultFiles || []).map((file) =>
+        unlinkOwnedVaultFile(file.url_path, req.userId)
+      )
+    );
     res.json({ id: deleted.id });
   } catch (err) {
     console.error("Remove subject error:", err);

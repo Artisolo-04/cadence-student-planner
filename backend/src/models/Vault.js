@@ -8,13 +8,17 @@ async function createResource(
     `INSERT INTO subject_resources
        (user_id, subject_id, folder_name, resource_type, title, url_path,
         file_size_bytes, mime_type, page_count)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9
+     WHERE $2::INTEGER IS NULL
+        OR EXISTS (
+          SELECT 1 FROM subjects s WHERE s.id = $2::INTEGER AND s.user_id = $1
+        )
      RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path,
                file_size_bytes, mime_type, page_count, created_at, updated_at`,
     [
       userId,
-      subjectId || null,
-      folderName || null,
+      subjectId ?? null,
+      folderName ?? null,
       resourceType,
       title,
       urlPath,
@@ -33,7 +37,7 @@ async function findResourcesByUserId(userId) {
             r.file_size_bytes, r.mime_type, r.page_count,
             r.created_at, r.updated_at
      FROM subject_resources r
-     LEFT JOIN subjects s ON s.id = r.subject_id
+     LEFT JOIN subjects s ON s.id = r.subject_id AND s.user_id = r.user_id
      WHERE r.user_id = $1
      ORDER BY r.created_at DESC`,
     [userId]
@@ -55,12 +59,14 @@ async function updateResource(id, userId, updates) {
   const setClauses = [];
   const values = [];
   let paramIndex = 1;
+  let subjectIdParam = null;
 
   if (Object.prototype.hasOwnProperty.call(updates, "title")) {
     setClauses.push(`title = $${paramIndex++}`);
     values.push(updates.title);
   }
   if (Object.prototype.hasOwnProperty.call(updates, "subjectId")) {
+    subjectIdParam = paramIndex;
     setClauses.push(`subject_id = $${paramIndex++}`);
     values.push(updates.subjectId);
   }
@@ -69,19 +75,24 @@ async function updateResource(id, userId, updates) {
     values.push(updates.folderName);
   }
 
-  if (setClauses.length === 0) {
-    return null;
-  }
+  if (setClauses.length === 0) return null;
 
   setClauses.push("updated_at = NOW()");
   values.push(id, userId);
   const idParam = paramIndex++;
   const userIdParam = paramIndex++;
 
+  const subjectOwnershipClause = subjectIdParam
+    ? ` AND ($${subjectIdParam}::INTEGER IS NULL OR EXISTS (
+         SELECT 1 FROM subjects s
+         WHERE s.id = $${subjectIdParam}::INTEGER AND s.user_id = $${userIdParam}
+       ))`
+    : "";
+
   const result = await pool.query(
     `UPDATE subject_resources
      SET ${setClauses.join(", ")}
-     WHERE id = $${idParam} AND user_id = $${userIdParam}
+     WHERE id = $${idParam} AND user_id = $${userIdParam}${subjectOwnershipClause}
      RETURNING id, user_id, subject_id, folder_name, resource_type, title, url_path,
                file_size_bytes, mime_type, page_count, created_at, updated_at`,
     values
