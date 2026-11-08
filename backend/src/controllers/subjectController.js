@@ -18,21 +18,43 @@ function parseTimetableId(raw) {
   return { timetableId, invalid: false };
 }
 
-async function addSubject(req, res) {
-  try {
-    const { name, color, teacher } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: "Subject name is required" });
-    }
-    if (!color || !HEX_COLOR_RE.test(color)) {
-      return res.status(400).json({ error: "A valid color is required" });
-    }
-
-    const subject = await createSubject(req.userId, {
+function validateSubjectInput(body) {
+  const { name, color, teacher } = body ?? {};
+  if (typeof name !== "string" || !name.trim()) {
+    return { error: "Subject name is required" };
+  }
+  if (name.trim().length > 255) {
+    return { error: "Subject name must be 255 characters or fewer" };
+  }
+  if (typeof color !== "string" || !HEX_COLOR_RE.test(color)) {
+    return { error: "A valid color is required" };
+  }
+  if (teacher != null && typeof teacher !== "string") {
+    return { error: "Teacher must be a string" };
+  }
+  if (typeof teacher === "string" && teacher.trim().length > 255) {
+    return { error: "Teacher must be 255 characters or fewer" };
+  }
+  return {
+    value: {
       name: name.trim(),
       color,
-      teacher: teacher?.trim(),
-    });
+      teacher: typeof teacher === "string" ? teacher.trim() : null,
+    },
+  };
+}
+
+function parseSubjectId(raw) {
+  const id = Number(raw);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
+
+async function addSubject(req, res) {
+  try {
+    const validated = validateSubjectInput(req.body);
+    if (validated.error) return res.status(400).json({ error: validated.error });
+
+    const subject = await createSubject(req.userId, validated.value);
     res.status(201).json({ subject });
   } catch (err) {
     if (err.code === "23505") {
@@ -62,24 +84,14 @@ async function listSubjects(req, res) {
 
 async function editSubject(req, res) {
   try {
-    const { name, color, teacher } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: "Subject name is required" });
-    }
-    if (!color || !HEX_COLOR_RE.test(color)) {
-      return res.status(400).json({ error: "A valid color is required" });
-    }
+    const id = parseSubjectId(req.params.id);
+    if (!id) return res.status(404).json({ error: "Subject not found" });
 
-    const existing = await findSubjectById(req.params.id);
-    if (!existing || existing.user_id !== req.userId) {
-      return res.status(404).json({ error: "Subject not found" });
-    }
+    const validated = validateSubjectInput(req.body);
+    if (validated.error) return res.status(400).json({ error: validated.error });
 
-    const subject = await updateSubject(req.params.id, req.userId, {
-      name: name.trim(),
-      color,
-      teacher: teacher?.trim(),
-    });
+    const subject = await updateSubject(id, req.userId, validated.value);
+    if (!subject) return res.status(404).json({ error: "Subject not found" });
     res.json({ subject });
   } catch (err) {
     if (err.code === "23505") {
@@ -94,7 +106,9 @@ async function editSubject(req, res) {
 
 async function removeSubject(req, res) {
   try {
-    const deleted = await deleteSubject(req.params.id, req.userId);
+    const id = parseSubjectId(req.params.id);
+    if (!id) return res.status(404).json({ error: "Subject not found" });
+    const deleted = await deleteSubject(id, req.userId);
     if (!deleted) {
       return res.status(404).json({ error: "Subject not found" });
     }
@@ -107,10 +121,11 @@ async function removeSubject(req, res) {
 
 async function getSubjectDetail(req, res) {
   try {
-    const existing = await findSubjectById(req.params.id);
-    if (!existing || existing.user_id !== req.userId) {
-      return res.status(404).json({ error: "Subject not found" });
-    }
+    const id = parseSubjectId(req.params.id);
+    if (!id) return res.status(404).json({ error: "Subject not found" });
+
+    const existing = await findSubjectById(id, req.userId);
+    if (!existing) return res.status(404).json({ error: "Subject not found" });
 
     const { timetableId, invalid } = parseTimetableId(req.query.timetableId);
     if (invalid) {
@@ -118,11 +133,11 @@ async function getSubjectDetail(req, res) {
     }
 
     if (timetableId == null) {
-      const { homework } = await findSubjectDetail(req.params.id, req.userId, -1);
+      const { homework } = await findSubjectDetail(id, req.userId, -1);
       return res.json({ subject: existing, entries: [], homework });
     }
 
-    const detail = await findSubjectDetail(req.params.id, req.userId, timetableId);
+    const detail = await findSubjectDetail(id, req.userId, timetableId);
     res.json({ subject: existing, ...detail });
   } catch (err) {
     console.error("Subject detail error:", err);
