@@ -24,7 +24,7 @@ export default function HomeworkStatusCard({ homework }) {
       {total === 0 ? (
         <p className="text-xs text-[var(--color-text-muted)]">No homework yet. Add a task to see your progress here.</p>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2.5">
             <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--color-fill-3)]">
               {STATUS.map((s) => (
@@ -56,7 +56,7 @@ export default function HomeworkStatusCard({ homework }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <p className="text-[11px] font-medium text-[var(--color-text-muted)]">By priority</p>
             {PRIORITY.map((p) => {
               const n = priority[p.key] ?? 0;

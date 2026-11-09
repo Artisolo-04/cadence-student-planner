@@ -11,6 +11,7 @@ import DayTimeCard from "./DayTimeCard";
 import HomeworkStatusCard from "./HomeworkStatusCard";
 import DeadlinesCard from "./DeadlinesCard";
 import ActivityCard from "./ActivityCard";
+import VaultCard from "./VaultCard";
 import useAnalyticsData from "./useAnalyticsData";
 import { GROUP_LABELS, findSchedule, findWorkspace, formatMinutes } from "./analyticsUtils";
 
@@ -117,7 +118,7 @@ export default function AnalyticsPage() {
         <HomeworkStatusCard homework={hw} />
         <DeadlinesCard homework={hw} days={days} />
         <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} />
-        <Placeholder icon={BookOpen} title="Vault" />
+        <VaultCard vault={data.vault} />
       </div>
     </div>
   );
