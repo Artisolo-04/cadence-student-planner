@@ -9,6 +9,8 @@ import StatTile from "./StatTile";
 import SubjectTimeCard from "./SubjectTimeCard";
 import DayTimeCard from "./DayTimeCard";
 import HomeworkStatusCard from "./HomeworkStatusCard";
+import DeadlinesCard from "./DeadlinesCard";
+import ActivityCard from "./ActivityCard";
 import useAnalyticsData from "./useAnalyticsData";
 import { GROUP_LABELS, findSchedule, findWorkspace, formatMinutes } from "./analyticsUtils";
 
@@ -113,8 +115,8 @@ export default function AnalyticsPage() {
         <SubjectTimeCard schedule={schedule} />
         <DayTimeCard schedule={schedule} />
         <HomeworkStatusCard homework={hw} />
-        <Placeholder icon={CalendarDays} title="Deadlines ahead" />
-        <Placeholder icon={Clock} title="Activity" />
+        <DeadlinesCard homework={hw} days={days} />
+        <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} />
         <Placeholder icon={BookOpen} title="Vault" />
       </div>
     </div>

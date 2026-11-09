@@ -9,7 +9,7 @@ const STATUS = [
 
 const PRIORITY = [
   { key: "high", label: "High", color: "var(--color-danger)" },
-  { key: "normal", label: "Normal", color: "var(--color-tint)" },
+  { key: "normal", label: "Normal", color: "var(--color-primary)" },
   { key: "low", label: "Low", color: "var(--color-text-muted)" },
 ];
 
@@ -24,8 +24,8 @@ export default function HomeworkStatusCard({ homework }) {
       {total === 0 ? (
         <p className="text-xs text-[var(--color-text-muted)]">No homework yet. Add a task to see your progress here.</p>
       ) : (
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2.5">
             <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-[var(--color-fill-3)]">
               {STATUS.map((s) => (
                 <div
@@ -35,41 +35,41 @@ export default function HomeworkStatusCard({ homework }) {
                 />
               ))}
             </div>
-            <ul className="flex flex-col gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               {STATUS.map((s) => {
                 const n = status[s.key] ?? 0;
                 return (
-                  <li key={s.key} className="flex items-center justify-between text-xs">
-                    <span className="flex items-center gap-2 text-[var(--color-text)]">
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+                  <div
+                    key={s.key}
+                    className="flex flex-col gap-0.5 rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-2 py-1.5"
+                  >
+                    <span className="flex items-center gap-1.5 text-[10px] text-[var(--color-text-muted)]">
+                      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: s.color }} />
                       {s.label}
                     </span>
-                    <span className="font-mono">
-                      <span className="text-[var(--color-text)]">{n}</span>{" "}
-                      <span className="text-[var(--color-text-muted)]">{pct(n)}%</span>
+                    <span className="font-mono text-sm font-semibold text-[var(--color-text)]">
+                      {n} <span className="text-[10px] font-normal text-[var(--color-text-muted)]">{pct(n)}%</span>
                     </span>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             <p className="text-[11px] font-medium text-[var(--color-text-muted)]">By priority</p>
             {PRIORITY.map((p) => {
               const n = priority[p.key] ?? 0;
               return (
-                <div key={p.key} className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--color-text)]">{p.label}</span>
-                    <span className="font-mono text-[var(--color-text-muted)]">{n}</span>
-                  </div>
+                <div key={p.key} className="grid grid-cols-[3.5rem_minmax(0,1fr)_1.75rem] items-center gap-2 text-xs">
+                  <span className="text-[var(--color-text)]">{p.label}</span>
                   <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--color-fill-3)]">
                     <div
                       className="h-full rounded-full transition-[width] duration-700"
                       style={{ width: `${(n / total) * 100}%`, backgroundColor: p.color }}
                     />
                   </div>
+                  <span className="text-right font-mono text-[var(--color-text-muted)]">{n}</span>
                 </div>
               );
             })}

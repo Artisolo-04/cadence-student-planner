@@ -13,7 +13,7 @@ export function TileLabel({ icon: Icon, children }) {
   );
 }
 
-export default function AnalyticsTile({ icon, title, meta, children, className = "" }) {
+export default function AnalyticsTile({ icon, title, meta, children, className = "", scroll = true }) {
   const { scrollRef, showTopFade, showBottomFade } = useScrollFade(title);
 
   return (
@@ -27,7 +27,10 @@ export default function AnalyticsTile({ icon, title, meta, children, className =
       </header>
 
       <div className="relative mt-3 min-h-0 flex-1">
-        <div ref={scrollRef} className="scrollbar-cadence h-full overflow-y-auto pr-2">
+        <div
+          ref={scrollRef}
+          className={`h-full ${scroll ? "scrollbar-cadence overflow-y-auto pr-2" : "overflow-hidden"}`}
+        >
           {children}
         </div>
         <TopFade show={showTopFade} />

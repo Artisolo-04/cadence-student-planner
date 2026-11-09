@@ -29,6 +29,7 @@ export default function DayTimeCard({ schedule }) {
     <AnalyticsTile
       icon={BarChart3}
       title="Time by day"
+      scroll={false}
       meta={schedule ? `${formatMinutes(schedule.weeklyMinutes)} per week` : null}
     >
       {!schedule ? (
