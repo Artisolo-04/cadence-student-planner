@@ -1,26 +1,36 @@
-import { BarChart3 } from "lucide-react";
-import EmptyState from "../../components/ui/EmptyState";
+import { useWorkspace } from "../../hooks/useWorkspace";
+import useAnalyticsData from "./useAnalyticsData";
+import { findSchedule, findWorkspace, formatMinutes } from "./analyticsUtils";
 
+// TEMPORARY page: only proves the data layer works. Replaced in the next step.
 export default function AnalyticsPage() {
-  return (
-    <div className="flex h-full w-full min-h-0 flex-col gap-5">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 shrink-0">
-        <div>
-          <h1 className="text-lg font-semibold text-[var(--color-text)]">Analytics</h1>
-          <p className="mt-1 hidden text-sm text-[var(--color-text-muted)] sm:block">
-            Insights for My workspace
-          </p>
-        </div>
-      </header>
+  const { activeId, activeWorkspace } = useWorkspace();
+  const { data, loading, error } = useAnalyticsData(30);
 
-      <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
-        <EmptyState
-          className="h-full w-full"
-          icon={BarChart3}
-          title="Your analytics workspace is ready"
-          body="This page has been freshly initialized. New insights will appear here once they are built."
-        />
-      </section>
+  const workspace = findWorkspace(data, activeId);
+  const schedule = findSchedule(workspace, activeWorkspace?.my_group ?? null);
+
+  console.log("[analytics]", { activeId, data, workspace, schedule });
+
+  return (
+    <div className="p-4 text-sm text-[var(--color-text)]">
+      <h1 className="text-lg font-semibold">Analytics (data check)</h1>
+      <pre className="mt-3 whitespace-pre-wrap text-[var(--color-text-muted)]">
+        {JSON.stringify(
+          {
+            loading,
+            error,
+            activeId,
+            workspace: workspace?.name ?? null,
+            group: schedule?.groupTag ?? null,
+            weeklyTime: schedule ? formatMinutes(schedule.weeklyMinutes) : null,
+            completionPercent: data?.homework?.completionPercent ?? null,
+            overdue: data?.homework?.overdue ?? null,
+          },
+          null,
+          2,
+        )}
+      </pre>
     </div>
   );
 }
