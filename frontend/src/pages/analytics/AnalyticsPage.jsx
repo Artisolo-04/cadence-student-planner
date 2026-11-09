@@ -12,6 +12,8 @@ import HomeworkStatusCard from "./HomeworkStatusCard";
 import DeadlinesCard from "./DeadlinesCard";
 import ActivityCard from "./ActivityCard";
 import VaultCard from "./VaultCard";
+import DetailPanel from "./DetailPanel";
+import SubjectDetail from "./SubjectDetail";
 import useAnalyticsData from "./useAnalyticsData";
 import { GROUP_LABELS, findSchedule, findWorkspace, formatMinutes } from "./analyticsUtils";
 
@@ -33,10 +35,12 @@ export default function AnalyticsPage() {
   const { activeId, activeWorkspace } = useWorkspace();
   const [days, setDays] = useState(30);
   const [groupTag, setGroupTag] = useState(null);
+  const [panel, setPanel] = useState(null);
   const { data, loading, error, reload } = useAnalyticsData(days);
 
   useEffect(() => {
     setGroupTag(null);
+    setPanel(null);
   }, [activeId]);
 
   if (!data && loading) return null;
@@ -90,7 +94,7 @@ export default function AnalyticsPage() {
       </header>
 
       <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatTile icon={Gauge} label="Completed" value={`${hw.completionPercent}%`} sub={`${hw.byStatus.done} of ${hw.total} tasks`} />
+        <StatTile icon={Gauge} label="Completed" value={`${Math.round(hw.completionPercent)}%`} sub={`${hw.byStatus.done} of ${hw.total} tasks`} />
         <StatTile
           icon={Clock}
           label="Overdue"
@@ -113,13 +117,22 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))]">
-        <SubjectTimeCard schedule={schedule} />
+        <SubjectTimeCard schedule={schedule} onExpand={() => setPanel("subjects")} />
         <DayTimeCard schedule={schedule} />
         <HomeworkStatusCard homework={hw} />
         <DeadlinesCard homework={hw} days={days} />
         <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} />
         <VaultCard vault={data.vault} />
       </div>
+
+      <DetailPanel
+        open={panel === "subjects"}
+        title="Time by subject"
+        subtitle={`${schedule ? formatMinutes(schedule.weeklyMinutes) : "0m"} per week${schedule ? ` · ${GROUP_LABELS[schedule.groupTag] ?? schedule.groupTag}` : ""}`}
+        onClose={() => setPanel(null)}
+      >
+        <SubjectDetail schedule={schedule} />
+      </DetailPanel>
     </div>
   );
 }

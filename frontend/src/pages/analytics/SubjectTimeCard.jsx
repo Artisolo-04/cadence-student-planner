@@ -2,7 +2,7 @@ import { BookOpen } from "lucide-react";
 import AnalyticsTile from "./AnalyticsTile";
 import { formatMinutes } from "./analyticsUtils";
 
-export default function SubjectTimeCard({ schedule }) {
+export default function SubjectTimeCard({ schedule, onExpand }) {
   const subjects = schedule?.bySubject ?? [];
   const max = Math.max(1, ...subjects.map((s) => s.scheduledMinutes));
 
@@ -10,6 +10,7 @@ export default function SubjectTimeCard({ schedule }) {
     <AnalyticsTile
       icon={BookOpen}
       title="Time by subject"
+      onExpand={onExpand}
       meta={subjects.length ? `${subjects.length} subjects` : null}
     >
       {subjects.length === 0 ? (

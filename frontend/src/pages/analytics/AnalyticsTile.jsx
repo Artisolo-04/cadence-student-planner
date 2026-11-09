@@ -1,3 +1,4 @@
+import { Maximize2 } from "lucide-react";
 import useScrollFade from "../../hooks/useScrollFade";
 import { BottomFade, TopFade } from "../../components/ui/ScrollFadeOverlay";
 
@@ -13,7 +14,7 @@ export function TileLabel({ icon: Icon, children }) {
   );
 }
 
-export default function AnalyticsTile({ icon, title, meta, children, className = "", scroll = true }) {
+export default function AnalyticsTile({ icon, title, meta, children, className = "", scroll = true, onExpand }) {
   const { scrollRef, showTopFade, showBottomFade } = useScrollFade(title);
 
   return (
@@ -23,7 +24,20 @@ export default function AnalyticsTile({ icon, title, meta, children, className =
     >
       <header className="flex shrink-0 items-center justify-between gap-2">
         <TileLabel icon={icon}>{title}</TileLabel>
-        {meta && <span className="text-[10px] font-mono text-[var(--color-text-muted)]">{meta}</span>}
+        <div className="flex items-center gap-2">
+          {meta && <span className="text-[10px] font-mono text-[var(--color-text-muted)]">{meta}</span>}
+          {onExpand && (
+            <button
+              type="button"
+              onClick={onExpand}
+              aria-label={`Open ${title} details`}
+              title="See details"
+              className="rounded-md p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-fill-3)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+            >
+              <Maximize2 size={12} />
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="relative mt-3 min-h-0 flex-1">
