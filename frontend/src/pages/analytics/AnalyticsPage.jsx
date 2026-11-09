@@ -14,6 +14,10 @@ import ActivityCard from "./ActivityCard";
 import VaultCard from "./VaultCard";
 import DetailPanel from "./DetailPanel";
 import SubjectDetail from "./SubjectDetail";
+import DayDetail from "./DayDetail";
+import DeadlinesDetail from "./DeadlinesDetail";
+import ActivityDetail from "./ActivityDetail";
+import VaultDetail from "./VaultDetail";
 import useAnalyticsData from "./useAnalyticsData";
 import { GROUP_LABELS, findSchedule, findWorkspace, formatMinutes } from "./analyticsUtils";
 
@@ -70,6 +74,37 @@ export default function AnalyticsPage() {
   const schedules = workspace?.schedules ?? [];
   const hw = data.homework;
 
+  const groupLabel = schedule ? GROUP_LABELS[schedule.groupTag] ?? schedule.groupTag : null;
+  const weekly = schedule ? formatMinutes(schedule.weeklyMinutes) : "0m";
+  const panelViews = {
+    subjects: {
+      title: "Time by subject",
+      subtitle: `${weekly} per week${groupLabel ? ` · ${groupLabel}` : ""}`,
+      body: <SubjectDetail schedule={schedule} />,
+    },
+    days: {
+      title: "Time by day",
+      subtitle: `${weekly} per week${groupLabel ? ` · ${groupLabel}` : ""}`,
+      body: <DayDetail schedule={schedule} />,
+    },
+    deadlines: {
+      title: "Deadlines ahead",
+      subtitle: `Next ${days} days`,
+      body: <DeadlinesDetail homework={hw} days={days} />,
+    },
+    activity: {
+      title: "Activity",
+      subtitle: `Last ${days} days`,
+      body: <ActivityDetail homework={hw} timetableActivity={data.timetableActivity} days={days} />,
+    },
+    vault: {
+      title: "Vault",
+      subtitle: "Documents and links you saved",
+      body: <VaultDetail vault={data.vault} />,
+    },
+  };
+  const panelView = panel ? panelViews[panel] : null;
+
   return (
     <div className="flex flex-col gap-4 lg:h-full lg:min-h-0 lg:overflow-hidden">
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
@@ -118,20 +153,20 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))]">
         <SubjectTimeCard schedule={schedule} onExpand={() => setPanel("subjects")} />
-        <DayTimeCard schedule={schedule} />
+        <DayTimeCard schedule={schedule} onExpand={() => setPanel("days")} />
         <HomeworkStatusCard homework={hw} />
-        <DeadlinesCard homework={hw} days={days} />
-        <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} />
-        <VaultCard vault={data.vault} />
+        <DeadlinesCard homework={hw} days={days} onExpand={() => setPanel("deadlines")} />
+        <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} onExpand={() => setPanel("activity")} />
+        <VaultCard vault={data.vault} onExpand={() => setPanel("vault")} />
       </div>
 
       <DetailPanel
-        open={panel === "subjects"}
-        title="Time by subject"
-        subtitle={`${schedule ? formatMinutes(schedule.weeklyMinutes) : "0m"} per week${schedule ? ` · ${GROUP_LABELS[schedule.groupTag] ?? schedule.groupTag}` : ""}`}
+        open={panelView !== null}
+        title={panelView?.title}
+        subtitle={panelView?.subtitle}
         onClose={() => setPanel(null)}
       >
-        <SubjectDetail schedule={schedule} />
+        {panelView?.body}
       </DetailPanel>
     </div>
   );

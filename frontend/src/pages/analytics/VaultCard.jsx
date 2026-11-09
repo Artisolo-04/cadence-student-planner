@@ -13,11 +13,11 @@ const TYPE_META = {
   text: { label: "Text", color: "var(--color-file-txt)" },
 };
 
-function typeMeta(type) {
+export function typeMeta(type) {
   return TYPE_META[type] ?? { label: String(type).toUpperCase(), color: "var(--color-file-generic)" };
 }
 
-export default function VaultCard({ vault }) {
+export default function VaultCard({ vault, onExpand }) {
   const total = vault?.totalResources ?? 0;
   const types = vault?.byType ?? [];
   const destinations = vault?.byDestination ?? [];
@@ -26,6 +26,7 @@ export default function VaultCard({ vault }) {
     <AnalyticsTile
       icon={FolderOpen}
       title="Vault"
+      onExpand={onExpand}
       meta={total > 0 ? formatBytes(vault.storageBytes) : null}
     >
       {total === 0 ? (

@@ -8,7 +8,7 @@ const TRACK_STYLE = {
   borderColor: "color-mix(in srgb, var(--color-primary) 22%, transparent)",
 };
 
-export default function DayTimeCard({ schedule }) {
+export default function DayTimeCard({ schedule, onExpand }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -29,6 +29,7 @@ export default function DayTimeCard({ schedule }) {
     <AnalyticsTile
       icon={BarChart3}
       title="Time by day"
+      onExpand={onExpand}
       scroll={false}
       meta={schedule ? `${formatMinutes(schedule.weeklyMinutes)} per week` : null}
     >

@@ -2,7 +2,7 @@ import { CalendarDays } from "lucide-react";
 import AnalyticsTile from "./AnalyticsTile";
 import MiniBars from "./MiniBars";
 
-export default function DeadlinesCard({ homework, days }) {
+export default function DeadlinesCard({ homework, days, onExpand }) {
   const items = (homework?.dueByDate ?? []).map((d) => ({
     date: d.date,
     value: (d.todo ?? 0) + (d.inProgress ?? 0),
@@ -10,7 +10,7 @@ export default function DeadlinesCard({ homework, days }) {
   const openTotal = items.reduce((sum, i) => sum + i.value, 0);
 
   return (
-    <AnalyticsTile icon={CalendarDays} title="Deadlines ahead" meta={`next ${days} days`} scroll={false}>
+    <AnalyticsTile icon={CalendarDays} title="Deadlines ahead" meta={`next ${days} days`} scroll={false} onExpand={onExpand}>
       {openTotal === 0 ? (
         <p className="text-xs text-[var(--color-text-muted)]">Nothing is due in the next {days} days.</p>
       ) : (
