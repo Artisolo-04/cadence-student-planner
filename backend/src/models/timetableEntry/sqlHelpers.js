@@ -1,5 +1,12 @@
 const { coalesceFragmentSpecs } = require("./intervalMath");
 
+async function lockTimetableSlots(client, timetableId) {
+  await client.query(
+    `SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))`,
+    [`timetable:${timetableId}:slots`]
+  );
+}
+
 async function lockTimetableDay(client, timetableId, dayOfWeek) {
   await client.query(
     `SELECT pg_advisory_xact_lock(hashtextextended($1::text, 0))`,
@@ -63,4 +70,4 @@ async function coalesceWithExistingNeighbors(client, timetableId, dayOfWeek, exc
   return { specs: merged, deletedIds };
 }
 
-module.exports = { lockTimetableDay, getSlotSortMap, coalesceWithExistingNeighbors };
+module.exports = { lockTimetableSlots, lockTimetableDay, getSlotSortMap, coalesceWithExistingNeighbors };

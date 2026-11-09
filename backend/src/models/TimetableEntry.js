@@ -1,7 +1,11 @@
 const pool = require("../config/db");
+const {
+  ensureBaselineSnapshotWithClient,
+  recordSnapshotWithClient,
+} = require("./TimetableSnapshot");
 const { OverlapConflictError } = require("./timetableEntry/errors");
 const { resolveAndWrite } = require("./timetableEntry/resolveAndWrite");
-const { lockTimetableDay, getSlotSortMap } = require("./timetableEntry/sqlHelpers");
+const { lockTimetableSlots, lockTimetableDay, getSlotSortMap } = require("./timetableEntry/sqlHelpers");
 
 async function createEntry(
   timetableId,
@@ -11,6 +15,8 @@ async function createEntry(
   try {
     await client.query("BEGIN");
     await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
+    await lockTimetableSlots(client, timetableId);
+    await ensureBaselineSnapshotWithClient(client, timetableId);
     await lockTimetableDay(client, timetableId, dayOfWeek);
 
     const slotMap = await getSlotSortMap(client, timetableId);
@@ -29,8 +35,9 @@ async function createEntry(
       iStart, iEnd
     );
 
+    const currentVersion = await recordSnapshotWithClient(client, timetableId);
     await client.query("COMMIT");
-    return resolveResult;
+    return { ...resolveResult, currentVersion };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -48,7 +55,27 @@ async function updateEntry(
   try {
     await client.query("BEGIN");
     await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
-    await lockTimetableDay(client, timetableId, dayOfWeek);
+    await lockTimetableSlots(client, timetableId);
+    await ensureBaselineSnapshotWithClient(client, timetableId);
+    const existingResult = await client.query(
+      `SELECT day_of_week
+       FROM timetable_entries
+       WHERE timetable_id = $1 AND id = $2
+       FOR UPDATE`,
+      [timetableId, entryId]
+    );
+    if (existingResult.rows.length === 0) {
+      throw new Error("Entry not found");
+    }
+
+    const affectedDays = [...new Set([
+      existingResult.rows[0].day_of_week,
+      dayOfWeek,
+    ])].sort((a, b) => a - b);
+
+    for (const day of affectedDays) {
+      await lockTimetableDay(client, timetableId, day);
+    }
 
     const slotMap = await getSlotSortMap(client, timetableId);
     const iStart = slotMap.idToSort.get(slotId);
@@ -66,8 +93,9 @@ async function updateEntry(
       iStart, iEnd
     );
 
+    const currentVersion = await recordSnapshotWithClient(client, timetableId);
     await client.query("COMMIT");
-    return resolveResult;
+    return { ...resolveResult, currentVersion };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -90,11 +118,29 @@ async function findEntriesByTimetableId(timetableId) {
 }
 
 async function deleteEntry(timetableId, entryId) {
-  const result = await pool.query(
-    `DELETE FROM timetable_entries WHERE timetable_id = $1 AND id = $2 RETURNING id`,
-    [timetableId, entryId]
-  );
-  return result.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await ensureBaselineSnapshotWithClient(client, timetableId);
+
+    const result = await client.query(
+      `DELETE FROM timetable_entries WHERE timetable_id = $1 AND id = $2 RETURNING id`,
+      [timetableId, entryId]
+    );
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    const currentVersion = await recordSnapshotWithClient(client, timetableId);
+    await client.query("COMMIT");
+    return { ...result.rows[0], currentVersion };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function applyBatch(timetableId, operations) {
@@ -102,6 +148,8 @@ async function applyBatch(timetableId, operations) {
   try {
     await client.query("BEGIN");
     await client.query("SET CONSTRAINTS timetable_entries_unique_span DEFERRED");
+    await lockTimetableSlots(client, timetableId);
+    await ensureBaselineSnapshotWithClient(client, timetableId);
 
     const touchedIds = [
       ...new Set(
@@ -241,12 +289,14 @@ async function applyBatch(timetableId, operations) {
       .map((entry) => hydratedById.get(entry.id))
       .filter(Boolean);
 
+    const currentVersion = await recordSnapshotWithClient(client, timetableId);
     await client.query("COMMIT");
     return {
       created: hydratedCreated,
       skipped,
       updated: hydratedUpdated,
       deletedIds,
+      currentVersion,
     };
   } catch (err) {
     await client.query("ROLLBACK");

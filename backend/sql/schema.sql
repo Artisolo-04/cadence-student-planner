@@ -24,9 +24,22 @@ CREATE TABLE IF NOT EXISTS timetables (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   my_group VARCHAR(10) CHECK (my_group IN ('g1', 'g2')),
+  current_version INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS timetable_snapshots (
+  id SERIAL PRIMARY KEY,
+  timetable_id INTEGER NOT NULL REFERENCES timetables(id) ON DELETE CASCADE,
+  version INTEGER NOT NULL,
+  entries_json JSONB NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE (timetable_id, version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_timetable_snapshots_timetable_id
+  ON timetable_snapshots(timetable_id, version);
 
 CREATE TABLE IF NOT EXISTS timetable_days (
   id SERIAL PRIMARY KEY,
@@ -79,6 +92,7 @@ CREATE TABLE IF NOT EXISTS timetable_entries (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT timetable_entries_unique_span
     UNIQUE (timetable_id, slot_id, end_slot_id, day_of_week, group_tag)
+    DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE INDEX IF NOT EXISTS idx_timetable_entries_timetable_id ON timetable_entries(timetable_id);

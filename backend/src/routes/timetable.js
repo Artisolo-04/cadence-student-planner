@@ -1,6 +1,7 @@
 const express = require("express");
-const router = express.Router();
+
 const { requireAuth } = require("../middleware/auth");
+const { parsePositiveRouteId } = require("../controllers/timetable/validators");
 const {
   createWorkspace,
   listWorkspaces,
@@ -20,6 +21,29 @@ const {
   undoEntries,
   redoEntries,
 } = require("../controllers/timetableController");
+
+const router = express.Router();
+
+router.param("id", (req, res, next, rawId) => {
+  const id = parsePositiveRouteId(rawId);
+  if (id === null) return res.status(404).json({ error: "Workspace not found" });
+  req.params.id = String(id);
+  next();
+});
+
+router.param("slotId", (req, res, next, rawId) => {
+  const id = parsePositiveRouteId(rawId);
+  if (id === null) return res.status(404).json({ error: "Slot not found" });
+  req.params.slotId = String(id);
+  next();
+});
+
+router.param("entryId", (req, res, next, rawId) => {
+  const id = parsePositiveRouteId(rawId);
+  if (id === null) return res.status(404).json({ error: "Entry not found" });
+  req.params.entryId = String(id);
+  next();
+});
 
 router.post("/", requireAuth, createWorkspace);
 router.get("/", requireAuth, listWorkspaces);

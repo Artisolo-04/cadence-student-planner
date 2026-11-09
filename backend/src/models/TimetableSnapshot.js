@@ -1,26 +1,36 @@
 const pool = require("../config/db");
+const { lockTimetableSlots } = require("./timetableEntry/sqlHelpers");
+
+async function ensureBaselineSnapshotWithClient(client, timetableId) {
+  const existing = await client.query(
+    `SELECT 1 FROM timetable_snapshots WHERE timetable_id = $1 LIMIT 1`,
+    [timetableId]
+  );
+  if (existing.rows.length > 0) return;
+
+  const entries = await client.query(
+    `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
+     FROM timetable_entries WHERE timetable_id = $1`,
+    [timetableId]
+  );
+
+  await client.query(
+    `INSERT INTO timetable_snapshots (timetable_id, version, entries_json)
+     VALUES ($1, 0, $2::jsonb)
+     ON CONFLICT (timetable_id, version) DO NOTHING`,
+    [timetableId, JSON.stringify(entries.rows)]
+  );
+}
 
 async function ensureBaselineSnapshot(timetableId) {
   const client = await pool.connect();
   try {
-    const existing = await client.query(
-      `SELECT 1 FROM timetable_snapshots WHERE timetable_id = $1 LIMIT 1`,
-      [timetableId]
-    );
-    if (existing.rows.length > 0) return;
-
-    const entries = await client.query(
-      `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
-       FROM timetable_entries WHERE timetable_id = $1`,
-      [timetableId]
-    );
-
-    await client.query(
-      `INSERT INTO timetable_snapshots (timetable_id, version, entries_json)
-       VALUES ($1, 0, $2::jsonb)
-       ON CONFLICT (timetable_id, version) DO NOTHING`,
-      [timetableId, JSON.stringify(entries.rows)]
-    );
+    await client.query("BEGIN");
+    await ensureBaselineSnapshotWithClient(client, timetableId);
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
   } finally {
     client.release();
   }
@@ -35,60 +45,63 @@ function normalizeEntries(rows) {
     .join(";");
 }
 
+async function recordSnapshotWithClient(client, timetableId) {
+  const ttResult = await client.query(
+    `SELECT current_version FROM timetables WHERE id = $1 FOR UPDATE`,
+    [timetableId]
+  );
+  if (ttResult.rows.length === 0) {
+    throw new Error("Timetable not found");
+  }
+  const currentVersion = ttResult.rows[0].current_version;
+
+  const entries = await client.query(
+    `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
+     FROM timetable_entries WHERE timetable_id = $1`,
+    [timetableId]
+  );
+
+  const current = await client.query(
+    `SELECT entries_json FROM timetable_snapshots
+     WHERE timetable_id = $1 AND version = $2`,
+    [timetableId, currentVersion]
+  );
+
+  if (
+    current.rows.length > 0 &&
+    normalizeEntries(current.rows[0].entries_json) === normalizeEntries(entries.rows)
+  ) {
+    return currentVersion;
+  }
+
+  const newVersion = currentVersion + 1;
+
+  await client.query(
+    `DELETE FROM timetable_snapshots WHERE timetable_id = $1 AND version > $2`,
+    [timetableId, currentVersion]
+  );
+
+  await client.query(
+    `INSERT INTO timetable_snapshots (timetable_id, version, entries_json)
+     VALUES ($1, $2, $3::jsonb)`,
+    [timetableId, newVersion, JSON.stringify(entries.rows)]
+  );
+
+  await client.query(
+    `UPDATE timetables SET current_version = $2 WHERE id = $1`,
+    [timetableId, newVersion]
+  );
+
+  return newVersion;
+}
+
 async function recordSnapshot(timetableId) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-
-    const ttResult = await client.query(
-      `SELECT current_version FROM timetables WHERE id = $1 FOR UPDATE`,
-      [timetableId]
-    );
-    if (ttResult.rows.length === 0) {
-      throw new Error("Timetable not found");
-    }
-    const currentVersion = ttResult.rows[0].current_version;
-
-    const entries = await client.query(
-      `SELECT id, subject_id, slot_id, end_slot_id, day_of_week, group_tag, room
-       FROM timetable_entries WHERE timetable_id = $1`,
-      [timetableId]
-    );
-
-    const current = await client.query(
-      `SELECT entries_json FROM timetable_snapshots
-       WHERE timetable_id = $1 AND version = $2`,
-      [timetableId, currentVersion]
-    );
-
-    if (
-      current.rows.length > 0 &&
-      normalizeEntries(current.rows[0].entries_json) === normalizeEntries(entries.rows)
-    ) {
-      await client.query("COMMIT");
-      return currentVersion;
-    }
-
-    const newVersion = currentVersion + 1;
-
-    await client.query(
-      `DELETE FROM timetable_snapshots WHERE timetable_id = $1 AND version > $2`,
-      [timetableId, currentVersion]
-    );
-
-    await client.query(
-      `INSERT INTO timetable_snapshots (timetable_id, version, entries_json)
-       VALUES ($1, $2, $3::jsonb)`,
-      [timetableId, newVersion, JSON.stringify(entries.rows)]
-    );
-
-    await client.query(
-      `UPDATE timetables SET current_version = $2 WHERE id = $1`,
-      [timetableId, newVersion]
-    );
-
+    const version = await recordSnapshotWithClient(client, timetableId);
     await client.query("COMMIT");
-    return newVersion;
+    return version;
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -97,10 +110,11 @@ async function recordSnapshot(timetableId) {
   }
 }
 
-async function restoreVersion(timetableId, targetVersion) {
+async function restoreVersion(timetableId, targetVersion, expectedCurrentVersion) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await lockTimetableSlots(client, timetableId);
 
     const ttResult = await client.query(
       `SELECT current_version FROM timetables WHERE id = $1 FOR UPDATE`,
@@ -108,6 +122,10 @@ async function restoreVersion(timetableId, targetVersion) {
     );
     if (ttResult.rows.length === 0) {
       throw new Error("Timetable not found");
+    }
+    if (ttResult.rows[0].current_version !== expectedCurrentVersion) {
+      await client.query("ROLLBACK");
+      return { conflict: true };
     }
 
     const snapResult = await client.query(
@@ -216,7 +234,9 @@ async function getMaxVersion(timetableId) {
 
 module.exports = {
   ensureBaselineSnapshot,
+  ensureBaselineSnapshotWithClient,
   recordSnapshot,
+  recordSnapshotWithClient,
   restoreVersion,
   getMaxVersion,
 };
