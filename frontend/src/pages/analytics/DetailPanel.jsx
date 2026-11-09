@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import useSlideTransition from "../vault/folderExplorer/ResourcePreviewSidebar/useSlideTransition";
 import useScrollFade from "../../hooks/useScrollFade";
 import { BottomFade, TopFade } from "../../components/ui/ScrollFadeOverlay";
+import { AccentHeaderShell, AccentIconBox, HeaderCloseButton } from "../../components/ui/AccentHeader";
 
 function PanelScroll({ children }) {
   const { scrollRef, showTopFade, showBottomFade } = useScrollFade();
@@ -17,13 +18,13 @@ function PanelScroll({ children }) {
   );
 }
 
-export default function DetailPanel({ open, title, subtitle, onClose, children }) {
+export default function DetailPanel({ open, title, subtitle, icon, accent, fill, onClose, children }) {
   const { mounted, visible } = useSlideTransition(open, 220);
 
   // Keep the last content on screen while the panel slides out.
-  const lastRef = useRef({ title, subtitle, children });
-  if (open) lastRef.current = { title, subtitle, children };
-  const shown = open ? { title, subtitle, children } : lastRef.current;
+  const lastRef = useRef({ title, subtitle, icon, accent, fill, children });
+  if (open) lastRef.current = { title, subtitle, icon, accent, fill, children };
+  const shown = open ? { title, subtitle, icon, accent, fill, children } : lastRef.current;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -33,6 +34,15 @@ export default function DetailPanel({ open, title, subtitle, onClose, children }
   }, [open, onClose]);
 
   if (!mounted) return null;
+
+  const titleBlock = (
+    <div className="min-w-0">
+      <h2 className="truncate text-sm font-semibold text-[var(--color-text)]">{shown.title}</h2>
+      {shown.subtitle && (
+        <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">{shown.subtitle}</p>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -51,23 +61,34 @@ export default function DetailPanel({ open, title, subtitle, onClose, children }
         aria-modal="true"
         aria-label={shown.title}
       >
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
-          <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-[var(--color-text)]">{shown.title}</h2>
-            {shown.subtitle && (
-              <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">{shown.subtitle}</p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close details"
-            className="shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)]"
-          >
-            <X size={18} />
-          </button>
-        </header>
-        <PanelScroll>{shown.children}</PanelScroll>
+        {shown.accent ? (
+          <AccentHeaderShell accent={shown.accent}>
+            <div className="relative z-10 flex min-w-0 flex-1 items-center gap-4">
+              {shown.icon && <AccentIconBox accent={shown.accent} icon={shown.icon} />}
+              {titleBlock}
+            </div>
+            <div className="relative z-10 flex shrink-0 items-center gap-2">
+              <HeaderCloseButton onClose={onClose} ariaLabel="Close details" />
+            </div>
+          </AccentHeaderShell>
+        ) : (
+          <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--color-border)] px-5 py-4">
+            {titleBlock}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close details"
+              className="shrink-0 rounded-md p-1.5 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)]"
+            >
+              <X size={18} />
+            </button>
+          </header>
+        )}
+        {shown.fill ? (
+          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden p-4">{shown.children}</div>
+        ) : (
+          <PanelScroll>{shown.children}</PanelScroll>
+        )}
       </aside>
     </>
   );

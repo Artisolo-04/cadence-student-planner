@@ -80,6 +80,9 @@ export default function AnalyticsPage() {
   const panelViews = {
     subjects: {
       title: "Time by subject",
+      icon: BookOpen,
+      accent: "var(--color-primary)",
+      fill: true,
       subtitle: `${weekly} per week${groupLabel ? ` · ${groupLabel}` : ""}`,
       body: <SubjectDetail schedule={schedule} />,
     },
@@ -183,6 +186,9 @@ export default function AnalyticsPage() {
         open={panelView !== null}
         title={panelView?.title}
         subtitle={panelView?.subtitle}
+        icon={panelView?.icon}
+        accent={panelView?.accent}
+        fill={panelView?.fill}
         onClose={() => setPanel(null)}
       >
         {panelView?.body}
