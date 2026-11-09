@@ -7,6 +7,8 @@ import EmptyState from "../../components/ui/EmptyState";
 import AnalyticsTile from "./AnalyticsTile";
 import StatTile from "./StatTile";
 import SubjectTimeCard from "./SubjectTimeCard";
+import DayTimeCard from "./DayTimeCard";
+import HomeworkStatusCard from "./HomeworkStatusCard";
 import useAnalyticsData from "./useAnalyticsData";
 import { GROUP_LABELS, findSchedule, findWorkspace, formatMinutes } from "./analyticsUtils";
 
@@ -109,8 +111,8 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))]">
         <SubjectTimeCard schedule={schedule} />
-        <Placeholder icon={BarChart3} title="Time by day" />
-        <Placeholder icon={Gauge} title="Homework status" />
+        <DayTimeCard schedule={schedule} />
+        <HomeworkStatusCard homework={hw} />
         <Placeholder icon={CalendarDays} title="Deadlines ahead" />
         <Placeholder icon={Clock} title="Activity" />
         <Placeholder icon={BookOpen} title="Vault" />
