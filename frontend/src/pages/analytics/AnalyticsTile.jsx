@@ -1,4 +1,4 @@
-import { Maximize2 } from "lucide-react";
+import { PanelRightOpen } from "lucide-react";
 import useScrollFade from "../../hooks/useScrollFade";
 import { BottomFade, TopFade } from "../../components/ui/ScrollFadeOverlay";
 
@@ -32,9 +32,9 @@ export default function AnalyticsTile({ icon, title, meta, children, className =
               onClick={onExpand}
               aria-label={`Open ${title} details`}
               title="See details"
-              className="rounded-md p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-fill-3)] hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+              className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)] transition-all duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)] active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
             >
-              <Maximize2 size={12} />
+              <PanelRightOpen size={13} />
             </button>
           )}
         </div>

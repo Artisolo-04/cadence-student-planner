@@ -27,7 +27,7 @@ function SubjectRow({ s, i, max, pct, className }) {
     <li className={`flex items-center gap-3 text-xs ${className}`}>
       <span
         className="h-2 w-2 shrink-0 rounded-full"
-        style={{ backgroundColor: s.color, boxShadow: `0 0 8px -1px ${s.color}` }}
+        style={{ backgroundColor: s.color }}
       />
       <span
         className={`min-w-0 flex-[5] truncate text-[var(--color-text)] ${i === 0 ? "font-semibold" : ""}`}

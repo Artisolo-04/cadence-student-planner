@@ -88,6 +88,9 @@ export default function AnalyticsPage() {
     },
     days: {
       title: "Time by day",
+      icon: BarChart3,
+      accent: "var(--color-primary)",
+      fill: true,
       subtitle: `${weekly} per week${groupLabel ? ` · ${groupLabel}` : ""}`,
       body: <DayDetail schedule={schedule} />,
     },
