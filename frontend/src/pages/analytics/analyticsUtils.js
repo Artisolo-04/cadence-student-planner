@@ -1,6 +1,6 @@
 export const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 export const DAY_SHORT = { 0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat" };
-export const GROUP_LABELS = { all: "All groups", g1: "Group 1", g2: "Group 2" };
+export const GROUP_LABELS = { all: "Shared classes", g1: "Group 1", g2: "Group 2" };
 
 export function formatMinutes(total) {
   const m = Math.max(0, Math.round(Number(total) || 0));

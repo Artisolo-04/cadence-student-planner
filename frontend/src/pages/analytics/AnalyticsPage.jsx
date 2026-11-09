@@ -13,6 +13,7 @@ import DeadlinesCard from "./DeadlinesCard";
 import ActivityCard from "./ActivityCard";
 import VaultCard from "./VaultCard";
 import DetailPanel from "./DetailPanel";
+import AnalyticsSkeleton from "./AnalyticsSkeleton";
 import SubjectDetail from "./SubjectDetail";
 import DayDetail from "./DayDetail";
 import DeadlinesDetail from "./DeadlinesDetail";
@@ -47,7 +48,7 @@ export default function AnalyticsPage() {
     setPanel(null);
   }, [activeId]);
 
-  if (!data && loading) return null;
+  if (!data && loading) return <AnalyticsSkeleton />;
 
   if (!data) {
     return (
@@ -128,7 +129,22 @@ export default function AnalyticsPage() {
         </div>
       </header>
 
-      <div className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4">
+      {error && (
+        <div
+          role="alert"
+          className="flex shrink-0 items-center justify-between gap-3 rounded-xl border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-xs text-[var(--color-danger)]"
+        >
+          <span>{error} Showing your last results.</span>
+          <button type="button" onClick={reload} className="shrink-0 font-medium underline underline-offset-2">
+            Try again
+          </button>
+        </div>
+      )}
+
+      <div
+        aria-busy={loading}
+        className={`grid shrink-0 grid-cols-2 gap-4 transition-opacity duration-200 lg:grid-cols-4 ${loading ? "opacity-60" : ""}`}
+      >
         <StatTile icon={Gauge} label="Completed" value={`${Math.round(hw.completionPercent)}%`} sub={`${hw.byStatus.done} of ${hw.total} tasks`} />
         <StatTile
           icon={Clock}
@@ -151,7 +167,10 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))]">
+      <div
+        aria-busy={loading}
+        className={`grid grid-cols-1 gap-4 transition-opacity duration-200 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))] ${loading ? "opacity-60" : ""}`}
+      >
         <SubjectTimeCard schedule={schedule} onExpand={() => setPanel("subjects")} />
         <DayTimeCard schedule={schedule} onExpand={() => setPanel("days")} />
         <HomeworkStatusCard homework={hw} />

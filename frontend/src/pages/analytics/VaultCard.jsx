@@ -34,14 +34,14 @@ export default function VaultCard({ vault, onExpand }) {
           Your vault is empty. Add a PDF, document, or link to see it here.
         </p>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <p className="text-xs text-[var(--color-text-muted)]">
             <span className="mr-1.5 text-2xl font-bold tabular-nums text-[var(--color-text)]">{total}</span>
             {total === 1 ? "resource" : "resources"} · {vault.fileCount} {vault.fileCount === 1 ? "file" : "files"} ·{" "}
             {vault.linkCount} {vault.linkCount === 1 ? "link" : "links"}
           </p>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <p className="text-[11px] font-medium text-[var(--color-text-muted)]">By type</p>
             {types.map((t) => {
               const meta = typeMeta(t.resourceType);
@@ -64,7 +64,7 @@ export default function VaultCard({ vault, onExpand }) {
           </div>
 
           {destinations.length > 0 && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <p className="text-[11px] font-medium text-[var(--color-text-muted)]">Where it is stored</p>
               {destinations.map((d, i) => (
                 <div key={`${d.destinationType}-${d.subjectId ?? d.folderName ?? i}`} className="flex items-center justify-between gap-3 text-xs">
