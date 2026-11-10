@@ -9,8 +9,14 @@ fs.mkdirSync(avatarsDir, { recursive: true });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, avatarsDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `user-${req.userId}-${file.fieldname}-${Date.now()}${ext}`);
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    };
+    const ext = extensions[file.mimetype];
+    if (!ext) return cb(new Error("Only JPG, PNG, or WEBP images are allowed"));
+    cb(null, `user-${req.userId}-${file.fieldname}-${Date.now()}.${ext}`);
   },
 });
 

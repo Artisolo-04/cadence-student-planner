@@ -9,7 +9,7 @@ const {
 
 async function checkpointEntries(req, res) {
   try {
-    const timetable = await findTimetableById(req.params.id);
+    const timetable = await findTimetableById(req.params.id, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
@@ -26,7 +26,7 @@ async function checkpointEntries(req, res) {
 
 async function undoEntries(req, res) {
   try {
-    const timetable = await findTimetableById(req.params.id);
+    const timetable = await findTimetableById(req.params.id, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
@@ -36,7 +36,10 @@ async function undoEntries(req, res) {
     }
 
     const targetVersion = timetable.current_version - 1;
-    const restoredVersion = await restoreVersion(req.params.id, targetVersion);
+    const restoredVersion = await restoreVersion(req.params.id, targetVersion, timetable.current_version);
+    if (restoredVersion?.conflict) {
+      return res.status(409).json({ error: "Timetable changed; refresh and try again" });
+    }
     if (restoredVersion === null) {
       return res.status(409).json({ error: "No earlier state found" });
     }
@@ -56,7 +59,7 @@ async function undoEntries(req, res) {
 
 async function redoEntries(req, res) {
   try {
-    const timetable = await findTimetableById(req.params.id);
+    const timetable = await findTimetableById(req.params.id, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
@@ -67,7 +70,10 @@ async function redoEntries(req, res) {
     }
 
     const targetVersion = timetable.current_version + 1;
-    const restoredVersion = await restoreVersion(req.params.id, targetVersion);
+    const restoredVersion = await restoreVersion(req.params.id, targetVersion, timetable.current_version);
+    if (restoredVersion?.conflict) {
+      return res.status(409).json({ error: "Timetable changed; refresh and try again" });
+    }
     if (restoredVersion === null) {
       return res.status(409).json({ error: "No later state found" });
     }

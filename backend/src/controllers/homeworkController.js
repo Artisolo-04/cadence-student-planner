@@ -1,7 +1,66 @@
 const Homework = require("../models/Homework");
 
-function isValidId(id) {
-  return /^\d+$/.test(id);
+const STATUSES = new Set(["todo", "in_progress", "done"]);
+const PRIORITIES = new Set(["low", "normal", "high"]);
+const MAX_POSTGRES_INT = 2147483647;
+
+function isValidId(raw) {
+  if (typeof raw !== "string" || !/^[1-9]\d*$/.test(raw)) return false;
+  const id = Number(raw);
+  return Number.isSafeInteger(id) && id <= MAX_POSTGRES_INT;
+}
+
+function isValidDate(raw) {
+  if (typeof raw !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false;
+  const [year, month, day] = raw.split("-").map(Number);
+  if (year < 1 || month < 1 || month > 12) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysPerMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day >= 1 && day <= daysPerMonth[month - 1];
+}
+
+function validateBody(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { error: "Invalid request body" };
+  }
+
+  const { subjectId, title, notes, dueDate, status, priority } = body;
+
+  if (typeof title !== "string" || !title.trim()) {
+    return { error: "Title is required" };
+  }
+  if (title.trim().length > 255) {
+    return { error: "Title must be 255 characters or fewer" };
+  }
+  if (!isValidDate(dueDate)) {
+    return { error: "Due date must be a valid date in YYYY-MM-DD format" };
+  }
+  if (
+    subjectId != null &&
+    (!Number.isSafeInteger(subjectId) || subjectId <= 0 || subjectId > MAX_POSTGRES_INT)
+  ) {
+    return { error: "Invalid subjectId" };
+  }
+  if (notes != null && typeof notes !== "string") {
+    return { error: "Notes must be a string" };
+  }
+  if (status != null && !STATUSES.has(status)) {
+    return { error: "Invalid status" };
+  }
+  if (priority != null && !PRIORITIES.has(priority)) {
+    return { error: "Invalid priority" };
+  }
+
+  return {
+    value: {
+      subjectId: subjectId ?? null,
+      title: title.trim(),
+      notes: notes ?? null,
+      dueDate,
+      status: status ?? null,
+      priority: priority ?? null,
+    },
+  };
 }
 
 async function listHomework(req, res) {
@@ -16,23 +75,11 @@ async function listHomework(req, res) {
 
 async function createHomework(req, res) {
   try {
-    const { subjectId, title, notes, dueDate, status, priority } = req.body;
+    const validated = validateBody(req.body);
+    if (validated.error) return res.status(400).json({ error: validated.error });
 
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: "Title is required" });
-    }
-    if (!dueDate) {
-      return res.status(400).json({ error: "Due date is required" });
-    }
-
-    const homework = await Homework.createHomework(req.userId, {
-      subjectId,
-      title: title.trim(),
-      notes,
-      dueDate,
-      status,
-      priority,
-    });
+    const homework = await Homework.createHomework(req.userId, validated.value);
+    if (!homework) return res.status(400).json({ error: "Invalid subjectId" });
     res.status(201).json(homework);
   } catch (err) {
     console.error("createHomework error:", err);
@@ -43,32 +90,21 @@ async function createHomework(req, res) {
 async function updateHomework(req, res) {
   try {
     const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ error: "Invalid homework id" });
 
-    if (!isValidId(id)) {
-      return res.status(400).json({ error: "Invalid homework id" });
-    }
-    const { subjectId, title, notes, dueDate, status, priority } = req.body;
-
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: "Title is required" });
-    }
-    if (!dueDate) {
-      return res.status(400).json({ error: "Due date is required" });
-    }
+    const validated = validateBody(req.body);
+    if (validated.error) return res.status(400).json({ error: validated.error });
 
     const existing = await Homework.findHomeworkById(id, req.userId);
-    if (!existing) {
-      return res.status(404).json({ error: "Homework not found" });
-    }
+    if (!existing) return res.status(404).json({ error: "Homework not found" });
 
+    const value = validated.value;
     const homework = await Homework.updateHomework(id, req.userId, {
-      subjectId,
-      title: title.trim(),
-      notes,
-      dueDate,
-      status: status || existing.status,
-      priority: priority || existing.priority,
+      ...value,
+      status: value.status ?? existing.status,
+      priority: value.priority ?? existing.priority,
     });
+    if (!homework) return res.status(400).json({ error: "Invalid subjectId" });
     res.json(homework);
   } catch (err) {
     console.error("updateHomework error:", err);
@@ -79,22 +115,16 @@ async function updateHomework(req, res) {
 async function updateHomeworkStatus(req, res) {
   try {
     const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ error: "Invalid homework id" });
 
-    if (!isValidId(id)) {
-      return res.status(400).json({ error: "Invalid homework id" });
-    }
-    const { status } = req.body;
-
-    if (!["todo", "in_progress", "done"].includes(status)) {
-      return res.status(400).json({ error: "Invalid status" });
-    }
+    const status = req.body?.status;
+    if (!STATUSES.has(status)) return res.status(400).json({ error: "Invalid status" });
 
     const existing = await Homework.findHomeworkById(id, req.userId);
-    if (!existing) {
-      return res.status(404).json({ error: "Homework not found" });
-    }
+    if (!existing) return res.status(404).json({ error: "Homework not found" });
 
     const homework = await Homework.updateHomeworkStatus(id, req.userId, status);
+    if (!homework) return res.status(404).json({ error: "Homework not found" });
     res.json(homework);
   } catch (err) {
     console.error("updateHomeworkStatus error:", err);
@@ -105,14 +135,10 @@ async function updateHomeworkStatus(req, res) {
 async function deleteHomework(req, res) {
   try {
     const { id } = req.params;
+    if (!isValidId(id)) return res.status(400).json({ error: "Invalid homework id" });
 
-    if (!isValidId(id)) {
-      return res.status(400).json({ error: "Invalid homework id" });
-    }
     const deleted = await Homework.deleteHomework(id, req.userId);
-    if (!deleted) {
-      return res.status(404).json({ error: "Homework not found" });
-    }
+    if (!deleted) return res.status(404).json({ error: "Homework not found" });
     res.json({ message: "Deleted" });
   } catch (err) {
     console.error("deleteHomework error:", err);

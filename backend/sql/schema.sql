@@ -24,9 +24,22 @@ CREATE TABLE IF NOT EXISTS timetables (
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name VARCHAR(255) NOT NULL,
   my_group VARCHAR(10) CHECK (my_group IN ('g1', 'g2')),
+  current_version INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS timetable_snapshots (
+  id SERIAL PRIMARY KEY,
+  timetable_id INTEGER NOT NULL REFERENCES timetables(id) ON DELETE CASCADE,
+  version INTEGER NOT NULL,
+  entries_json JSONB NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  UNIQUE (timetable_id, version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_timetable_snapshots_timetable_id
+  ON timetable_snapshots(timetable_id, version);
 
 CREATE TABLE IF NOT EXISTS timetable_days (
   id SERIAL PRIMARY KEY,
@@ -79,6 +92,7 @@ CREATE TABLE IF NOT EXISTS timetable_entries (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT timetable_entries_unique_span
     UNIQUE (timetable_id, slot_id, end_slot_id, day_of_week, group_tag)
+    DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE INDEX IF NOT EXISTS idx_timetable_entries_timetable_id ON timetable_entries(timetable_id);
@@ -101,6 +115,34 @@ CREATE TABLE IF NOT EXISTS homework (
 CREATE INDEX IF NOT EXISTS idx_homework_user_id ON homework(user_id);
 CREATE INDEX IF NOT EXISTS idx_homework_subject_id ON homework(subject_id);
 CREATE INDEX IF NOT EXISTS idx_homework_due_date ON homework(due_date);
+
+CREATE TABLE IF NOT EXISTS subject_resources (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  subject_id INTEGER REFERENCES subjects(id) ON DELETE CASCADE,
+  folder_name VARCHAR(120),
+  resource_type VARCHAR(10) NOT NULL CHECK (resource_type IN ('pdf', 'link', 'docx', 'xlsx', 'txt')),
+  title VARCHAR(255) NOT NULL,
+  url_path TEXT NOT NULL,
+  file_size_bytes BIGINT,
+  mime_type VARCHAR(127),
+  page_count INTEGER,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  CONSTRAINT subject_resources_folder_or_subject_chk
+    CHECK (subject_id IS NOT NULL OR folder_name IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS idx_subject_resources_user_id ON subject_resources(user_id);
+CREATE INDEX IF NOT EXISTS idx_subject_resources_subject_id ON subject_resources(subject_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_vault_title_per_subject
+ON subject_resources (user_id, subject_id, LOWER(TRIM(title)))
+WHERE subject_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_vault_title_per_folder
+ON subject_resources (user_id, folder_name, LOWER(TRIM(title)))
+WHERE folder_name IS NOT NULL;
 
 CREATE OR REPLACE FUNCTION resequence_timetable_slots() RETURNS TRIGGER AS $$
 BEGIN

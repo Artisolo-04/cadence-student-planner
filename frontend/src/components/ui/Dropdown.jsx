@@ -15,6 +15,8 @@ export default function Dropdown({
   placeholder = "Select...",
   className = "",
   size = "md",
+  tone = "solid",
+  wrapperClassName = "",
   height,
 }) {
   const [open, setOpen] = useState(false);
@@ -29,6 +31,7 @@ export default function Dropdown({
   const triggerRef = useRef(null);
   const listRef = useRef(null);
   const isSm = size === "sm";
+  const soft = tone === "soft";
 
   useEffect(() => {
     let raf1, raf2;
@@ -114,11 +117,15 @@ export default function Dropdown({
     setOpen(false);
   }
 
-  const triggerClasses = isSm
+  const triggerClasses = soft
+    ? "inline-flex items-center justify-between gap-2 whitespace-nowrap rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-3 text-xs font-medium text-[var(--color-text)] transition-colors duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+    : isSm
     ? "w-auto inline-flex items-center gap-8 whitespace-nowrap rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] px-2 text-[11px] font-medium text-[var(--color-text-muted)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
     : "w-full flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none transition-shadow duration-150 focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
 
-  const triggerStyle = isSm
+  const triggerStyle = soft
+    ? { height: height || "32px", boxSizing: "border-box" }
+    : isSm
     ? {
         height: height || "26px",
         display: "flex",
@@ -129,7 +136,7 @@ export default function Dropdown({
     : undefined;
 
   return (
-    <div className={isSm ? "flex" : "flex flex-col gap-2"}>
+    <div className={`${isSm ? "flex" : "flex flex-col gap-2"} ${wrapperClassName}`}>
       {label && (
         <label
           htmlFor={id}
@@ -138,7 +145,7 @@ export default function Dropdown({
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className={`relative ${wrapperClassName ? "min-w-0 flex-1" : ""}`}>
         <button
           type="button"
           id={id}
@@ -151,7 +158,7 @@ export default function Dropdown({
             {selected ? selected.label : placeholder}
           </span>
           <ChevronDown
-            size={isSm ? 11 : 18}
+            size={soft ? 13 : isSm ? 11 : 18}
             className={`text-[var(--color-text-muted)] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           />
         </button>
@@ -168,8 +175,8 @@ export default function Dropdown({
                 width: coords.width,
                 maxHeight: listHeight,
               }}
-              className={`z-[100] overflow-y-auto scrollbar-cadence p-1
-                rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg
+              className={`z-[100] overflow-y-auto scrollbar-cadence p-1 ${soft ? "flex flex-col gap-1" : ""}
+                ${soft ? "rounded-lg border border-[var(--color-line)]" : "rounded-lg border border-[var(--color-border)]"} bg-[var(--color-surface)] shadow-lg
                 transition-all duration-150 ease-out
                 ${coords.openUp ? "origin-bottom" : "origin-top"}
                 ${
@@ -187,8 +194,9 @@ export default function Dropdown({
                       role="option"
                       aria-selected={isSelected}
                       onClick={() => select(opt)}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left rounded-sm
+                      className={`w-full flex items-center justify-between ${soft ? "px-2.5 py-2 text-xs rounded-md" : "px-3 py-2 text-sm rounded-sm"} text-left
                         hover:bg-[var(--color-surface-alt)] transition-colors
+                        ${soft && isSelected ? "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]" : ""}
                         ${isSelected ? "text-[var(--color-primary)] font-medium" : "text-[var(--color-text)]"}`}
                     >
                       {opt.label}

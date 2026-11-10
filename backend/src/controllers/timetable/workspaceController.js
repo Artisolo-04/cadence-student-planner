@@ -11,14 +11,26 @@ const {
 } = require("../../models/Timetable");
 const { findEntriesByTimetableId } = require("../../models/TimetableEntry");
 const { getMaxVersion } = require("../../models/TimetableSnapshot");
+function validateWorkspaceName(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return { error: "Request body must be a JSON object" };
+  }
+  if (typeof body.name !== "string" || !body.name.trim()) {
+    return { error: "Workspace name is required" };
+  }
+  if (body.name.trim().length > 255) {
+    return { error: "Workspace name must be 255 characters or fewer" };
+  }
+  return { value: body.name.trim() };
+}
+
 
 async function createWorkspace(req, res) {
   try {
-    const { name } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: "Workspace name is required" });
-    }
-    const timetable = await createTimetable(req.userId, name.trim());
+    const input = validateWorkspaceName(req.body);
+    if (input.error) return res.status(400).json({ error: input.error });
+    const name = input.value;
+    const timetable = await createTimetable(req.userId, name);
     res.status(201).json({ timetable });
   } catch (err) {
     console.error("Create workspace error:", err);
@@ -38,7 +50,7 @@ async function listWorkspaces(req, res) {
 
 async function getWorkspace(req, res) {
   try {
-    const timetable = await findTimetableById(req.params.id);
+    const timetable = await findTimetableById(req.params.id, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
@@ -66,17 +78,17 @@ async function getWorkspace(req, res) {
 
 async function renameWorkspace(req, res) {
   try {
-    const { name } = req.body;
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: "Workspace name is required" });
-    }
+    const input = validateWorkspaceName(req.body);
+    if (input.error) return res.status(400).json({ error: input.error });
+    const name = input.value;
 
-    const timetable = await findTimetableById(req.params.id);
+    const timetable = await findTimetableById(req.params.id, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const updated = await updateTimetableName(req.params.id, name.trim());
+    const updated = await updateTimetableName(req.params.id, req.userId, name);
+    if (!updated) return res.status(404).json({ error: "Workspace not found" });
     res.json({ timetable: updated });
   } catch (err) {
     console.error("Rename workspace error:", err);
@@ -86,6 +98,10 @@ async function renameWorkspace(req, res) {
 
 async function updateMyGroup(req, res) {
   try {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body) ||
+        !Object.prototype.hasOwnProperty.call(req.body, "myGroup")) {
+      return res.status(400).json({ error: "myGroup must be 'g1', 'g2', or null" });
+    }
     const { myGroup } = req.body;
 
     if (myGroup !== null && !["g1", "g2"].includes(myGroup)) {
@@ -111,12 +127,19 @@ async function updateMyGroup(req, res) {
 
 async function updateDays(req, res) {
   try {
-    const { days } = req.body;
-    if (!Array.isArray(days) || days.some((day) => day < 0 || day > 6)) {
-      return res.status(400).json({ error: "Days must be an array of numbers between 0 and 6" });
+    const days = req.body?.days;
+    if (
+      !Array.isArray(days) ||
+      days.length > 7 ||
+      days.some((day) => !Number.isInteger(day) || day < 0 || day > 6) ||
+      new Set(days).size !== days.length
+    ) {
+      return res.status(400).json({
+        error: "Days must be unique integers between 0 and 6",
+      });
     }
 
-    const timetable = await findTimetableById(req.params.id);
+    const timetable = await findTimetableById(req.params.id, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }

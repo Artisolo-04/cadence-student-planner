@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const { lockTimetableSlots } = require("./timetableEntry/sqlHelpers");
 
 async function createTimetable(userId, name) {
   const result = await pool.query(
@@ -8,10 +9,10 @@ async function createTimetable(userId, name) {
   return result.rows[0];
 }
 
-async function findTimetableById(id) {
+async function findTimetableById(id, userId) {
   const result = await pool.query(
-    "SELECT id, user_id, name, my_group, current_version, created_at, updated_at FROM timetables WHERE id = $1",
-    [id]
+    "SELECT id, user_id, name, my_group, current_version, created_at, updated_at FROM timetables WHERE id = $1 AND user_id = $2",
+    [id, userId]
   );
   return result.rows[0];
 }
@@ -24,10 +25,10 @@ async function findTimetablesByUserId(userId) {
   return result.rows;
 }
 
-async function updateTimetableName(id, name) {
+async function updateTimetableName(id, userId, name) {
   const result = await pool.query(
-    "UPDATE timetables SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, user_id, name, my_group, current_version, created_at, updated_at",
-    [name, id]
+    "UPDATE timetables SET name = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING id, user_id, name, my_group, current_version, created_at, updated_at",
+    [name, id, userId]
   );
   return result.rows[0];
 }
@@ -78,23 +79,100 @@ async function findDaysByTimetableId(timetableId) {
   return result.rows;
 }
 
-async function addSlot(timetableId, { label, startTime, endTime }) {
-  const result = await pool.query(
-    "INSERT INTO timetable_slots (timetable_id, label, start_time, end_time) VALUES ($1, $2, $3, $4) RETURNING id, label, start_time, end_time, sort_order",
-    [timetableId, label || null, startTime, endTime]
+function slotConflict(message) {
+  const error = new Error(message);
+  error.code = "SLOT_CONFLICT";
+  return error;
+}
+
+async function assertNoSlotTimeOverlap(client, timetableId, slotId, startTime, endTime) {
+  const overlap = await client.query(
+    `SELECT id
+     FROM timetable_slots
+     WHERE timetable_id = $1
+       AND ($2::INTEGER IS NULL OR id <> $2)
+       AND start_time < $4::TIME
+       AND end_time > $3::TIME
+     LIMIT 1`,
+    [timetableId, slotId, startTime, endTime]
   );
-  return result.rows[0];
+  if (overlap.rows.length > 0) {
+    throw slotConflict("Slot times cannot overlap another slot");
+  }
+}
+
+async function addSlot(timetableId, { label, startTime, endTime }) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await lockTimetableSlots(client, timetableId);
+    await assertNoSlotTimeOverlap(client, timetableId, null, startTime, endTime);
+
+    const result = await client.query(
+      `INSERT INTO timetable_slots (timetable_id, label, start_time, end_time)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, label, start_time, end_time, sort_order`,
+      [timetableId, label || null, startTime, endTime]
+    );
+    await client.query("COMMIT");
+    return result.rows[0];
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function updateSlot(slotId, timetableId, { label, startTime, endTime }) {
-  const result = await pool.query(
-    `UPDATE timetable_slots
-     SET label = $1, start_time = $2, end_time = $3
-     WHERE id = $4 AND timetable_id = $5
-     RETURNING id, label, start_time, end_time, sort_order`,
-    [label || null, startTime, endTime, slotId, timetableId]
-  );
-  return result.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await lockTimetableSlots(client, timetableId);
+
+    const existingSlot = await client.query(
+      "SELECT id FROM timetable_slots WHERE id = $1 AND timetable_id = $2 FOR UPDATE",
+      [slotId, timetableId]
+    );
+    if (existingSlot.rows.length === 0) {
+      await client.query("COMMIT");
+      return null;
+    }
+
+    await assertNoSlotTimeOverlap(client, timetableId, slotId, startTime, endTime);
+
+    const result = await client.query(
+      `UPDATE timetable_slots
+       SET label = $1, start_time = $2, end_time = $3
+       WHERE id = $4 AND timetable_id = $5
+       RETURNING id, label, start_time, end_time, sort_order`,
+      [label || null, startTime, endTime, slotId, timetableId]
+    );
+
+    if (result.rows.length > 0) {
+      const invalidSpan = await client.query(
+        `SELECT e.id
+         FROM timetable_entries e
+         JOIN timetable_slots start_slot ON start_slot.id = e.slot_id
+         JOIN timetable_slots end_slot ON end_slot.id = e.end_slot_id
+         WHERE e.timetable_id = $1
+           AND start_slot.sort_order > end_slot.sort_order
+         LIMIT 1`,
+        [timetableId]
+      );
+      if (invalidSpan.rows.length > 0) {
+        throw slotConflict("Slot update would reverse an existing entry span");
+      }
+    }
+
+    await client.query("COMMIT");
+    return result.rows[0];
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function findSlotsByTimetableId(timetableId) {
@@ -109,6 +187,7 @@ async function deleteSlot(slotId, timetableId) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await lockTimetableSlots(client, timetableId);
 
     const entryCountResult = await client.query(
       `SELECT COUNT(*)::int AS count FROM timetable_entries

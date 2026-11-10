@@ -8,10 +8,10 @@ async function createSubject(userId, { name, color, teacher }) {
   return result.rows[0];
 }
 
-async function findSubjectById(id) {
+async function findSubjectById(id, userId) {
   const result = await pool.query(
-    "SELECT id, user_id, name, color, teacher, created_at, updated_at FROM subjects WHERE id = $1",
-    [id]
+    "SELECT id, user_id, name, color, teacher, created_at, updated_at FROM subjects WHERE id = $1 AND user_id = $2",
+    [id, userId]
   );
   return result.rows[0];
 }
@@ -25,7 +25,12 @@ async function findSubjectsByUserId(userId, timetableId = null) {
             )::float AS weekly_hours
      FROM subjects s
      LEFT JOIN timetable_entries e
-       ON e.subject_id = s.id AND e.timetable_id = $2
+       ON e.subject_id = s.id
+      AND e.timetable_id = $2
+      AND EXISTS (
+        SELECT 1 FROM timetables owned_t
+        WHERE owned_t.id = e.timetable_id AND owned_t.user_id = $1
+      )
      LEFT JOIN timetable_slots slot_start ON slot_start.id = e.slot_id
      LEFT JOIN timetable_slots slot_end ON slot_end.id = e.end_slot_id
      WHERE s.user_id = $1
@@ -48,11 +53,44 @@ async function updateSubject(id, userId, { name, color, teacher }) {
 }
 
 async function deleteSubject(id, userId) {
-  const result = await pool.query(
-    "DELETE FROM subjects WHERE id = $1 AND user_id = $2 RETURNING id",
-    [id, userId]
-  );
-  return result.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const subjectResult = await client.query(
+      "SELECT id FROM subjects WHERE id = $1 AND user_id = $2 FOR UPDATE",
+      [id, userId]
+    );
+    if (!subjectResult.rows[0]) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    const filesResult = await client.query(
+      `SELECT url_path
+       FROM subject_resources
+       WHERE user_id = $1 AND subject_id = $2
+         AND resource_type IN ('pdf', 'docx', 'xlsx', 'txt')`,
+      [userId, id]
+    );
+
+    const deletedResult = await client.query(
+      "DELETE FROM subjects WHERE id = $1 AND user_id = $2 RETURNING id",
+      [id, userId]
+    );
+
+    await client.query("COMMIT");
+    return { ...deletedResult.rows[0], vaultFiles: filesResult.rows };
+  } catch (err) {
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackErr) {
+      console.error("DELETE SUBJECT ROLLBACK FAILED:", rollbackErr);
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function findSubjectDetail(id, userId, timetableId = null) {
@@ -62,17 +100,19 @@ async function findSubjectDetail(id, userId, timetableId = null) {
      FROM timetable_entries e
      JOIN timetable_slots slot_start ON slot_start.id = e.slot_id
      JOIN timetable_slots slot_end ON slot_end.id = e.end_slot_id
-     JOIN timetables t ON t.id = e.timetable_id
-     WHERE e.subject_id = $1 AND t.user_id = $2 AND e.timetable_id = $3
+     JOIN timetables t ON t.id = e.timetable_id AND t.user_id = $2
+     JOIN subjects owned_s ON owned_s.id = e.subject_id AND owned_s.user_id = $2
+     WHERE e.subject_id = $1 AND e.timetable_id = $3
      ORDER BY e.day_of_week ASC, slot_start.start_time ASC`,
     [id, userId, timetableId]
   );
 
   const homeworkResult = await pool.query(
-    `SELECT id, title, due_date, status, priority
-     FROM homework
-     WHERE subject_id = $1 AND user_id = $2
-     ORDER BY due_date ASC`,
+    `SELECT h.id, h.title, h.due_date, h.status, h.priority
+     FROM homework h
+     JOIN subjects owned_s ON owned_s.id = h.subject_id AND owned_s.user_id = $2
+     WHERE h.subject_id = $1 AND h.user_id = $2
+     ORDER BY h.due_date ASC`,
     [id, userId]
   );
 

@@ -7,44 +7,36 @@ const {
   applyBatch,
   OverlapConflictError,
 } = require("../../models/TimetableEntry");
-const {
-  ensureBaselineSnapshot,
-  recordSnapshot,
-} = require("../../models/TimetableSnapshot");
-const { VALID_GROUP_TAGS, validateOp } = require("./validators");
+const { parsePositiveRouteId, validateEntryInput, validateOp } = require("./validators");
 
 async function createEntryHandler(req, res) {
   try {
-    const { slotId, endSlotId, dayOfWeek, subjectId, groupTag = "all", room } = req.body;
-    if (slotId == null || dayOfWeek == null || subjectId == null) {
-      return res.status(400).json({ error: "slotId, dayOfWeek, and subjectId are required" });
-    }
-    if (dayOfWeek < 0 || dayOfWeek > 6) {
-      return res.status(400).json({ error: "dayOfWeek must be between 0 and 6" });
-    }
-    if (!["all", "g1", "g2"].includes(groupTag)) {
-      return res.status(400).json({ error: "groupTag must be 'all', 'g1', or 'g2'" });
-    }
+    const input = validateEntryInput(req.body);
+    if (input.error) return res.status(400).json({ error: input.error });
+    const { slotId, endSlotId, dayOfWeek, subjectId, groupTag, room } = input.value;
 
-    const timetable = await findTimetableById(req.params.id);
+    const timetableId = parsePositiveRouteId(req.params.id);
+    if (timetableId === null) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+    const timetable = await findTimetableById(timetableId, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const subject = await findSubjectById(subjectId);
+    const subject = await findSubjectById(subjectId, req.userId);
     if (!subject || subject.user_id !== req.userId) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    await ensureBaselineSnapshot(req.params.id);
 
-    const { mainEntry, deletedIds, createdFragments, skipped, reason, coveredBy } = await createEntry(req.params.id, {
+    const { mainEntry, deletedIds, createdFragments, skipped, reason, coveredBy, currentVersion } = await createEntry(req.params.id, {
       slotId,
-      endSlotId: endSlotId ?? slotId,
+      endSlotId,
       dayOfWeek,
       subjectId,
       groupTag,
-      room: room?.trim() ? room.trim() : null,
+      room,
     });
 
     if (skipped) {
@@ -54,11 +46,9 @@ async function createEntryHandler(req, res) {
         entry: coveredBy,
         deletedIds: [],
         createdFragments: [],
-        currentVersion: timetable.current_version,
+        currentVersion,
       });
     }
-
-    const currentVersion = await recordSnapshot(req.params.id);
 
     res.status(201).json({
       entry: mainEntry,
@@ -83,39 +73,38 @@ async function createEntryHandler(req, res) {
 
 async function updateEntryHandler(req, res) {
   try {
-    const { slotId, endSlotId, dayOfWeek, subjectId, groupTag = "all", room } = req.body;
-    if (slotId == null || dayOfWeek == null || subjectId == null) {
-      return res.status(400).json({ error: "slotId, dayOfWeek, and subjectId are required" });
-    }
-    if (dayOfWeek < 0 || dayOfWeek > 6) {
-      return res.status(400).json({ error: "dayOfWeek must be between 0 and 6" });
-    }
-    if (!["all", "g1", "g2"].includes(groupTag)) {
-      return res.status(400).json({ error: "groupTag must be 'all', 'g1', or 'g2'" });
-    }
+    const input = validateEntryInput(req.body);
+    if (input.error) return res.status(400).json({ error: input.error });
+    const { slotId, endSlotId, dayOfWeek, subjectId, groupTag, room } = input.value;
 
-    const timetable = await findTimetableById(req.params.id);
+    const timetableId = parsePositiveRouteId(req.params.id);
+    if (timetableId === null) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+    const timetable = await findTimetableById(timetableId, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    const subject = await findSubjectById(subjectId);
+    const subject = await findSubjectById(subjectId, req.userId);
     if (!subject || subject.user_id !== req.userId) {
       return res.status(404).json({ error: "Subject not found" });
     }
 
-    await ensureBaselineSnapshot(req.params.id);
 
-    const { mainEntry, deletedIds, createdFragments, skipped, reason, coveredBy } = await updateEntry(
-      req.params.id,
-      req.params.entryId,
+    const entryId = parsePositiveRouteId(req.params.entryId);
+    if (entryId === null) return res.status(404).json({ error: "Entry not found" });
+
+    const { mainEntry, deletedIds, createdFragments, skipped, reason, coveredBy, currentVersion } = await updateEntry(
+      timetableId,
+      entryId,
       {
         slotId,
-        endSlotId: endSlotId ?? slotId,
+        endSlotId,
         dayOfWeek,
         subjectId,
         groupTag,
-        room: room?.trim() ? room.trim() : null,
+        room,
       }
     );
 
@@ -126,11 +115,9 @@ async function updateEntryHandler(req, res) {
         entry: coveredBy,
         deletedIds: [],
         createdFragments: [],
-        currentVersion: timetable.current_version,
+        currentVersion,
       });
     }
-
-    const currentVersion = await recordSnapshot(req.params.id);
 
     res.json({
       entry: mainEntry,
@@ -158,21 +145,25 @@ async function updateEntryHandler(req, res) {
 
 async function clearEntry(req, res) {
   try {
-    const timetable = await findTimetableById(req.params.id);
+    const timetableId = parsePositiveRouteId(req.params.id);
+    if (timetableId === null) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+    const timetable = await findTimetableById(timetableId, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
 
-    await ensureBaselineSnapshot(req.params.id);
 
-    const deleted = await deleteEntry(req.params.id, req.params.entryId);
+    const entryId = parsePositiveRouteId(req.params.entryId);
+    if (entryId === null) return res.status(404).json({ error: "Entry not found" });
+
+    const deleted = await deleteEntry(timetableId, entryId);
     if (!deleted) {
       return res.status(404).json({ error: "Entry not found" });
     }
 
-    const currentVersion = await recordSnapshot(req.params.id);
-
-    res.json({ id: deleted.id, currentVersion });
+    res.json({ id: deleted.id, currentVersion: deleted.currentVersion });
   } catch (err) {
     console.error("Clear entry error:", err);
     res.status(500).json({ error: "Something went wrong clearing the cell" });
@@ -181,6 +172,9 @@ async function clearEntry(req, res) {
 
 async function batchUpdateEntries(req, res) {
   try {
+    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+      return res.status(400).json({ error: "operations must be a non-empty array" });
+    }
     const { operations } = req.body;
     if (!Array.isArray(operations) || operations.length === 0) {
       return res.status(400).json({ error: "operations must be a non-empty array" });
@@ -191,7 +185,11 @@ async function batchUpdateEntries(req, res) {
 
     operations.forEach(validateOp);
 
-    const timetable = await findTimetableById(req.params.id);
+    const timetableId = parsePositiveRouteId(req.params.id);
+    if (timetableId === null) {
+      return res.status(404).json({ error: "Workspace not found" });
+    }
+    const timetable = await findTimetableById(timetableId, req.userId);
     if (!timetable || timetable.user_id !== req.userId) {
       return res.status(404).json({ error: "Workspace not found" });
     }
@@ -200,7 +198,7 @@ async function batchUpdateEntries(req, res) {
       ...new Set(operations.filter((o) => o.op !== "delete").map((o) => o.subjectId)),
     ];
     for (const subjectId of subjectIds) {
-      const subject = await findSubjectById(subjectId);
+      const subject = await findSubjectById(subjectId, req.userId);
       if (!subject || subject.user_id !== req.userId) {
         return res.status(404).json({ error: `Subject not found: ${subjectId}` });
       }
@@ -213,14 +211,8 @@ async function batchUpdateEntries(req, res) {
       room: o.room?.trim ? (o.room.trim() ? o.room.trim() : null) : (o.room ?? null),
     }));
 
-    await ensureBaselineSnapshot(req.params.id);
-    const result = await applyBatch(req.params.id, normalizedOps);
-    const allSkipped = (result.skipped?.length ?? 0) === normalizedOps.length;
-    const newVersion = allSkipped
-      ? timetable.current_version
-      : await recordSnapshot(req.params.id);
-
-    res.json({ ...result, currentVersion: newVersion });
+    const result = await applyBatch(timetableId, normalizedOps);
+    res.json(result);
   } catch (err) {
     if (err instanceof OverlapConflictError) {
       return res.status(409).json({ error: err.message, conflicts: err.conflicts });
