@@ -86,7 +86,8 @@ async function addVaultItem(req, res) {
     if (title.trim().length > 255) {
       return res.status(400).json({ error: "title must be 255 characters or fewer" });
     }
-    if (!isHttpUrl(urlPath)) {
+    const isPlaceholder = urlPath === "#" && resourceType === "link";
+    if (!isPlaceholder && !isHttpUrl(urlPath)) {
       return res.status(400).json({ error: "urlPath must be an HTTP or HTTPS URL" });
     }
 
