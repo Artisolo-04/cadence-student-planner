@@ -30,9 +30,9 @@ const MAX_ROWS = 3;
 // Folders have no fixed color, so use the primary color at decreasing strength
 const folderColor = (i) => `color-mix(in srgb, var(--color-primary) ${Math.max(100 - i * 18, 28)}%, transparent)`;
 
-function Row({ color, label, right, share }) {
+function Row({ color, label, right, share, extra }) {
   return (
-    <div className="grid grid-cols-[minmax(0,34%)_minmax(0,1fr)_5.5rem] items-center gap-3 text-xs">
+    <div className={`${extra ? "grid sm:hidden" : "grid"} grid-cols-[minmax(0,34%)_minmax(0,1fr)_5.5rem] items-center gap-3 text-xs`}>
       <span className="flex min-w-0 items-center gap-2 text-[var(--color-text)]">
         <span className="h-2 w-2 shrink-0 rounded-sm" style={{ backgroundColor: color }} />
         <span className="truncate" title={label}>
@@ -108,8 +108,8 @@ export default function VaultCard({ vault, onExpand }) {
 
           {/* Rows share the free height evenly */}
           <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${shown.length >= MAX_ROWS ? "justify-evenly" : "justify-start gap-3"}`}>
-            {shown.map((e) => (
-              <Row key={e.key} color={e.color} label={e.label} right={e.right} share={(e.count / sum) * 100} />
+            {entries.map((e, i) => (
+              <Row key={e.key} color={e.color} label={e.label} right={e.right} share={(e.count / sum) * 100} extra={i >= MAX_ROWS} />
             ))}
           </div>
 
@@ -117,7 +117,7 @@ export default function VaultCard({ vault, onExpand }) {
             <button
               type="button"
               onClick={onExpand}
-              className="flex shrink-0 items-center gap-1 self-start text-[11px] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+              className="hidden shrink-0 items-center gap-1 self-start sm:flex text-[11px] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
             >
               +{hidden} more · See all
               <ChevronRight size={12} />

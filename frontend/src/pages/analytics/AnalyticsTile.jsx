@@ -33,7 +33,7 @@ export default function AnalyticsTile({ icon, title, meta, children, className =
               onClick={onExpand}
               aria-label={`Open ${title} details`}
               title="See details"
-              className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)] transition-all duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)] active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
+              className="hidden sm:inline-flex h-6 w-6 items-center justify-center rounded-lg border border-[var(--color-line)] bg-[var(--color-fill-1)] text-[var(--color-text-muted)] transition-all duration-150 hover:border-[color-mix(in_srgb,var(--color-primary)_45%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] hover:text-[var(--color-primary)] active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]"
             >
               <PanelRightOpen size={13} />
             </button>
@@ -44,7 +44,7 @@ export default function AnalyticsTile({ icon, title, meta, children, className =
       <div className="relative mt-3 min-h-0 flex-1">
         <div
           ref={scrollRef}
-          className={`h-full ${scroll ? "scrollbar-cadence overflow-y-auto pr-2" : "overflow-hidden"}`}
+          className={`h-full ${scroll ? "scrollbar-cadence overflow-y-auto lg:pr-2" : "overflow-hidden"}`}
         >
           {children}
         </div>

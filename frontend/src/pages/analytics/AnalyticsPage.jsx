@@ -126,16 +126,18 @@ export default function AnalyticsPage() {
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-lg font-semibold text-[var(--color-text)]">Analytics</h1>
-          <p className="mt-0.5 truncate text-sm text-[var(--color-text-muted)]">
+          <p className="mt-0.5 hidden truncate text-sm text-[var(--color-text-muted)] sm:block">
             Insights for {workspace?.name ?? activeWorkspace?.name ?? "your workspace"}
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           {schedules.length > 1 && (
             <Dropdown
               size="sm"
               tone="soft"
+              wrapperClassName="min-w-0 flex-1 sm:flex-none"
+              className="w-full sm:w-auto"
               value={schedule?.groupTag}
               onChange={(e) => setGroupTag(e.target.value)}
               options={schedules.map((s) => ({ value: s.groupTag, label: GROUP_LABELS[s.groupTag] ?? s.groupTag }))}

@@ -16,6 +16,7 @@ export default function Dropdown({
   className = "",
   size = "md",
   tone = "solid",
+  wrapperClassName = "",
   height,
 }) {
   const [open, setOpen] = useState(false);
@@ -135,7 +136,7 @@ export default function Dropdown({
     : undefined;
 
   return (
-    <div className={isSm ? "flex" : "flex flex-col gap-2"}>
+    <div className={`${isSm ? "flex" : "flex flex-col gap-2"} ${wrapperClassName}`}>
       {label && (
         <label
           htmlFor={id}
@@ -144,7 +145,7 @@ export default function Dropdown({
           {label}
         </label>
       )}
-      <div className="relative">
+      <div className={`relative ${wrapperClassName ? "min-w-0 flex-1" : ""}`}>
         <button
           type="button"
           id={id}
