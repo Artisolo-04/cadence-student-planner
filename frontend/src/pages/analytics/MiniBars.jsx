@@ -95,7 +95,7 @@ export default function MiniBars({ items, unit }) {
             </span>
             <div
               className={`relative min-h-0 w-full flex-1 overflow-hidden rounded-lg border border-[var(--color-line)] ${
-                has ? "bg-[var(--color-fill-1)]" : "border-dashed bg-transparent"
+                has ? (isToday ? "border-[var(--color-primary)] bg-[var(--color-fill-1)]" : "bg-[var(--color-fill-1)]") : "border-dashed bg-transparent"
               }`}
             >
               {has && (
@@ -103,7 +103,7 @@ export default function MiniBars({ items, unit }) {
                   className="absolute inset-x-[3px] bottom-[3px] rounded-md transition-all duration-300"
                   style={{
                     height: `calc(${Math.max((i.value / max) * 100, 8)}% - 6px)`,
-                    background: isToday ? TODAY_FILL : NORMAL_FILL,
+                    background: NORMAL_FILL,
                   }}
                 />
               )}
