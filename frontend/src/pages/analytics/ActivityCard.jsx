@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Activity, Inbox } from "lucide-react";
 import AnalyticsTile from "./AnalyticsTile";
 import MiniBars, { ChartEmpty } from "./MiniBars";
-import SegmentedControl from "../../components/ui/SegmentedControl";
+import TileSwitch from "./TileSwitch";
 
 const VIEWS = [
-  { id: "added", label: "Homework added" },
-  { id: "edits", label: "Timetable edits" },
+  { id: "added", label: "Homework", title: "Homework added" },
+  { id: "edits", label: "Timetable", title: "Timetable edits" },
 ];
 
 function countLabel(view, n) {
@@ -23,17 +23,19 @@ export default function ActivityCard({ homework, timetableActivity, days, onExpa
   const total = items.reduce((sum, i) => sum + i.value, 0);
 
   return (
-    <AnalyticsTile icon={Activity} title="Activity" meta={`last ${days} days`} scroll={false} onExpand={onExpand}>
+    <AnalyticsTile
+      icon={Activity}
+      title="Activity"
+      meta={`last ${days} days`}
+      scroll={false}
+      onExpand={onExpand}
+      actions={<TileSwitch ariaLabel="Activity type" options={VIEWS} value={view} onChange={setView} />}
+    >
       <div className="flex h-full min-h-0 flex-col gap-3">
-        <div className="flex shrink-0 items-center justify-between gap-3">
-          <SegmentedControl size="sm" ariaLabel="Activity type" options={VIEWS} value={view} onChange={setView} className="shrink-0" />
-          {total > 0 && (
-            <p className="truncate text-xs text-[var(--color-text-muted)]">
-              <span className="mr-1.5 text-2xl font-bold tabular-nums text-[var(--color-text)]">{total}</span>
-              {countLabel(view, total)}
-            </p>
-          )}
-        </div>
+        <p className="shrink-0 text-xs text-[var(--color-text-muted)]">
+          <span className="mr-1.5 text-2xl font-bold tabular-nums text-[var(--color-text)]">{total}</span>
+          {countLabel(view, total)}
+        </p>
         <div className="min-h-0 flex-1">
           {total === 0 ? (
             <ChartEmpty icon={Inbox}>

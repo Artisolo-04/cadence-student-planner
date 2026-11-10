@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BarChart3, BookOpen, CalendarDays, Clock, Gauge } from "lucide-react";
+import { Activity as ActivityIcon, FolderOpen as VaultIcon, BarChart3, BookOpen, CalendarDays, Clock, Gauge } from "lucide-react";
 import { useWorkspace } from "../../hooks/useWorkspace";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 import Dropdown from "../../components/ui/Dropdown";
@@ -104,11 +104,16 @@ export default function AnalyticsPage() {
     },
     activity: {
       title: "Activity",
+      icon: ActivityIcon,
+      accent: "var(--color-primary)",
+      fill: true,
       subtitle: `Last ${days} days`,
       body: <ActivityDetail homework={hw} timetableActivity={data.timetableActivity} days={days} />,
     },
     vault: {
       title: "Vault",
+      icon: VaultIcon,
+      accent: "var(--color-primary)",
       subtitle: "Documents and links you saved",
       body: <VaultDetail vault={data.vault} />,
     },

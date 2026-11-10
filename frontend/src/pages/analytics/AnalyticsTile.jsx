@@ -14,7 +14,7 @@ export function TileLabel({ icon: Icon, children }) {
   );
 }
 
-export default function AnalyticsTile({ icon, title, meta, children, className = "", scroll = true, onExpand }) {
+export default function AnalyticsTile({ icon, title, meta, children, className = "", scroll = true, onExpand, actions }) {
   const { scrollRef, showTopFade, showBottomFade } = useScrollFade(title);
 
   return (
@@ -26,6 +26,7 @@ export default function AnalyticsTile({ icon, title, meta, children, className =
         <TileLabel icon={icon}>{title}</TileLabel>
         <div className="flex items-center gap-2">
           {meta && <span className="text-[10px] font-mono text-[var(--color-text-muted)]">{meta}</span>}
+          {actions}
           {onExpand && (
             <button
               type="button"
