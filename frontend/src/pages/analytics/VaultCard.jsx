@@ -17,6 +17,13 @@ export function typeMeta(type) {
   return TYPE_META[type] ?? { label: String(type).toUpperCase(), color: "var(--color-file-generic)" };
 }
 
+const MAX_ROWS = 3;
+
+function MoreRow({ count }) {
+  if (count <= 0) return null;
+  return <p className="text-[11px] text-[var(--color-text-muted)]">+{count} more</p>;
+}
+
 export default function VaultCard({ vault, onExpand }) {
   const total = vault?.totalResources ?? 0;
   const types = vault?.byType ?? [];
@@ -30,9 +37,11 @@ export default function VaultCard({ vault, onExpand }) {
       meta={total > 0 ? formatBytes(vault.storageBytes) : null}
     >
       {total === 0 ? (
-        <p className="text-xs text-[var(--color-text-muted)]">
-          Your vault is empty. Add a PDF, document, or link to see it here.
-        </p>
+        <div className="flex h-full min-h-[5rem] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[var(--color-line)] px-4 text-center">
+          <p className="text-xs text-[var(--color-text-muted)]">
+            Your vault is empty. Add a PDF, document, or link to see it here.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-xs text-[var(--color-text-muted)]">
@@ -41,43 +50,55 @@ export default function VaultCard({ vault, onExpand }) {
             {vault.linkCount} {vault.linkCount === 1 ? "link" : "links"}
           </p>
 
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[11px] font-medium text-[var(--color-text-muted)]">By type</p>
-            {types.map((t) => {
-              const meta = typeMeta(t.resourceType);
-              return (
-                <div key={t.resourceType} className="grid grid-cols-[5.5rem_minmax(0,1fr)_3.5rem] items-center gap-2 text-xs">
-                  <span className="flex items-center gap-2 text-[var(--color-text)]">
-                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: meta.color }} />
-                    {meta.label}
-                  </span>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--color-fill-3)]">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${(t.count / total) * 100}%`, backgroundColor: meta.color }}
-                    />
-                  </div>
-                  <span className="text-right font-mono text-[var(--color-text-muted)]">{t.count}</span>
-                </div>
-              );
-            })}
+          <div className="flex h-2 w-full gap-0.5 overflow-hidden rounded-md">
+            {types.map((t) => (
+              <div
+                key={t.resourceType}
+                title={`${typeMeta(t.resourceType).label}: ${t.count}`}
+                className="h-full rounded-sm"
+                style={{ width: `${(t.count / total) * 100}%`, backgroundColor: typeMeta(t.resourceType).color }}
+              />
+            ))}
           </div>
 
-          {destinations.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              <p className="text-[11px] font-medium text-[var(--color-text-muted)]">Where it is stored</p>
-              {destinations.map((d, i) => (
-                <div key={`${d.destinationType}-${d.subjectId ?? d.folderName ?? i}`} className="flex items-center justify-between gap-3 text-xs">
-                  <span className="truncate text-[var(--color-text)]" title={d.subjectName ?? d.folderName ?? ""}>
-                    {d.subjectName ?? d.folderName ?? "Unassigned"}
-                  </span>
-                  <span className="shrink-0 font-mono text-[var(--color-text-muted)]">
-                    {d.count} · {formatBytes(d.storageBytes)}
-                  </span>
-                </div>
-              ))}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex min-w-0 flex-col gap-2">
+              <p className="text-[11px] font-medium text-[var(--color-text-muted)]">By type</p>
+              {types.slice(0, MAX_ROWS).map((t) => {
+                const meta = typeMeta(t.resourceType);
+                return (
+                  <div key={t.resourceType} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="flex min-w-0 items-center gap-2 text-[var(--color-text)]">
+                      <span className="h-2 w-2 shrink-0 rounded-sm" style={{ backgroundColor: meta.color }} />
+                      <span className="truncate">{meta.label}</span>
+                    </span>
+                    <span className="shrink-0 font-mono text-[var(--color-text-muted)]">{t.count}</span>
+                  </div>
+                );
+              })}
+              <MoreRow count={types.length - MAX_ROWS} />
             </div>
-          )}
+
+            {destinations.length > 0 && (
+              <div className="flex min-w-0 flex-col gap-2">
+                <p className="text-[11px] font-medium text-[var(--color-text-muted)]">Where it is stored</p>
+                {destinations.slice(0, MAX_ROWS).map((d, i) => (
+                  <div
+                    key={`${d.destinationType}-${d.subjectId ?? d.folderName ?? i}`}
+                    className="flex items-center justify-between gap-3 text-xs"
+                  >
+                    <span className="truncate text-[var(--color-text)]" title={d.subjectName ?? d.folderName ?? ""}>
+                      {d.subjectName ?? d.folderName ?? "Unassigned"}
+                    </span>
+                    <span className="shrink-0 font-mono text-[var(--color-text-muted)]">
+                      {d.count} · {formatBytes(d.storageBytes)}
+                    </span>
+                  </div>
+                ))}
+                <MoreRow count={destinations.length - MAX_ROWS} />
+              </div>
+            )}
+          </div>
         </div>
       )}
     </AnalyticsTile>

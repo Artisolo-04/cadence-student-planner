@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Activity } from "lucide-react";
+import { Activity, Inbox } from "lucide-react";
 import AnalyticsTile from "./AnalyticsTile";
-import MiniBars from "./MiniBars";
+import MiniBars, { ChartEmpty } from "./MiniBars";
 import SegmentedControl from "../../components/ui/SegmentedControl";
 
 const VIEWS = [
@@ -34,15 +34,15 @@ export default function ActivityCard({ homework, timetableActivity, days, onExpa
             </p>
           )}
         </div>
-        {total === 0 ? (
-          <p className="text-xs text-[var(--color-text-muted)]">
-            {view === "added" ? "No tasks were added" : "No timetable edits"} in the last {days} days.
-          </p>
-        ) : (
-          <div className="min-h-0 flex-1">
+        <div className="min-h-0 flex-1">
+          {total === 0 ? (
+            <ChartEmpty icon={Inbox}>
+              {view === "added" ? "No tasks were added" : "No timetable edits"} in the last {days} days.
+            </ChartEmpty>
+          ) : (
             <MiniBars items={items} unit={view === "added" ? "added" : "edits"} />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </AnalyticsTile>
   );
