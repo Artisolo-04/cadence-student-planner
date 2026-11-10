@@ -96,7 +96,10 @@ export default function AnalyticsPage() {
     },
     deadlines: {
       title: "Deadlines ahead",
+      icon: CalendarDays,
+      accent: "var(--color-primary)",
       subtitle: `Next ${days} days`,
+      fill: true,
       body: <DeadlinesDetail homework={hw} days={days} />,
     },
     activity: {
