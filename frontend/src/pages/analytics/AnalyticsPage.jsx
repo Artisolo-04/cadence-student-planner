@@ -135,12 +135,13 @@ export default function AnalyticsPage() {
           {schedules.length > 1 && (
             <Dropdown
               size="sm"
+              tone="soft"
               value={schedule?.groupTag}
               onChange={(e) => setGroupTag(e.target.value)}
               options={schedules.map((s) => ({ value: s.groupTag, label: GROUP_LABELS[s.groupTag] ?? s.groupTag }))}
             />
           )}
-          <SegmentedControl size="sm" ariaLabel="Time range" options={RANGE_OPTIONS} value={days} onChange={setDays} />
+          <SegmentedControl tone="soft" size="sm" ariaLabel="Time range" options={RANGE_OPTIONS} value={days} onChange={setDays} />
         </div>
       </header>
 
