@@ -115,6 +115,7 @@ export default function AnalyticsPage() {
       icon: VaultIcon,
       accent: "var(--color-primary)",
       subtitle: "Documents and links you saved",
+      fill: true,
       body: <VaultDetail vault={data.vault} />,
     },
   };
