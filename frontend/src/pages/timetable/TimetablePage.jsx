@@ -7,6 +7,7 @@ import {
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
+import TimetableSkeleton from "./TimetableSkeleton";
 import TimetableWizard from "./wizard/TimetableWizard";
 import TimetableGrid from "./grid/layout/TimetableGrid";
 import ViewOptionsPanel from "./ViewOptionsPanel";
@@ -25,7 +26,11 @@ export default function TimetablePage() {
     loading: workspacesLoading,
   } = useWorkspace();
 
-  const [view, setView] = useState("loading");
+  const [view, setView] = useState(() =>
+      workspacesLoading
+        ? "loading"
+        : (timetables.length === 0 || EMPTY_PREVIEW ? "empty" : "list")
+    );
   const [wizardMode, setWizardMode] = useState("create");
   const [workspace, setWorkspace] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -146,7 +151,7 @@ export default function TimetablePage() {
   }
 
   if (view === "loading") {
-    return null;
+    return <TimetableSkeleton />;
   }
 
   if (view === "wizard") {
