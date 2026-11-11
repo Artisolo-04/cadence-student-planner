@@ -235,6 +235,7 @@ export default function SubjectDetailDrawer({
               weeklySlots={detail?.entries?.length || 0}
               activeTasks={activeTaskCount}
               daysPerWeek={daysPerWeek}
+              loading={!error && (loading || !detail)}
             />
 
             <div className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl">

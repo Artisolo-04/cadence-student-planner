@@ -2,11 +2,21 @@ import { BookOpen, Calendar, ListChecks, CalendarDays } from "lucide-react";
 import { AccentHeaderShell, HeaderCloseButton } from "../../../components/ui/AccentHeader";
 import IconTile from "../../../components/ui/IconTile";
 
-function MetricBadge({ icon: Icon, label }) {
+function Sk({ className = "" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`sk inline-block align-baseline ${className}`}
+    />
+  );
+}
+
+function MetricBadge({ icon: Icon, count, singular, plural, loading = false }) {
   return (
     <span className="flex shrink-0 items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-surface)_55%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-text)] backdrop-blur-md">
       <Icon size={13} className="text-[var(--color-text-muted)]" />
-      {label}
+      {loading ? <Sk className="h-[0.72em] w-3 rounded-[3px]" /> : count}{" "}
+        {!loading && count === 1 ? singular : plural}
     </span>
   );
 }
@@ -17,6 +27,7 @@ export default function DrawerHeader({
   weeklySlots,
   activeTasks,
   daysPerWeek,
+  loading = false,
 }) {
   return (
     <AccentHeaderShell accent={subject.color}>
@@ -40,10 +51,13 @@ export default function DrawerHeader({
         </div>
       </div>
 
-      <div className="relative z-10 hidden flex-1 items-center justify-end gap-2 overflow-x-auto scrollbar-hidden md:flex">
-        <MetricBadge icon={Calendar} label={`${weeklySlots} Weekly Slot${weeklySlots === 1 ? "" : "s"}`} />
-        <MetricBadge icon={ListChecks} label={`${activeTasks} Active Task${activeTasks === 1 ? "" : "s"}`} />
-        <MetricBadge icon={CalendarDays} label={`${daysPerWeek} Day${daysPerWeek === 1 ? "" : "s"}/Week`} />
+      <div
+        aria-busy={loading || undefined}
+        className="relative z-10 hidden flex-1 items-center justify-end gap-2 overflow-x-auto scrollbar-hidden md:flex"
+      >
+        <MetricBadge icon={Calendar} count={weeklySlots} singular="Weekly Slot" plural="Weekly Slots" loading={loading} />
+        <MetricBadge icon={ListChecks} count={activeTasks} singular="Active Task" plural="Active Tasks" loading={loading} />
+        <MetricBadge icon={CalendarDays} count={daysPerWeek} singular="Day/Week" plural="Days/Week" loading={loading} />
       </div>
 
       <HeaderCloseButton onClose={onClose} />
