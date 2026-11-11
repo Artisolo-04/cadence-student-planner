@@ -1,15 +1,21 @@
 import EmptyState from "../../../components/ui/EmptyState";
+import { Sk } from "./DrawerSkeletonBits";
 import { Clock as EmptyNextIcon } from "lucide-react";
 import { CalendarClock, Gauge, ListChecks } from "lucide-react";
 
-function NextSessionCard({ nextSession }) {
+function NextSessionCard({ nextSession, loading = false }) {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-3 backdrop-blur-md">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
         <CalendarClock size={12} />
         Next Session
       </div>
-      {nextSession ? (
+      {loading ? (
+          <div aria-hidden="true" className="mt-1.5 text-sm font-medium leading-snug">
+            <p><Sk className="h-[0.72em] w-11/12 rounded-[3px]" /></p>
+            <p><Sk className="h-[0.72em] w-1/2 rounded-[3px]" delay={0.2} /></p>
+          </div>
+        ) : nextSession ? (
         <p className="mt-1.5 text-sm font-medium leading-snug text-[var(--color-text)]">
           {nextSession.dayLabel} at {nextSession.time}
           {nextSession.room && (
@@ -23,8 +29,9 @@ function NextSessionCard({ nextSession }) {
   );
 }
 
-function TimeFootprintBar({ footprintPercent, accentColor }) {
+function TimeFootprintBar({ footprintPercent, accentColor, loading = false }) {
   const clamped = Math.max(0, Math.min(100, footprintPercent));
+    const fill = loading ? 0 : clamped;
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-3 backdrop-blur-md">
       <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -32,7 +39,7 @@ function TimeFootprintBar({ footprintPercent, accentColor }) {
           <Gauge size={12} />
           Weekly Footprint
         </span>
-        <span>{clamped}%</span>
+        <span>{loading ? <Sk className="h-[0.72em] w-6 rounded-[3px]" /> : clamped + "%"}</span>
       </div>
       <svg
         viewBox="0 0 100 4"
@@ -41,16 +48,16 @@ function TimeFootprintBar({ footprintPercent, accentColor }) {
         aria-hidden="true"
       >
         <rect x="0" y="0" width="100" height="4" rx="2" fill="var(--color-border)" />
-        <rect x="0" y="0" width={clamped} height="4" rx="2" fill={accentColor} />
+        <rect x="0" y="0" width={fill} height="4" rx="2" fill={accentColor} />
       </svg>
       <p className="mt-1.5 text-[11px] leading-snug text-[var(--color-text-muted)]">
-        Occupies {clamped}% of your weekly academic track
+        Occupies {loading ? <Sk className="h-[0.72em] w-6 rounded-[3px]" /> : clamped + "%"} of your weekly academic track
       </p>
     </div>
   );
 }
 
-function TaskVelocityLine({ completed, total }) {
+function TaskVelocityLine({ completed, total, loading = false }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-2.5 backdrop-blur-md">
       <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--color-text)]">
@@ -58,18 +65,18 @@ function TaskVelocityLine({ completed, total }) {
         Task Velocity
       </span>
       <span className="text-xs font-semibold text-[var(--color-text)]">
-        {completed} / {total} Completed
+        {loading ? <Sk className="h-[0.72em] w-8 rounded-[3px]" /> : completed + " / " + total} Completed
       </span>
     </div>
   );
 }
 
-export default function SummaryHud({ nextSession, footprintPercent, accentColor, tasksCompleted, tasksTotal }) {
+export default function SummaryHud({ nextSession, footprintPercent, accentColor, tasksCompleted, tasksTotal, loading = false }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <NextSessionCard nextSession={nextSession} />
-      <TimeFootprintBar footprintPercent={footprintPercent} accentColor={accentColor} />
-      <TaskVelocityLine completed={tasksCompleted} total={tasksTotal} />
+      <NextSessionCard nextSession={nextSession} loading={loading} />
+      <TimeFootprintBar footprintPercent={footprintPercent} accentColor={accentColor} loading={loading} />
+      <TaskVelocityLine completed={tasksCompleted} total={tasksTotal} loading={loading} />
     </div>
   );
 }
