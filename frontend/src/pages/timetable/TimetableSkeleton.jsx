@@ -1,6 +1,7 @@
 import { CalendarDays, Plus, Trash2 } from "lucide-react";
 import IconTile from "../../components/ui/IconTile";
 import Button from "../../components/ui/Button";
+import SkeletonScrollArea from "../../components/ui/SkeletonScrollArea";
 
 const CARD_WASH =
   "linear-gradient(155deg, color-mix(in srgb, var(--color-primary) 22%, transparent) 0%, color-mix(in srgb, var(--color-accent) 10%, transparent) 55%, transparent 100%)";
@@ -69,13 +70,13 @@ export default function TimetableSkeleton() {
       </header>
 
       <section className="relative flex min-h-0 flex-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-2 sm:p-4">
-        <div className="h-full min-w-0 flex-1 overflow-hidden rounded-xl p-0">
+        <SkeletonScrollArea>
           <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <CardSkeleton key={i} index={i} />
             ))}
           </div>
-        </div>
+        </SkeletonScrollArea>
       </section>
     </div>
   );
