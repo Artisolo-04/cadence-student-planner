@@ -18,7 +18,7 @@ export function useTimetableEntries({
   maxVersion,
 }) {
   const { timetable, entries = [] } = workspace;
-  const subjects = useSubjects();
+  const { subjects, loading: subjectsLoading } = useSubjects();
   const [activeCell, setActiveCell] = useState(null);
   const [saveError, setSaveError] = useState(null);
 
@@ -266,6 +266,7 @@ export function useTimetableEntries({
 
   return {
     subjects,
+    subjectsLoading,
     entriesByCell,
     activeCell,
     activeEntry,

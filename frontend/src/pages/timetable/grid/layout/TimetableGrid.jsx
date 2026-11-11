@@ -155,6 +155,7 @@ export default function TimetableGrid({
 
   const {
     subjects,
+    subjectsLoading,
     entriesByCell,
     activeCell,
     activeEntry,
@@ -350,6 +351,7 @@ export default function TimetableGrid({
             open={Boolean(activeCell)}
             onClose={closePicker}
             subjects={subjects}
+            loading={subjectsLoading}
             currentSubjectId={activeEntry?.subject_id ?? null}
             currentGroupTag={activeCell?.groupTag}
             currentRoom={activeEntry?.room}
@@ -401,7 +403,7 @@ export default function TimetableGrid({
           }}
         >
           <div className="h-full w-64">
-            <SubjectsDrawer subjects={subjects} />
+            <SubjectsDrawer subjects={subjects} loading={subjectsLoading} />
           </div>
         </div>
       </div>
