@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ClipboardList, AlertTriangle, ArrowRight, Radar, Clock, CheckCircle2, Flag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import VaultMatchLink from "./VaultMatchLink";
+import { DueHeaderSkeleton, DueRowsSkeleton } from "./DashboardSkeleton";
 import { findVaultMatch } from "./vaultAccess";
 import { formatDueDate } from "../homework/homeworkUtils";
 
@@ -121,6 +122,7 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
             Intercept Queue
           </div>
 
+          {loading && <DueHeaderSkeleton />}
           {!loading && grandTotal > 0 && (
             <div className="flex items-center gap-3">
               <BadgeSelect ariaLabel="Intercept queue" value={tab} onChange={setSelectedTab} options={tabOptions} />
@@ -139,7 +141,7 @@ export default function DueSoonCard({ buckets: rawBuckets, loading, vaultFiles =
         </div>
 
         {loading ? (
-          <p className="mt-3 text-xs text-[var(--color-text-muted)]">Loading…</p>
+          <DueRowsSkeleton />
         ) : !buckets ? (
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
             <AlertTriangle size={22} className="text-[var(--color-danger)]" />

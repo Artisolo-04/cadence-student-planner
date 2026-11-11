@@ -47,6 +47,7 @@ export function useDashboardData(now = new Date()) {
 
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailLoadedFor, setDetailLoadedFor] = useState(null);
   const [error, setError] = useState(null);
 
   const [workspace, setWorkspace] = useState(null);
@@ -88,6 +89,7 @@ export function useDashboardData(now = new Date()) {
       setWorkspace(null);
       setSlots([]);
       setEntries([]);
+      setLoadingDetail(false);
       return;
     }
 
@@ -109,7 +111,10 @@ export function useDashboardData(now = new Date()) {
         console.error("Dashboard detail load error:", err);
         if (!cancelled) setError("Couldn't load that workspace's schedule.");
       } finally {
-        if (!cancelled) setLoadingDetail(false);
+        if (!cancelled) {
+          setLoadingDetail(false);
+          setDetailLoadedFor(activeId);
+        }
       }
     }
 
@@ -405,7 +410,12 @@ export function useDashboardData(now = new Date()) {
     : null;
 
   return {
-    loading: loadingWorkspaces || loadingSubjects || loadingDetail,
+    loading:
+      loadingWorkspaces ||
+      loadingSubjects ||
+      loadingDetail ||
+      (activeId != null && detailLoadedFor !== activeId),
+    switching: loadingDetail || (activeId != null && detailLoadedFor !== activeId),
     error: error || workspaceError,
     timetables,
     activeId,
