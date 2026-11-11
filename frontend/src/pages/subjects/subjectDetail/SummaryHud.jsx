@@ -3,7 +3,7 @@ import { Sk } from "./DrawerSkeletonBits";
 import { Clock as EmptyNextIcon } from "lucide-react";
 import { CalendarClock, Gauge, ListChecks } from "lucide-react";
 
-function NextSessionCard({ nextSession, loading = false }) {
+function NextSessionCard({ nextSession, loading = false, nextLines = 2 }) {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-3 backdrop-blur-md">
       <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -11,11 +11,13 @@ function NextSessionCard({ nextSession, loading = false }) {
         Next Session
       </div>
       {loading ? (
-          <div aria-hidden="true" className="mt-1.5 text-sm font-medium leading-snug">
-            <p><Sk className="h-[0.72em] w-11/12 rounded-[3px]" /></p>
+        <div aria-hidden="true" className="mt-1.5 text-sm font-medium leading-snug">
+          <p><Sk className="h-[0.72em] w-11/12 rounded-[3px]" /></p>
+          {nextLines > 1 && (
             <p><Sk className="h-[0.72em] w-1/2 rounded-[3px]" delay={0.2} /></p>
-          </div>
-        ) : nextSession ? (
+          )}
+        </div>
+      ) : nextSession ? (
         <p className="mt-1.5 text-sm font-medium leading-snug text-[var(--color-text)]">
           {nextSession.dayLabel} at {nextSession.time}
           {nextSession.room && (
@@ -31,7 +33,7 @@ function NextSessionCard({ nextSession, loading = false }) {
 
 function TimeFootprintBar({ footprintPercent, accentColor, loading = false }) {
   const clamped = Math.max(0, Math.min(100, footprintPercent));
-    const fill = loading ? 0 : clamped;
+  const fill = loading ? 0 : clamped;
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-3 backdrop-blur-md">
       <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -71,10 +73,10 @@ function TaskVelocityLine({ completed, total, loading = false }) {
   );
 }
 
-export default function SummaryHud({ nextSession, footprintPercent, accentColor, tasksCompleted, tasksTotal, loading = false }) {
+export default function SummaryHud({ nextSession, footprintPercent, accentColor, tasksCompleted, tasksTotal, loading = false, skeletonNextLines }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <NextSessionCard nextSession={nextSession} loading={loading} />
+      <NextSessionCard nextSession={nextSession} loading={loading} nextLines={skeletonNextLines} />
       <TimeFootprintBar footprintPercent={footprintPercent} accentColor={accentColor} loading={loading} />
       <TaskVelocityLine completed={tasksCompleted} total={tasksTotal} loading={loading} />
     </div>

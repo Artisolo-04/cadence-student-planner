@@ -5,7 +5,7 @@ import { formatDuration, formatTime } from "./subjectDetailUtils";
 import { Sk } from "./DrawerSkeletonBits";
 import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
-const SKELETON_DAYS = [2, 1, 2];
+const DEFAULT_SKELETON_DAYS = [2, 1, 2];
 
 function Chip({ delay = 0, children }) {
   return (
@@ -18,10 +18,10 @@ function Chip({ delay = 0, children }) {
   );
 }
 
-function ScheduleSkeleton() {
+function ScheduleSkeleton({ days = DEFAULT_SKELETON_DAYS }) {
   return (
     <div aria-hidden="true" className="flex flex-col gap-3">
-      {SKELETON_DAYS.map((rows, d) => (
+      {days.map((rows, d) => (
         <div
           key={d}
           className="rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-3"
@@ -71,7 +71,7 @@ function ScheduleSkeleton() {
   );
 }
 
-export default function ScheduleSection({ entries, timetableId, scheduleDays, fade, loading = false }) {
+export default function ScheduleSection({ entries, timetableId, scheduleDays, fade, loading = false, skeletonDays }) {
   return (
     <section className="flex min-h-0 flex-1 basis-0 flex-col">
       <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -84,11 +84,11 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
           className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
           {loading ? (
-              <ScheduleSkeleton />
-            ) : entries.length === 0 ? (
+            <ScheduleSkeleton days={skeletonDays ?? undefined} />
+          ) : entries.length === 0 ? (
             <EmptyState
               variant="compact"
-              className="h-full"
+              className="h-full cad-reveal"
               icon={EmptyScheduleIcon}
               title={timetableId ? "Not scheduled here" : "No workspace selected"}
               body={timetableId ? "This subject has no sessions in this workspace." : "Select a workspace to see scheduling."}

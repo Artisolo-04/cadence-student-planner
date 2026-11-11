@@ -5,6 +5,7 @@ import DrawerHeader from "./subjectDetail/DrawerHeader";
 import ScheduleSection from "./subjectDetail/ScheduleSection";
 import HomeworkSection from "./subjectDetail/HomeworkSection";
 import SummaryHud from "./subjectDetail/SummaryHud";
+import { readDrawerShape, saveDrawerShape } from "./subjectDetail/drawerShape";
 import useScrollFade from "../../hooks/useScrollFade";
 import CalendarWorkspaceEngine from "./subjectDetail/CalendarWorkspaceEngine";
 import SegmentedControl from "../../components/ui/SegmentedControl";
@@ -28,13 +29,13 @@ export default function SubjectDetailDrawer({
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [detail, setDetailRaw] = useState(null);
-    const [detailKey, setDetailKey] = useState(null);
-    const setDetail = useCallback((next) => {
-      setDetailRaw((prev) => {
-        if (typeof next !== "function") return next;
-        return prev ? next(prev) : prev;
-      });
-    }, []);
+  const [detailKey, setDetailKey] = useState(null);
+  const setDetail = useCallback((next) => {
+    setDetailRaw((prev) => {
+      if (typeof next !== "function") return next;
+      return prev ? next(prev) : prev;
+    });
+  }, []);
   const [error, setError] = useState("");
 
   const [togglingIds, setTogglingIds] = useState(() => new Set());
@@ -94,11 +95,31 @@ export default function SubjectDetailDrawer({
   );
   const tasksTotal = detail?.homework?.length || 0;
 
-    const currentKey = subject ? `${subject.id}:${timetableId ?? ""}` : null;
-    const ready = Boolean(detail) && detailKey === currentKey;
-    const showSkeleton = !error && (loading || !ready);
-    const sectionEntries = ready ? (detail.entries ?? []) : [];
-    const sectionHomework = ready ? (detail.homework ?? []) : [];
+  const currentKey = subject ? `${subject.id}:${timetableId ?? ""}` : null;
+  const ready = Boolean(detail) && detailKey === currentKey;
+  const showSkeleton = !error && (loading || !ready);
+  const sectionEntries = ready ? (detail.entries ?? []) : [];
+  const sectionHomework = ready ? (detail.homework ?? []) : [];
+
+  const skeletonShape = useMemo(
+    () => (showSkeleton ? readDrawerShape(currentKey) : null),
+    [showSkeleton, currentKey]
+  );
+
+  useEffect(() => {
+    if (!ready || !currentKey) return;
+    let nextLines = 1;
+    if (nextSession) {
+      const room = nextSession.room ? ` · Room ${nextSession.room}` : "";
+      const text = `${nextSession.dayLabel} at ${nextSession.time}${room}`;
+      nextLines = text.length > 30 ? 2 : 1;
+    }
+    saveDrawerShape(currentKey, {
+      days: scheduleDays.map((day) => day.entries.length),
+      hw: tasksTotal,
+      nextLines,
+    });
+  }, [ready, currentKey, scheduleDays, tasksTotal, nextSession]);
 
   useEffect(() => {
     let raf1, raf2;
@@ -145,9 +166,9 @@ export default function SubjectDetailDrawer({
       })
       .then(({ data }) => {
         if (!cancelled) {
-            setDetail(data);
-            setDetailKey(requestKey);
-          }
+          setDetail(data);
+          setDetailKey(requestKey);
+        }
       })
       .catch((err) => {
         console.error("Load subject detail error:", err);
@@ -257,9 +278,9 @@ export default function SubjectDetailDrawer({
             />
 
             <div
-                aria-busy={showSkeleton || undefined}
-                className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl"
-              >
+              aria-busy={showSkeleton || undefined}
+              className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl"
+            >
               {showSkeleton && (
                 <span role="status" className="sr-only">Loading subject details</span>
               )}
@@ -276,7 +297,8 @@ export default function SubjectDetailDrawer({
                       accentColor={subject.color}
                       tasksCompleted={tasksCompleted}
                       tasksTotal={tasksTotal}
-                        loading={showSkeleton}
+                      skeletonNextLines={skeletonShape?.nextLines}
+                      loading={showSkeleton}
                     />
 
                     <div className="mt-auto">
@@ -316,7 +338,8 @@ export default function SubjectDetailDrawer({
                           timetableId={timetableId}
                           scheduleDays={scheduleDays}
                           fade={scheduleFade}
-                            loading={showSkeleton}
+                          skeletonDays={skeletonShape?.days}
+                          loading={showSkeleton}
                         />
                       </div>
 
@@ -335,7 +358,8 @@ export default function SubjectDetailDrawer({
                           onSubmit={handleAddHomework}
                           onToggle={toggleHomeworkStatus}
                           fade={homeworkFade}
-                            loading={showSkeleton}
+                          skeletonRows={skeletonShape?.hw}
+                          loading={showSkeleton}
                         />
                       </div>
                     </div>
