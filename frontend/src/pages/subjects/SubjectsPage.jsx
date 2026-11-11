@@ -1,10 +1,12 @@
 import EmptyState from "../../components/ui/EmptyState";
 import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import SubjectList from "./SubjectList";
+import SubjectsSkeleton from "./SubjectsSkeleton";
+import { readSubjectsListShape, saveSubjectsListShape } from "./subjectsListShape";
 import SubjectFormModal from "./SubjectFormModal";
 import SubjectDetailDrawer from "./SubjectDetailDrawer";
 import { useWorkspace } from "../../hooks/useWorkspace";
@@ -12,6 +14,8 @@ import { useWorkspace } from "../../hooks/useWorkspace";
 export default function SubjectsPage() {
   const { activeId } = useWorkspace();
   const [view, setView] = useState("loading");
+  const [reloading, setReloading] = useState(false);
+  const reqRef = useRef(0);
   const [subjects, setSubjects] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
@@ -23,15 +27,21 @@ export default function SubjectsPage() {
   }, [activeId]);
 
   async function loadSubjects() {
+    const reqId = ++reqRef.current;
+    setReloading(true);
     try {
       const { data } = await api.get("/subjects", {
         params: activeId ? { timetableId: activeId } : undefined,
       });
+      if (reqId !== reqRef.current) return;
+      saveSubjectsListShape(data.subjects);
       setSubjects(data.subjects);
       setView(data.subjects.length === 0 || EMPTY_PREVIEW ? "empty" : "list");
     } catch (err) {
       console.error("Load subjects error:", err);
-      setView("empty");
+      if (reqId === reqRef.current) setView("empty");
+    } finally {
+      if (reqId === reqRef.current) setReloading(false);
     }
   }
 
@@ -71,8 +81,8 @@ export default function SubjectsPage() {
     });
   }
 
-  if (view === "loading") {
-    return null;
+  if (view === "loading" || reloading) {
+    return <SubjectsSkeleton shape={readSubjectsListShape()} />;
   }
 
   return (
