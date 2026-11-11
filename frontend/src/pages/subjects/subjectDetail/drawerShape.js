@@ -20,6 +20,23 @@ function readAll() {
   return {};
 }
 
+const DEFAULT_HW = 8;
+const HOURS_PER_SESSION_GUESS = 3;
+const MAX_ESTIMATED_DAYS = 4;
+
+// First open of a subject (no remembered shape): estimate from the list's weekly_hours.
+// Only "0 hours" is exact (no sessions here). Anything else is a guess.
+export function estimateDrawerShape(weeklyHours, timetableId) {
+  if (!timetableId || weeklyHours == null) return null;
+  const hours = Number(weeklyHours);
+  if (!Number.isFinite(hours) || hours < 0) return null;
+  const sessions =
+    hours === 0
+      ? 0
+      : Math.min(Math.max(Math.round(hours / HOURS_PER_SESSION_GUESS), 1), MAX_ESTIMATED_DAYS);
+  return { days: Array(sessions).fill(1), hw: DEFAULT_HW, nextLines: 2 };
+}
+
 export function readDrawerShape(key) {
   if (!key) return null;
   const entry = readAll()[key];

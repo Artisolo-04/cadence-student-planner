@@ -5,7 +5,11 @@ import DrawerHeader from "./subjectDetail/DrawerHeader";
 import ScheduleSection from "./subjectDetail/ScheduleSection";
 import HomeworkSection from "./subjectDetail/HomeworkSection";
 import SummaryHud from "./subjectDetail/SummaryHud";
-import { readDrawerShape, saveDrawerShape } from "./subjectDetail/drawerShape";
+import {
+  estimateDrawerShape,
+  readDrawerShape,
+  saveDrawerShape,
+} from "./subjectDetail/drawerShape";
 import useScrollFade from "../../hooks/useScrollFade";
 import CalendarWorkspaceEngine from "./subjectDetail/CalendarWorkspaceEngine";
 import SegmentedControl from "../../components/ui/SegmentedControl";
@@ -101,10 +105,13 @@ export default function SubjectDetailDrawer({
   const sectionEntries = ready ? (detail.entries ?? []) : [];
   const sectionHomework = ready ? (detail.homework ?? []) : [];
 
-  const skeletonShape = useMemo(
-    () => (showSkeleton ? readDrawerShape(currentKey) : null),
-    [showSkeleton, currentKey]
-  );
+  const skeletonShape = useMemo(() => {
+    if (!showSkeleton) return null;
+    return (
+      readDrawerShape(currentKey) ??
+      estimateDrawerShape(subject?.weekly_hours, timetableId)
+    );
+  }, [showSkeleton, currentKey, subject?.weekly_hours, timetableId]);
 
   useEffect(() => {
     if (!ready || !currentKey) return;
