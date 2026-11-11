@@ -81,13 +81,13 @@ export default function SubjectsPage() {
     });
   }
 
-  if (view === "loading" || reloading) {
-    return <SubjectsSkeleton shape={readSubjectsListShape()} />;
-  }
+  const showSkeleton = view === "loading" || reloading;
 
   return (
     <>
-      {view === "list" ? (
+      {showSkeleton ? (
+          <SubjectsSkeleton shape={readSubjectsListShape()} />
+        ) : view === "list" ? (
         <SubjectList
           subjects={subjects}
           onAddNew={startCreate}
