@@ -40,6 +40,7 @@ function HomeworkSkeleton({ rows = DEFAULT_SKELETON_ROWS }) {
 export default function HomeworkSection({
   loading = false,
   skeletonRows,
+  knownEmpty = false,
   homework,
   togglingIds,
   newTitle,
@@ -85,7 +86,7 @@ export default function HomeworkSection({
           onScroll={fade.onScroll}
           className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
-          {loading ? (
+          {loading && !knownEmpty ? (
             <HomeworkSkeleton rows={skeletonRows ?? undefined} />
           ) : homework.length === 0 ? (
             <EmptyState variant="compact" className="h-full cad-reveal" icon={EmptyHomeworkIcon} title="No homework yet" body="Add a task above to link it to this subject." />

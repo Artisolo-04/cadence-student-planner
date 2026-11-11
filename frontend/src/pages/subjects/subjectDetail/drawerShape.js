@@ -34,7 +34,7 @@ export function estimateDrawerShape(weeklyHours, timetableId) {
     hours === 0
       ? 0
       : Math.min(Math.max(Math.round(hours / HOURS_PER_SESSION_GUESS), 1), MAX_ESTIMATED_DAYS);
-  return { days: Array(sessions).fill(1), hw: DEFAULT_HW, nextLines: 2 };
+  return { days: Array(sessions).fill(1), hw: DEFAULT_HW, nextLines: 2, scheduleEmpty: sessions === 0, hwEmpty: false };
 }
 
 export function readDrawerShape(key) {

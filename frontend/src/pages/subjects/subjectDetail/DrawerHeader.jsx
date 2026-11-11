@@ -28,6 +28,8 @@ export default function DrawerHeader({
   activeTasks,
   daysPerWeek,
   loading = false,
+  knownNoSessions = false,
+  knownNoTasks = false,
 }) {
   return (
     <AccentHeaderShell accent={subject.color}>
@@ -55,9 +57,9 @@ export default function DrawerHeader({
         aria-busy={loading || undefined}
         className="relative z-10 hidden flex-1 items-center justify-end gap-2 overflow-x-auto scrollbar-hidden md:flex"
       >
-        <MetricBadge icon={Calendar} count={weeklySlots} singular="Weekly Slot" plural="Weekly Slots" loading={loading} />
-        <MetricBadge icon={ListChecks} count={activeTasks} singular="Active Task" plural="Active Tasks" loading={loading} />
-        <MetricBadge icon={CalendarDays} count={daysPerWeek} singular="Day/Week" plural="Days/Week" loading={loading} />
+        <MetricBadge icon={Calendar} count={weeklySlots} singular="Weekly Slot" plural="Weekly Slots" loading={loading && !knownNoSessions} />
+        <MetricBadge icon={ListChecks} count={activeTasks} singular="Active Task" plural="Active Tasks" loading={loading && !knownNoTasks} />
+        <MetricBadge icon={CalendarDays} count={daysPerWeek} singular="Day/Week" plural="Days/Week" loading={loading && !knownNoSessions} />
       </div>
 
       <HeaderCloseButton onClose={onClose} />

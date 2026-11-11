@@ -22,6 +22,12 @@ import {
 
 const FALLBACK_TOTAL_WEEKLY_MINUTES = 1800;
 
+// A remembered shape says exactly which parts were empty last time.
+function withKnownEmpty(shape) {
+  if (!shape) return null;
+  return { ...shape, scheduleEmpty: shape.days.length === 0, hwEmpty: shape.hw === 0 };
+}
+
 export default function SubjectDetailDrawer({
   subject,
   timetableId,
@@ -108,7 +114,7 @@ export default function SubjectDetailDrawer({
   const skeletonShape = useMemo(() => {
     if (!showSkeleton) return null;
     return (
-      readDrawerShape(currentKey) ??
+      withKnownEmpty(readDrawerShape(currentKey)) ??
       estimateDrawerShape(subject?.weekly_hours, timetableId)
     );
   }, [showSkeleton, currentKey, subject?.weekly_hours, timetableId]);
@@ -281,6 +287,8 @@ export default function SubjectDetailDrawer({
               weeklySlots={detail?.entries?.length || 0}
               activeTasks={activeTaskCount}
               daysPerWeek={daysPerWeek}
+              knownNoSessions={Boolean(skeletonShape?.scheduleEmpty)}
+              knownNoTasks={Boolean(skeletonShape?.hwEmpty)}
               loading={showSkeleton}
             />
 
@@ -305,6 +313,8 @@ export default function SubjectDetailDrawer({
                       tasksCompleted={tasksCompleted}
                       tasksTotal={tasksTotal}
                       skeletonNextLines={skeletonShape?.nextLines}
+                      knownNoSessions={Boolean(skeletonShape?.scheduleEmpty)}
+                      knownNoTasks={Boolean(skeletonShape?.hwEmpty)}
                       loading={showSkeleton}
                     />
 
@@ -346,6 +356,7 @@ export default function SubjectDetailDrawer({
                           scheduleDays={scheduleDays}
                           fade={scheduleFade}
                           skeletonDays={skeletonShape?.days}
+                          knownEmpty={Boolean(skeletonShape?.scheduleEmpty)}
                           loading={showSkeleton}
                         />
                       </div>
@@ -366,6 +377,7 @@ export default function SubjectDetailDrawer({
                           onToggle={toggleHomeworkStatus}
                           fade={homeworkFade}
                           skeletonRows={skeletonShape?.hw}
+                          knownEmpty={Boolean(skeletonShape?.hwEmpty)}
                           loading={showSkeleton}
                         />
                       </div>

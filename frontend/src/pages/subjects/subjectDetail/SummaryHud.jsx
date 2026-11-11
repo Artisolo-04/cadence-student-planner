@@ -73,12 +73,12 @@ function TaskVelocityLine({ completed, total, loading = false }) {
   );
 }
 
-export default function SummaryHud({ nextSession, footprintPercent, accentColor, tasksCompleted, tasksTotal, loading = false, skeletonNextLines }) {
+export default function SummaryHud({ nextSession, footprintPercent, accentColor, tasksCompleted, tasksTotal, loading = false, skeletonNextLines, knownNoSessions = false, knownNoTasks = false }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <NextSessionCard nextSession={nextSession} loading={loading} nextLines={skeletonNextLines} />
-      <TimeFootprintBar footprintPercent={footprintPercent} accentColor={accentColor} loading={loading} />
-      <TaskVelocityLine completed={tasksCompleted} total={tasksTotal} loading={loading} />
+      <NextSessionCard nextSession={nextSession} loading={loading && !knownNoSessions} nextLines={skeletonNextLines} />
+      <TimeFootprintBar footprintPercent={footprintPercent} accentColor={accentColor} loading={loading && !knownNoSessions} />
+      <TaskVelocityLine completed={tasksCompleted} total={tasksTotal} loading={loading && !knownNoTasks} />
     </div>
   );
 }

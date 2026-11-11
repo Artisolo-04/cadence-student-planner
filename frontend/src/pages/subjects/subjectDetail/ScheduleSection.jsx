@@ -71,7 +71,7 @@ function ScheduleSkeleton({ days = DEFAULT_SKELETON_DAYS }) {
   );
 }
 
-export default function ScheduleSection({ entries, timetableId, scheduleDays, fade, loading = false, skeletonDays }) {
+export default function ScheduleSection({ entries, timetableId, scheduleDays, fade, loading = false, skeletonDays, knownEmpty = false }) {
   return (
     <section className="flex min-h-0 flex-1 basis-0 flex-col">
       <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -83,7 +83,7 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
           onScroll={fade.onScroll}
           className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
-          {loading ? (
+          {loading && !knownEmpty ? (
             <ScheduleSkeleton days={skeletonDays ?? undefined} />
           ) : entries.length === 0 ? (
             <EmptyState
