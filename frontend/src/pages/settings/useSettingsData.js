@@ -80,8 +80,16 @@ export function useSettingsData() {
     return () => window.removeEventListener(WORKSPACE_LIST_CHANGED_EVENT, handleListChanged);
   }, [load]);
 
+  // Follow the sidebar's active workspace in the same render (no one-frame gap)
+  // until the user picks a workspace in this page's dropdown.
+  const followedActive =
+    !hasUserSelectedRef.current && activeId != null
+      ? workspaces.find((w) => String(w.id) === String(activeId))
+      : null;
+  const effectiveSelectedId = followedActive ? followedActive.id : selectedId;
+
   const selectedWorkspace =
-    workspaces.find((workspace) => workspace.id === selectedId) ?? null;
+    workspaces.find((workspace) => workspace.id === effectiveSelectedId) ?? null;
 
   const updateGroup = useCallback(
     async (myGroup) => {
@@ -119,7 +127,7 @@ export function useSettingsData() {
     workspaces,
     loading,
     error,
-    selectedId,
+    selectedId: effectiveSelectedId,
     setSelectedId,
     selectedWorkspace,
     updateGroup,
