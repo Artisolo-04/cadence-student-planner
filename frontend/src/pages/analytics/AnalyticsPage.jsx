@@ -41,14 +41,16 @@ export default function AnalyticsPage() {
   const [days, setDays] = useState(30);
   const [groupTag, setGroupTag] = useState(null);
   const [panel, setPanel] = useState(null);
-  const { data, loading, error, reload } = useAnalyticsData(days);
+  const { data, loading, error, reload, loadedDays } = useAnalyticsData(days);
+  // True from the render the range changes until its data (or its error) arrives.
+  const daysLoading = loadedDays !== days && (loading || !error);
 
   useEffect(() => {
     setGroupTag(null);
     setPanel(null);
   }, [activeId]);
 
-  if (!data && loading) return <AnalyticsSkeleton />;
+  if (!data && loading) return <AnalyticsSkeleton days={days} onDaysChange={setDays} />;
 
   if (!data) {
     return (
@@ -161,7 +163,7 @@ export default function AnalyticsPage() {
 
       <div
         aria-busy={loading}
-        className={`grid shrink-0 grid-cols-2 gap-4 transition-opacity duration-200 lg:grid-cols-4 ${loading ? "opacity-60" : ""}`}
+        className="grid shrink-0 grid-cols-2 gap-4 lg:grid-cols-4"
       >
         <StatTile icon={Gauge} label="Completed" value={`${Math.round(hw.completionPercent)}%`} sub={`${hw.byStatus.done} of ${hw.total} tasks`} />
         <StatTile
@@ -187,13 +189,13 @@ export default function AnalyticsPage() {
 
       <div
         aria-busy={loading}
-        className={`grid grid-cols-1 gap-4 transition-opacity duration-200 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))] ${loading ? "opacity-60" : ""}`}
+        className="grid grid-cols-1 gap-4 lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:grid-rows-[repeat(2,minmax(0,1fr))]"
       >
         <SubjectTimeCard schedule={schedule} onExpand={() => setPanel("subjects")} />
         <DayTimeCard schedule={schedule} onExpand={() => setPanel("days")} />
         <HomeworkStatusCard homework={hw} />
-        <DeadlinesCard homework={hw} days={days} onExpand={() => setPanel("deadlines")} />
-        <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} onExpand={() => setPanel("activity")} />
+        <DeadlinesCard homework={hw} days={days} loading={daysLoading} onExpand={() => setPanel("deadlines")} />
+        <ActivityCard homework={hw} timetableActivity={data.timetableActivity} days={days} loading={daysLoading} onExpand={() => setPanel("activity")} />
         <VaultCard vault={data.vault} onExpand={() => setPanel("vault")} />
       </div>
 
