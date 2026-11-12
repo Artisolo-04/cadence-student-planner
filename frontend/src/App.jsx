@@ -11,6 +11,7 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import VaultPage from "./pages/vault/VaultPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "./layouts/ProtectedLayout";
+import ShellSkeleton from "./components/layout/ShellSkeleton";
 
 export default function App() {
   return (
@@ -27,7 +28,7 @@ export default function App() {
       />
       <Route
         element={
-          <ProtectedRoute>
+          <ProtectedRoute fallback={<ShellSkeleton />}>
             <ProtectedLayout />
           </ProtectedRoute>
         }

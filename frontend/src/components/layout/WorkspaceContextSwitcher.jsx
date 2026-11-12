@@ -101,7 +101,14 @@ export default function WorkspaceContextSwitcher() {
     setOpen(false);
   }, [collapsed]);
 
-  if (loading || timetables.length === 0) return null;
+  if (loading && timetables.length === 0) {
+      return (
+        <div className="mb-2" aria-hidden="true">
+          <div className="sk h-[42px] w-full rounded-lg border border-white/10" />
+        </div>
+      );
+    }
+    if (timetables.length === 0) return null;
 
   function handleSelect(id) {
     selectWorkspace(id);

@@ -6,7 +6,7 @@ export const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem("cadence_token")));
 
   const loadCurrentUser = useCallback(async () => {
     const token = localStorage.getItem("cadence_token");
