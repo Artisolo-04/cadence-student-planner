@@ -1,10 +1,12 @@
 import EmptyState from "../../components/ui/EmptyState";
 import { EMPTY_PREVIEW } from "../../lib/emptyPreview";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClipboardList, Plus } from "lucide-react";
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import HomeworkList from "./HomeworkList";
+import HomeworkSkeleton from "./HomeworkSkeleton";
+import { readHomeworkListShape, saveHomeworkListShape } from "./homeworkListShape";
 import HomeworkFormModal from "./HomeworkFormModal";
 
 export default function HomeworkPage() {
@@ -13,23 +15,30 @@ export default function HomeworkPage() {
   const [subjects, setSubjects] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editingHomework, setEditingHomework] = useState(null);
+  const reqRef = useRef(0);
+  const okRef = useRef(false);
 
   useEffect(() => {
     loadAll();
   }, []);
 
   async function loadAll() {
+    const reqId = ++reqRef.current;
+    let nextView = "empty";
     try {
       const [homeworkRes, subjectsRes] = await Promise.all([
         api.get("/homework"),
         api.get("/subjects"),
       ]);
+      if (reqId !== reqRef.current) return;
+      okRef.current = true;
       setHomework(homeworkRes.data);
       setSubjects(subjectsRes.data.subjects);
-      setView(homeworkRes.data.length === 0 || EMPTY_PREVIEW ? "empty" : "list");
+      nextView = homeworkRes.data.length === 0 || EMPTY_PREVIEW ? "empty" : "list";
     } catch (err) {
       console.error("Load homework error:", err);
-      setView("empty");
+    } finally {
+      if (reqId === reqRef.current) setView(nextView);
     }
   }
 
@@ -79,8 +88,19 @@ export default function HomeworkPage() {
     await handleStatusChange(item.id, nextStatus);
   }
 
-  if (view === "loading") {
-    return null;
+  // Keep the remembered skeleton shape in sync with real data (load, create, edit, delete).
+  useEffect(() => {
+    if (view === "loading" || !okRef.current || EMPTY_PREVIEW) return;
+    saveHomeworkListShape(homework);
+  }, [homework, view]);
+
+  const loading = view === "loading";
+  const savedShape = loading ? readHomeworkListShape() : null;
+  // Remembered as empty: show the real empty state right away, no skeleton rows.
+  const guessEmpty = Array.isArray(savedShape) && savedShape.length === 0;
+
+  if (loading && !guessEmpty) {
+    return <HomeworkSkeleton shape={savedShape} />;
   }
 
   return (
