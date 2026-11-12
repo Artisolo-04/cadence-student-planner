@@ -4,6 +4,7 @@ import { resolveAssetUrl } from "../resolveAssetUrl";
 import useScrollFade from "../../../../../hooks/useScrollFade";
 import { TopFade, BottomFade } from "../../../../../components/ui/ScrollFadeOverlay";
 import { CustomScrollbar } from "../../../../../components/ui/CustomScrollbar";
+import PreviewSkeleton from "../PreviewSkeleton";
 
 const TEXT_BG = "color-mix(in srgb, var(--color-text) 3%, var(--color-surface))";
 
@@ -38,9 +39,7 @@ export default function TextViewer({ item }) {
 
   if (state.status === "loading") {
     return (
-      <div className="flex flex-1 items-center justify-center text-xs text-[var(--color-text-muted)]">
-        Loading preview…
-      </div>
+      <PreviewSkeleton padding="p-3" />
     );
   }
 
