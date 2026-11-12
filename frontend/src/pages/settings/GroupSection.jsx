@@ -1,5 +1,6 @@
 import Dropdown from "../../components/ui/Dropdown";
 import { useSettingsData } from "./useSettingsData";
+import GroupSkeleton from "./GroupSkeleton";
 
 const GROUP_OPTIONS = [
   { value: "none", label: "No group (see everything)" },
@@ -21,12 +22,7 @@ export default function GroupSection() {
   } = useSettingsData();
 
   if (loading) {
-    return (
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-        <h2 className="text-base font-semibold text-[var(--color-text)] mb-1">My group</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">Loading your workspaces...</p>
-      </div>
-    );
+    return <GroupSkeleton showActiveBadge={activeId != null} />;
   }
 
   if (workspaces.length === 0) {

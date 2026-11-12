@@ -15,6 +15,7 @@ export function useSettingsData() {
   const [savingGroup, setSavingGroup] = useState(false);
 
   const hasUserSelectedRef = useRef(false);
+  const reqRef = useRef(0);
 
   const setSelectedId = useCallback((id) => {
     hasUserSelectedRef.current = true;
@@ -23,11 +24,12 @@ export function useSettingsData() {
 
   const load = useCallback(
     async ({ preserveSelection } = {}) => {
-      setLoading(true);
+      const reqId = ++reqRef.current;
       setError(null);
 
       try {
         const { data } = await api.get("/timetables");
+        if (reqId !== reqRef.current) return;
         const list = data.timetables ?? [];
         setWorkspaces(list);
 
@@ -45,9 +47,9 @@ export function useSettingsData() {
         });
       } catch (err) {
         console.error("Settings workspaces load error:", err);
-        setError("Couldn't load your workspaces right now.");
+        if (reqId === reqRef.current) setError("Couldn't load your workspaces right now.");
       } finally {
-        setLoading(false);
+        if (reqId === reqRef.current) setLoading(false);
       }
     },
     [activeId]
