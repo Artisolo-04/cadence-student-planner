@@ -13,6 +13,8 @@ import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import FolderExplorerModal from "./folderExplorer/FolderExplorerModal";
 import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
 import VaultFilterBar from "./VaultFilterBar";
+import VaultSkeleton from "./VaultSkeleton";
+import { readVaultShape, saveVaultShape } from "./vaultShape";
 import { DEFAULT_VAULT_FILTERS, applyVaultFilters, isFilterActive } from "./vaultFilters";
 
 const CONTENT_VIEWS = [
@@ -139,6 +141,17 @@ export default function VaultPage() {
   const activeGroups = isUniversity ? bySubject : byFolder;
   const visibleGroups = useMemo(() => applyVaultFilters(activeGroups, filters), [activeGroups, filters]);
   const isFiltering = isFilterActive(filters);
+
+  // Keep the remembered skeleton shape in sync with real data (first load and every change).
+  useEffect(() => {
+    if (loading || error || EMPTY_PREVIEW) return;
+    saveVaultShape(bySubject, byFolder);
+  }, [loading, error, bySubject, byFolder]);
+
+  const savedShape = loading ? readVaultShape(contentView) : null;
+  // Remembered as empty: show the real empty state right away, no skeleton cards.
+  const guessEmpty = Array.isArray(savedShape) && savedShape.length === 0 && !isFiltering;
+  const showSkeleton = loading && !guessEmpty;
   const activeAccent = "var(--color-primary)";
   const emptyMessage = isUniversity
     ? "No subject-linked resources yet. Click \"New workspace\" to start one."
@@ -255,8 +268,8 @@ export default function VaultPage() {
           onScroll={updateScrollFades}
           className="h-full min-w-0 flex-1 overflow-y-auto rounded-lg p-0 scrollbar-hidden sm:p-0"
         >
-          {loading ? (
-            <p className="text-sm text-[var(--color-text-muted)]">Loading vault…</p>
+          {showSkeleton ? (
+            <VaultSkeleton layout={layoutMode} shape={savedShape} />
           ) : (
             <div className={`flex flex-col gap-4 ${visibleGroups.length === 0 || EMPTY_PREVIEW ? "h-full" : ""}`}>
               {visibleGroups.length === 0 || EMPTY_PREVIEW ? (

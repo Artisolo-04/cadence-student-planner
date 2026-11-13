@@ -2,6 +2,7 @@ import { CalendarCheck, CalendarDays } from "lucide-react";
 import AnalyticsTile from "./AnalyticsTile";
 import { ChartEmpty, localDateKey } from "./MiniBars";
 import { formatShortDate } from "./analyticsUtils";
+import { DeadlinesBodySkeleton } from "./AnalyticsSkeleton";
 
 const tint = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
 const TODO = tint("var(--color-text-muted)", 85);
@@ -120,7 +121,7 @@ function ThinBars({ items, max }) {
   );
 }
 
-export default function DeadlinesCard({ homework, days, onExpand }) {
+export default function DeadlinesCard({ homework, days, onExpand, loading = false }) {
   const items = (homework?.dueByDate ?? []).map((d) => {
     const todo = d.todo ?? 0;
     const progress = d.inProgress ?? 0;
@@ -134,7 +135,9 @@ export default function DeadlinesCard({ homework, days, onExpand }) {
 
   return (
     <AnalyticsTile icon={CalendarDays} title="Deadlines ahead" meta={`next ${days} days`} scroll={false} onExpand={onExpand}>
-      {openTotal === 0 ? (
+      {loading ? (
+          <DeadlinesBodySkeleton days={days} />
+        ) : openTotal === 0 ? (
         <ChartEmpty icon={CalendarCheck}>Nothing is due in the next {days} days. Enjoy the calm.</ChartEmpty>
       ) : (
         <div className="flex h-full min-h-0 flex-col gap-3">

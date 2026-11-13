@@ -3,6 +3,7 @@ import { Activity, Inbox } from "lucide-react";
 import AnalyticsTile from "./AnalyticsTile";
 import MiniBars, { ChartEmpty } from "./MiniBars";
 import TileSwitch from "./TileSwitch";
+import { ActivityBodySkeleton } from "./AnalyticsSkeleton";
 
 const VIEWS = [
   { id: "added", label: "Homework", title: "Homework added" },
@@ -14,7 +15,7 @@ function countLabel(view, n) {
   return n === 1 ? "timetable edit" : "timetable edits";
 }
 
-export default function ActivityCard({ homework, timetableActivity, days, onExpand }) {
+export default function ActivityCard({ homework, timetableActivity, days, onExpand, loading = false }) {
   const [view, setView] = useState("added");
 
   const added = (homework?.createdByDate ?? []).map((d) => ({ date: d.date, value: d.count }));
@@ -31,7 +32,10 @@ export default function ActivityCard({ homework, timetableActivity, days, onExpa
       onExpand={onExpand}
       actions={<TileSwitch ariaLabel="Activity type" options={VIEWS} value={view} onChange={setView} />}
     >
-      <div className="flex h-full min-h-0 flex-col gap-3">
+      {loading ? (
+          <ActivityBodySkeleton days={days} view={view} />
+        ) : (
+        <div className="flex h-full min-h-0 flex-col gap-3">
         <p className="shrink-0 text-xs text-[var(--color-text-muted)]">
           <span className="mr-1.5 text-2xl font-bold tabular-nums text-[var(--color-text)]">{total}</span>
           {countLabel(view, total)}
@@ -46,6 +50,7 @@ export default function ActivityCard({ homework, timetableActivity, days, onExpa
           )}
         </div>
       </div>
-    </AnalyticsTile>
+    )}
+      </AnalyticsTile>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../../lib/api";
 
 const SENTINEL_TITLE = ".vault_sentinel";
@@ -15,18 +15,20 @@ export function useVaultData() {
   const [byFolder, setByFolder] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const reqRef = useRef(0);
 
   const fetchVault = useCallback(async () => {
-    setLoading(true);
+    const reqId = ++reqRef.current;
     setError(null);
     try {
       const { data } = await api.get("/vault");
+      if (reqId !== reqRef.current) return;
       setBySubject(stripSentinelItems(data.bySubject));
       setByFolder(stripSentinelItems(data.byFolder));
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to load vault");
+      if (reqId === reqRef.current) setError(err.response?.data?.error || "Failed to load vault");
     } finally {
-      setLoading(false);
+      if (reqId === reqRef.current) setLoading(false);
     }
   }, []);
 

@@ -2,9 +2,76 @@ import EmptyState from "../../../components/ui/EmptyState";
 import { Calendar as EmptyScheduleIcon } from "lucide-react";
 import { Clock, MapPin, Users } from "lucide-react";
 import { formatDuration, formatTime } from "./subjectDetailUtils";
+import { Sk } from "./DrawerSkeletonBits";
 import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 
-export default function ScheduleSection({ entries, timetableId, scheduleDays, fade }) {
+const DEFAULT_SKELETON_DAYS = [2, 1, 2];
+
+function Chip({ delay = 0, children }) {
+  return (
+    <span
+      className="sk flex shrink-0 items-center gap-1 rounded-md border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] font-medium"
+      style={{ "--sk-delay": `-${delay}s` }}
+    >
+      <span className="invisible flex items-center gap-1">{children}</span>
+    </span>
+  );
+}
+
+function ScheduleSkeleton({ days = DEFAULT_SKELETON_DAYS }) {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-3">
+      {days.map((rows, d) => (
+        <div
+          key={d}
+          className="rounded-lg border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-3 py-3"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-semibold">
+              <Sk className="h-[0.72em] w-20 rounded-[3px]" delay={d * 0.25} />
+            </span>
+            <span
+              className="sk inline-flex rounded-md border border-[var(--color-border)] px-2 py-0.5 text-[11px] font-medium tracking-tight"
+              style={{ "--sk-delay": `-${d * 0.25}s` }}
+            >
+              <span className="invisible">3h 10m</span>
+            </span>
+          </div>
+
+          <ul className="relative mt-2.5 flex flex-col gap-2.5 pl-3">
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-1 bottom-1 w-[3px] rounded-full bg-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+            />
+            {Array.from({ length: rows }, (_, r) => (
+              <li key={r}>
+                <div className="flex items-start justify-between gap-1.5 text-xs">
+                  <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-[var(--color-text-muted)]">
+                    <Clock size={11} className="shrink-0" />
+                    <Sk className="h-[0.72em] w-24 rounded-[3px]" delay={d * 0.25 + r * 0.15} />
+                  </span>
+                  <div className="flex flex-wrap items-center justify-end gap-1.5">
+                    <Chip delay={d * 0.25 + r * 0.15}>3h 10m</Chip>
+                    <Chip delay={d * 0.25 + r * 0.15}>
+                      <Users size={10} />
+                      All
+                    </Chip>
+                    <Chip delay={d * 0.25 + r * 0.15}>
+                      <MapPin size={10} />
+                      Info 07
+                    </Chip>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function ScheduleSection({ entries, timetableId, scheduleDays, fade, loading = false, skeletonDays, knownEmpty = false }) {
   return (
     <section className="flex min-h-0 flex-1 basis-0 flex-col">
       <h4 className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
@@ -16,10 +83,12 @@ export default function ScheduleSection({ entries, timetableId, scheduleDays, fa
           onScroll={fade.onScroll}
           className="h-full min-w-0 flex-1 overflow-y-auto scrollbar-hidden"
         >
-          {entries.length === 0 ? (
+          {loading && !knownEmpty ? (
+            <ScheduleSkeleton days={skeletonDays ?? undefined} />
+          ) : entries.length === 0 ? (
             <EmptyState
               variant="compact"
-              className="h-full"
+              className="h-full cad-reveal"
               icon={EmptyScheduleIcon}
               title={timetableId ? "Not scheduled here" : "No workspace selected"}
               body={timetableId ? "This subject has no sessions in this workspace." : "Select a workspace to see scheduling."}

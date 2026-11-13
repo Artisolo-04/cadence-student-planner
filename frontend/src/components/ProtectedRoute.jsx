@@ -1,8 +1,12 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children, fallback = null }) {
   const { user, loading } = useAuth();
+
+  if (loading && fallback) {
+    return fallback;
+  }
 
   if (loading) {
     return (

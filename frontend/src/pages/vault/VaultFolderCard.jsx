@@ -39,7 +39,7 @@ function pluralize(label, count) {
   return label.endsWith("s") ? label : `${label}s`;
 }
 
-function buildBreakdown(items) {
+export function buildBreakdown(items) {
   const counts = new Map();
   for (const item of items) {
     const kind = resolveKind(item);

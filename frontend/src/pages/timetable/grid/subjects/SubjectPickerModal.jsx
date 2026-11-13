@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Search, X, Check } from "lucide-react";
+import { Search, X, Check, BookOpen } from "lucide-react";
 import Modal from "../../../../components/ui/Modal";
 import Button from "../../../../components/ui/Button";
 import Input from "../../../../components/ui/Input";
 import { CustomScrollbar } from "../../../../components/ui/CustomScrollbar";
 import SegmentedControl from "../../../../components/ui/SegmentedControl";
 import SubjectPickerRow from "./SubjectPickerRow";
+import { readSubjectsShape } from "../entries/subjectsShape";
 
 const ITEM_HEIGHT = 52;
 const ITEM_GAP = 6;
@@ -29,6 +30,7 @@ export default function SubjectPickerModal({
   onClear,
   cellLabel,
   cellEntries,
+  loading = false,
 }) {
   const scrollRef = useRef(null);
   const [showTopFade, setShowTopFade] = useState(false);
@@ -146,7 +148,47 @@ export default function SubjectPickerModal({
           />
         </div>
 
-        {subjects.length === 0 ? (
+        {loading ? (
+          <div role="status" aria-busy="true" className="flex flex-col gap-4">
+            <span className="sr-only">Loading subjects</span>
+            <div className="relative">
+              <Search
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+              />
+              <Input
+                id="subject-picker-search-loading"
+                placeholder="Search subjects..."
+                className="pl-9"
+                disabled
+                tabIndex={-1}
+              />
+            </div>
+            <div aria-hidden="true" className="flex flex-col gap-1.5">
+              {(readSubjectsShape() ?? [true, true, true, true]).slice(0, 4).map((hasTeacher, i) => (
+                <div
+                  key={i}
+                  className="sk relative flex min-h-[52px] items-center gap-3 overflow-hidden rounded-lg border-t border-white/15 px-3 py-2"
+                  style={{ "--sk-delay": `-${i * 0.2}s` }}
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/25 bg-white/20">
+                    <BookOpen size={15} className="text-[var(--color-text-muted)] opacity-60" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-bold">
+                      <span className={`inline-block h-[0.72em] rounded-[3px] bg-[color-mix(in_srgb,var(--color-text)_16%,transparent)] align-baseline ${["w-2/3", "w-3/4", "w-1/2", "w-3/5"][i % 4]}`} />
+                    </span>
+                    {hasTeacher && (
+                      <span className="block truncate text-xs font-semibold">
+                        <span className={`inline-block h-[0.72em] rounded-[3px] bg-[color-mix(in_srgb,var(--color-text)_16%,transparent)] align-baseline ${["w-1/3", "w-2/5", "w-1/4", "w-1/3"][i % 4]}`} />
+                      </span>
+                    )}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : subjects.length === 0 ? (
           <p className="text-sm text-[var(--color-text-muted)]">
             You don't have any subjects yet. Add one from the Subjects page first.
           </p>
