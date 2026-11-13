@@ -23,7 +23,7 @@ function formatIssueDate(dateStr) {
   return d.toLocaleDateString(undefined, { month: "2-digit", year: "numeric" });
 }
 
-export default function StudentCard({ user, profile, groupTag }) {
+export default function StudentCard({ user, profile, groupTag, switching = false }) {
   const fullName = profile?.full_name || "Student";
   const initials = getInitials(profile?.full_name, user?.email);
   const avatarSrc = profile?.avatar_url ? `${API_ORIGIN}${profile.avatar_url}` : null;
@@ -100,7 +100,11 @@ export default function StudentCard({ user, profile, groupTag }) {
               {profile?.class_year ? (
                 <span className="truncate pl-[20px] text-xs">{profile.class_year}</span>
               ) : null}
-              {showGroupField ? (
+              {switching ? (
+                  <span aria-hidden="true" className="flex h-4 items-center pl-[20px]">
+                    <span className="sk h-2.5 w-10 rounded" />
+                  </span>
+                ) : showGroupField ? (
                 <span className="truncate pl-[20px] text-xs">{groupTag.toUpperCase()}</span>
               ) : null}
             </div>

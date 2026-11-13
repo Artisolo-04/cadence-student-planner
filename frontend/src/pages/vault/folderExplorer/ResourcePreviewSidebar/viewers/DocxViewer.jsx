@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import mammoth from "mammoth";
 import DOMPurify from "dompurify";
-import { Loader2, FileWarning } from "lucide-react";
+import { FileWarning } from "lucide-react";
+import PreviewSkeleton from "../PreviewSkeleton";
 import { resolveAssetUrl } from "../resolveAssetUrl";
 import useScrollFade from "../../../../../hooks/useScrollFade";
 import { TopFade, BottomFade } from "../../../../../components/ui/ScrollFadeOverlay";
@@ -44,10 +45,7 @@ export default function DocxViewer({ item }) {
 
   if (status === "loading") {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_3%,var(--color-surface))] text-[var(--color-text-muted)]">
-        <Loader2 size={22} className="animate-spin" />
-        <p className="text-xs">Extracting document text…</p>
-      </div>
+      <PreviewSkeleton padding="p-5" />
     );
   }
 

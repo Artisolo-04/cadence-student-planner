@@ -314,3 +314,38 @@
   .drawer-elevated { box-shadow: var(--shadow-overlay); }
 }
 
+/* Skeleton animations */
+@keyframes cad-shimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -50% 0; }
+}
+
+@keyframes cad-reveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sk {
+  background-color: var(--color-fill-4);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    color-mix(in srgb, var(--color-text) 9%, transparent) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: cad-shimmer 1.6s ease-in-out infinite;
+  animation-delay: var(--sk-delay, 0s);
+}
+
+.cad-reveal {
+  animation: cad-reveal 0.35s ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk,
+  .cad-reveal {
+    animation: none;
+  }
+}

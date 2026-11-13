@@ -8,6 +8,7 @@ import { dayIndexToColumns, slotIndexToGridRow } from "../../timetable/grid/over
 import { WEEKDAY_FULL } from "../../timetable/grid/layout/weekdayConstants";
 import SubjectLabel from "../../timetable/grid/subjects/SubjectLabel";
 import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
+import { readGridShape, saveGridShape } from "../../timetable/gridShape";
 
 const ROW_HEIGHT = 56;
 const HEADER_HEIGHT = 40;
@@ -54,9 +55,96 @@ function OpacityRangeControl({ value, onChange }) {
   );
 }
 
+const DEFAULT_SKELETON_DAYS = [1, 2, 3, 4, 5];
+const DEFAULT_SKELETON_ROWS = 6;
+
+function GridSkeleton({ shape, focusLevel, onFocusChange }) {
+  const dayList = shape?.days?.length ? shape.days : DEFAULT_SKELETON_DAYS;
+  const rows = shape?.rows > 0 ? shape.rows : DEFAULT_SKELETON_ROWS;
+  const headCell =
+    "border-b border-[var(--color-border)] bg-[var(--color-surface-alt)] px-1 py-2 text-center text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]";
+  const rowIdx = Array.from({ length: rows }, (_, r) => r);
+
+  return (
+    <div role="status" aria-busy="true" className="flex min-h-0 flex-1 flex-col gap-3">
+      <span className="sr-only">Loading timetable grid</span>
+      <div
+        className="flex shrink-0 items-center justify-between gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-3 py-2.5"
+      >
+        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+          Controls
+        </span>
+        <OpacityRangeControl value={focusLevel} onChange={onFocusChange} />
+      </div>
+
+      <div aria-hidden="true" className="flex min-h-0 flex-1">
+        <div className="relative flex min-h-0 flex-1 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
+            <div
+              className="grid h-full text-sm"
+              style={{
+                gridTemplateColumns: `88px repeat(${dayList.length * 2}, minmax(0, 1fr))`,
+                gridTemplateRows: `${HEADER_HEIGHT}px repeat(${rows}, minmax(${ROW_HEIGHT}px, 1fr))`,
+              }}
+            >
+              <div style={{ gridColumn: 1, gridRow: 1 }} className={`${headCell} border-r`}>
+                Time
+              </div>
+              {dayList.map((dow, i) => (
+                <div
+                  key={`h${i}`}
+                  style={{ gridColumn: `${2 + i * 2} / span 2`, gridRow: 1 }}
+                  className={`${headCell} ${i === dayList.length - 1 ? "" : "border-r"}`}
+                >
+                  {WEEKDAY_FULL[dow] ?? ""}
+                </div>
+              ))}
+
+              {rowIdx.map((r) => (
+                <div
+                  key={`t${r}`}
+                  style={{ gridColumn: 1, gridRow: r + 2 }}
+                  className={`flex items-center justify-center border-r border-[var(--color-border)] bg-[var(--color-surface-alt)] px-1.5 ${
+                    r === rows - 1 ? "" : "border-b"
+                  }`}
+                >
+                  <span
+                    className="sk inline-block h-[0.72em] w-14 rounded-[3px]"
+                    style={{ "--sk-delay": `-${r * 0.15}s` }}
+                  />
+                </div>
+              ))}
+
+              {rowIdx.flatMap((r) =>
+                dayList.map((_, i) => (
+                  <Fragment key={`c${r}-${i}`}>
+                    <div
+                      style={{ gridColumn: 2 + i * 2, gridRow: r + 2 }}
+                      className={`border-r border-[var(--color-border)] ${r === rows - 1 ? "" : "border-b"}`}
+                    />
+                    <div
+                      style={{ gridColumn: 3 + i * 2, gridRow: r + 2 }}
+                      className={`${i === dayList.length - 1 ? "" : "border-r"} border-[var(--color-border)] ${
+                        r === rows - 1 ? "" : "border-b"
+                      }`}
+                    />
+                  </Fragment>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CalendarWorkspaceEngine({ subject, timetableId, enabled }) {
   const [workspace, setWorkspace] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadedKey, setLoadedKey] = useState(null);
+  const requestKey = timetableId ? String(timetableId) : null;
+  // True from the very first render of a new timetable: no one-frame empty flash.
+  const loading = enabled && requestKey !== null && loadedKey !== requestKey;
   const [error, setError] = useState("");
   const [focusLevel, setFocusLevel] = useState(DEFAULT_FOCUS_LEVEL);
   const dimOpacity = 1 - focusLevel;
@@ -66,20 +154,23 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
     if (!enabled || !timetableId) return;
 
     let cancelled = false;
-    setLoading(true);
+    const key = String(timetableId);
     setError("");
 
     api
       .get(`/timetables/${timetableId}`)
       .then(({ data }) => {
-        if (!cancelled) setWorkspace(data);
+        if (!cancelled) {
+          setWorkspace(data);
+          saveGridShape(timetableId, data);
+        }
       })
       .catch((err) => {
         console.error("Load timetable workspace error:", err);
         if (!cancelled) setError("Couldn't load the timetable grid.");
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoadedKey(key);
       });
 
     return () => {
@@ -112,6 +203,8 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
     [orderedDays, orderedSlots, spanLayout]
   );
 
+  const skeletonShape = loading ? readGridShape(requestKey) : null;
+
   if (!enabled) return null;
 
   return (
@@ -126,7 +219,7 @@ export default function CalendarWorkspaceEngine({ subject, timetableId, enabled 
       )}
 
       {loading && (
-        <p className="p-4 text-sm text-[var(--color-text-muted)]">Loading timetable…</p>
+        <GridSkeleton shape={skeletonShape} focusLevel={focusLevel} onFocusChange={setFocusLevel} />
       )}
       {!loading && error && (
         <p className="p-4 text-sm text-[var(--color-danger)]">{error}</p>

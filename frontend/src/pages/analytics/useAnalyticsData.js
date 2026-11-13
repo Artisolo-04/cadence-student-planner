@@ -6,6 +6,7 @@ export default function useAnalyticsData(days) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [loadedDays, setLoadedDays] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -15,7 +16,10 @@ export default function useAnalyticsData(days) {
       setError(null);
       try {
         const { data: overview } = await api.get("/analytics/overview", { params: { days } });
-        if (!cancelled) setData(overview);
+        if (!cancelled) {
+          setData(overview);
+          setLoadedDays(days);
+        }
       } catch (err) {
         console.error("Analytics load error:", err);
         if (!cancelled) setError(err.response?.data?.error ?? "Couldn't load your analytics right now.");
@@ -30,7 +34,10 @@ export default function useAnalyticsData(days) {
     };
   }, [days, reloadKey]);
 
-  const reload = useCallback(() => setReloadKey((k) => k + 1), []);
+  const reload = useCallback(() => {
+    setLoading(true);
+    setReloadKey((k) => k + 1);
+  }, []);
 
-  return { data, loading, error, reload };
+  return { data, loading, error, reload, loadedDays };
 }

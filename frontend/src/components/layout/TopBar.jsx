@@ -40,7 +40,10 @@ function MobileWorkspaceButton() {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  if (loading || timetables.length === 0) return null;
+  if (loading && timetables.length === 0) {
+      return <span aria-hidden="true" className="sk h-9 w-[120px] shrink-0 rounded-md md:hidden" />;
+    }
+    if (timetables.length === 0) return null;
 
   function handleSelect(id) {
     selectWorkspace(id);

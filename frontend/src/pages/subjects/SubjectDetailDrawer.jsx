@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Calendar, ClipboardList, Search } from "lucide-react";
 import api from "../../lib/api";
 import DrawerHeader from "./subjectDetail/DrawerHeader";
 import ScheduleSection from "./subjectDetail/ScheduleSection";
 import HomeworkSection from "./subjectDetail/HomeworkSection";
 import SummaryHud from "./subjectDetail/SummaryHud";
+import {
+  estimateDrawerShape,
+  readDrawerShape,
+  saveDrawerShape,
+} from "./subjectDetail/drawerShape";
 import useScrollFade from "../../hooks/useScrollFade";
 import CalendarWorkspaceEngine from "./subjectDetail/CalendarWorkspaceEngine";
 import SegmentedControl from "../../components/ui/SegmentedControl";
@@ -17,6 +22,12 @@ import {
 
 const FALLBACK_TOTAL_WEEKLY_MINUTES = 1800;
 
+// A remembered shape says exactly which parts were empty last time.
+function withKnownEmpty(shape) {
+  if (!shape) return null;
+  return { ...shape, scheduleEmpty: shape.days.length === 0, hwEmpty: shape.hw === 0 };
+}
+
 export default function SubjectDetailDrawer({
   subject,
   timetableId,
@@ -27,7 +38,14 @@ export default function SubjectDetailDrawer({
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [detail, setDetail] = useState(null);
+  const [detail, setDetailRaw] = useState(null);
+  const [detailKey, setDetailKey] = useState(null);
+  const setDetail = useCallback((next) => {
+    setDetailRaw((prev) => {
+      if (typeof next !== "function") return next;
+      return prev ? next(prev) : prev;
+    });
+  }, []);
   const [error, setError] = useState("");
 
   const [togglingIds, setTogglingIds] = useState(() => new Set());
@@ -87,6 +105,35 @@ export default function SubjectDetailDrawer({
   );
   const tasksTotal = detail?.homework?.length || 0;
 
+  const currentKey = subject ? `${subject.id}:${timetableId ?? ""}` : null;
+  const ready = Boolean(detail) && detailKey === currentKey;
+  const showSkeleton = !error && (loading || !ready);
+  const sectionEntries = ready ? (detail.entries ?? []) : [];
+  const sectionHomework = ready ? (detail.homework ?? []) : [];
+
+  const skeletonShape = useMemo(() => {
+    if (!showSkeleton) return null;
+    return (
+      withKnownEmpty(readDrawerShape(currentKey)) ??
+      estimateDrawerShape(subject?.weekly_hours, timetableId)
+    );
+  }, [showSkeleton, currentKey, subject?.weekly_hours, timetableId]);
+
+  useEffect(() => {
+    if (!ready || !currentKey) return;
+    let nextLines = 1;
+    if (nextSession) {
+      const room = nextSession.room ? ` · Room ${nextSession.room}` : "";
+      const text = `${nextSession.dayLabel} at ${nextSession.time}${room}`;
+      nextLines = text.length > 30 ? 2 : 1;
+    }
+    saveDrawerShape(currentKey, {
+      days: scheduleDays.map((day) => day.entries.length),
+      hw: tasksTotal,
+      nextLines,
+    });
+  }, [ready, currentKey, scheduleDays, tasksTotal, nextSession]);
+
   useEffect(() => {
     let raf1, raf2;
     if (open) {
@@ -118,9 +165,11 @@ export default function SubjectDetailDrawer({
     if (!open || !subject) return;
 
     let cancelled = false;
+    const requestKey = `${subject.id}:${timetableId ?? ""}`;
     setLoading(true);
     setError("");
     setDetail(null);
+    setDetailKey(null);
     setNewTitle("");
     setAddError("");
 
@@ -129,7 +178,10 @@ export default function SubjectDetailDrawer({
         params: timetableId ? { timetableId } : undefined,
       })
       .then(({ data }) => {
-        if (!cancelled) setDetail(data);
+        if (!cancelled) {
+          setDetail(data);
+          setDetailKey(requestKey);
+        }
       })
       .catch((err) => {
         console.error("Load subject detail error:", err);
@@ -235,17 +287,23 @@ export default function SubjectDetailDrawer({
               weeklySlots={detail?.entries?.length || 0}
               activeTasks={activeTaskCount}
               daysPerWeek={daysPerWeek}
+              knownNoSessions={Boolean(skeletonShape?.scheduleEmpty)}
+              knownNoTasks={Boolean(skeletonShape?.hwEmpty)}
+              loading={showSkeleton}
             />
 
-            <div className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl">
-              {loading && (
-                <p className="p-5 text-sm text-[var(--color-text-muted)]">Loading…</p>
+            <div
+              aria-busy={showSkeleton || undefined}
+              className="relative z-10 flex min-h-0 flex-1 flex-col backdrop-blur-2xl"
+            >
+              {showSkeleton && (
+                <span role="status" className="sr-only">Loading subject details</span>
               )}
               {error && (
                 <p className="p-5 text-sm text-[var(--color-danger)]">{error}</p>
               )}
 
-              {!loading && !error && detail && (
+              {!error && (
                 <div className="flex min-h-0 flex-1 flex-col md:flex-row">
                   <div className="hidden shrink-0 flex-col gap-5 px-5 py-5 md:flex md:w-72 md:border-r md:border-[var(--color-border)]">
                     <SummaryHud
@@ -254,6 +312,10 @@ export default function SubjectDetailDrawer({
                       accentColor={subject.color}
                       tasksCompleted={tasksCompleted}
                       tasksTotal={tasksTotal}
+                      skeletonNextLines={skeletonShape?.nextLines}
+                      knownNoSessions={Boolean(skeletonShape?.scheduleEmpty)}
+                      knownNoTasks={Boolean(skeletonShape?.hwEmpty)}
+                      loading={showSkeleton}
                     />
 
                     <div className="mt-auto">
@@ -289,10 +351,13 @@ export default function SubjectDetailDrawer({
                         }`}
                       >
                         <ScheduleSection
-                          entries={detail.entries}
+                          entries={sectionEntries}
                           timetableId={timetableId}
                           scheduleDays={scheduleDays}
                           fade={scheduleFade}
+                          skeletonDays={skeletonShape?.days}
+                          knownEmpty={Boolean(skeletonShape?.scheduleEmpty)}
+                          loading={showSkeleton}
                         />
                       </div>
 
@@ -302,7 +367,7 @@ export default function SubjectDetailDrawer({
                         }`}
                       >
                         <HomeworkSection
-                          homework={detail.homework}
+                          homework={sectionHomework}
                           togglingIds={togglingIds}
                           newTitle={newTitle}
                           setNewTitle={setNewTitle}
@@ -311,6 +376,9 @@ export default function SubjectDetailDrawer({
                           onSubmit={handleAddHomework}
                           onToggle={toggleHomeworkStatus}
                           fade={homeworkFade}
+                          skeletonRows={skeletonShape?.hw}
+                          knownEmpty={Boolean(skeletonShape?.hwEmpty)}
+                          loading={showSkeleton}
                         />
                       </div>
                     </div>
@@ -333,7 +401,7 @@ export default function SubjectDetailDrawer({
               )}
             </div>
 
-            {!loading && !error && detail && viewMode === "default" && (
+            {!error && viewMode === "default" && (
               <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center md:hidden">
                 <div className="pointer-events-auto rounded-lg shadow-[0_8px_30px_-8px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                     <SegmentedControl

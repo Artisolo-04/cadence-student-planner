@@ -9,6 +9,7 @@ import { getResourceMeta } from "../vault/resourceMeta";
 import { stripExtension } from "../vault/components/AddVaultItemForm/utils";
 import { formatBytes } from "../vault/folderExplorer/components/FolderExplorerModal/utils";
 import { recentFiles, timeAgo } from "./vaultAccess";
+import { VaultRowsSkeleton } from "./DashboardSkeleton";
 
 const ICON_BY_BADGE = {
   PDF: FileText, TXT: FileText, MD: FileText,
@@ -98,7 +99,7 @@ export default function VaultQuickAccessCard({ files = [], loading, onOpen }) {
         </div>
 
         {loading ? (
-          <p className="mt-3 text-xs text-[var(--color-text-muted)]">Loading…</p>
+          <VaultRowsSkeleton />
         ) : items.length === 0 || EMPTY_PREVIEW ? (
           <EmptyState variant="compact" className="flex-1" icon={EmptyVaultIcon} title="No files in your Vault yet" body="Upload notes or PDFs and they will show up here." />
         ) : (

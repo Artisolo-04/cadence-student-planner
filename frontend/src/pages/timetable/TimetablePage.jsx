@@ -7,6 +7,9 @@ import {
 import api from "../../lib/api";
 import Button from "../../components/ui/Button";
 import WorkspaceList from "./WorkspaceList";
+import TimetableSkeleton from "./TimetableSkeleton";
+import TimetableGridSkeleton from "./TimetableGridSkeleton";
+import { readGridShape, saveGridShape } from "./gridShape";
 import TimetableWizard from "./wizard/TimetableWizard";
 import TimetableGrid from "./grid/layout/TimetableGrid";
 import ViewOptionsPanel from "./ViewOptionsPanel";
@@ -25,8 +28,14 @@ export default function TimetablePage() {
     loading: workspacesLoading,
   } = useWorkspace();
 
-  const [view, setView] = useState("loading");
+  const [view, setView] = useState(() =>
+      workspacesLoading
+        ? "loading"
+        : (timetables.length === 0 || EMPTY_PREVIEW ? "empty" : "list")
+    );
   const [wizardMode, setWizardMode] = useState("create");
+  const [gridLoading, setGridLoading] = useState(false);
+  const openReqRef = useRef(0);
   const [workspace, setWorkspace] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const editActionsRef = useRef({ undo: () => {}, redo: () => {} });
@@ -57,13 +66,19 @@ export default function TimetablePage() {
 
   async function openWorkspaceById(id) {
     openedIdRef.current = id;
+    const reqId = ++openReqRef.current;
+    setGridLoading(true);
     try {
       const { data } = await api.get(`/timetables/${id}`);
+      if (reqId !== openReqRef.current) return;
+      saveGridShape(id, data);
       setWorkspace(data);
       setIsEditMode(false);
       setView("grid");
     } catch (err) {
       console.error("Load workspace detail error:", err);
+    } finally {
+      if (reqId === openReqRef.current) setGridLoading(false);
     }
   }
 
@@ -73,6 +88,7 @@ export default function TimetablePage() {
   }
 
   async function handleWizardComplete(detail) {
+    saveGridShape(detail.timetable.id, detail);
     setWorkspace(detail);
     setIsEditMode(false);
     setView("grid");
@@ -145,8 +161,12 @@ export default function TimetablePage() {
     }
   }
 
+  if (gridLoading) {
+    return <TimetableGridSkeleton shape={readGridShape(openedIdRef.current)} />;
+  }
+
   if (view === "loading") {
-    return null;
+    return <TimetableSkeleton />;
   }
 
   if (view === "wizard") {
