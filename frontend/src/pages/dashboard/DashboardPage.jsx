@@ -58,7 +58,7 @@ export default function DashboardPage() {
           <StudentCard user={user} profile={profile} groupTag={groupTag} switching={switching} />
         </div>
 
-          <div className="min-h-[9rem] flex-1">
+          <div className="flex-none lg:min-h-0 lg:flex-1">
           <VelocityRingTile
             total={homeworkStats.total}
             done={homeworkStats.done}
@@ -67,7 +67,7 @@ export default function DashboardPage() {
           />
         </div>
 
-          <div className="min-h-[9rem] flex-1">
+          <div className="flex-none lg:min-h-0 lg:flex-1">
           {switching ? <WeeklySkeleton /> : <WeeklyIntensityTile data={weeklyIntensity} />}
         </div>
       </aside>
