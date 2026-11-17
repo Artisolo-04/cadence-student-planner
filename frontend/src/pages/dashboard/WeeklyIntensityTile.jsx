@@ -43,7 +43,7 @@ export default function WeeklyIntensityTile({ data }) {
         </span>
       </div>
 
-      <div className="mt-3 flex min-h-0 flex-1 items-stretch justify-between gap-2">
+      <div className="mt-3 flex min-h-32 flex-1 lg:min-h-0 items-stretch justify-between gap-2">
         {data.map((d) => {
           const pct = (d.minutes / maxMinutes) * 100;
           return (

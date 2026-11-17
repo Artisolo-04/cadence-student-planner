@@ -35,7 +35,7 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
 
   return (
     <div
-      className="relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl gap-2"
+      className="relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl border border-[var(--color-line)] bg-[var(--color-surface)] p-5 backdrop-blur-xl"
       style={{
         backgroundImage:
           "linear-gradient(150deg, color-mix(in srgb, var(--color-tint) 14%, transparent) 0%, transparent 70%)",
@@ -51,7 +51,7 @@ export default function VelocityRingTile({ total, done, overdue, loading }) {
         </span>
       </div>
 
-      <div className="flex flex-row items-baseline gap-2">
+      <div className="flex flex-row my-auto items-baseline gap-2">
         <span className="text-5xl font-bold leading-none tabular-nums text-[var(--color-text)]">
           {displayPct}%
         </span>
