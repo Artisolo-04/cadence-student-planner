@@ -450,10 +450,10 @@ export default function DashboardSkeleton() {
         <div className="shrink-0">
           <StudentSkeleton />
         </div>
-        <div className="min-h-[9rem] flex-1">
+        <div className="flex-none lg:min-h-0 lg:flex-1">
           <VelocitySkeleton />
         </div>
-        <div className="min-h-[9rem] flex-1">
+        <div className="flex-none lg:min-h-0 lg:flex-1">
           <WeeklySkeleton />
         </div>
       </aside>
