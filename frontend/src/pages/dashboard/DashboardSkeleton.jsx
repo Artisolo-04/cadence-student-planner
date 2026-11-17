@@ -147,7 +147,7 @@ const STATS = [
 
 function VelocitySkeleton() {
   return (
-    <Card className="flex h-full flex-col justify-between gap-2 p-5" wash={TINT_WASH} delay={0.12}>
+    <Card className="flex h-full flex-col gap-4 p-5" wash={TINT_WASH} delay={0.12}>
       <div className="flex shrink-0 items-center justify-between">
         <div className={LABEL}>
           <Gauge size={12} />
@@ -156,7 +156,7 @@ function VelocitySkeleton() {
         <T as="span" size="text-[10px] font-mono" w="w-14" />
       </div>
 
-      <div className="flex flex-row items-baseline gap-2">
+      <div className="flex flex-row my-auto items-baseline gap-2">
         <T as="span" size="text-5xl font-bold leading-none" w="w-24" />
         <span className="text-xs text-[var(--color-text-muted)]">of tasks done</span>
       </div>
@@ -197,7 +197,7 @@ export function WeeklySkeleton() {
         <T as="span" size="text-[10px] font-mono" w="w-16" />
       </div>
 
-      <div className="mt-3 flex min-h-0 flex-1 items-stretch justify-between gap-2">
+      <div className="mt-3 flex min-h-32 flex-1 lg:min-h-0 items-stretch justify-between gap-2">
         {DAYS.map((label, i) => (
           <div key={label} className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
             <div
