@@ -4,6 +4,7 @@ import { CustomScrollbar } from "../../components/ui/CustomScrollbar";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 import Dropdown from "../../components/ui/Dropdown";
+import DatePicker from "../../components/ui/DatePicker";
 import Button from "../../components/ui/Button";
 
 const PRIORITY_OPTIONS = [
@@ -79,6 +80,7 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
   return (
     <Modal
       open={open}
+      size="lg"
       onClose={() => !saving && onClose()}
       title={homework ? "Edit homework" : "New homework"}
       footer={
@@ -99,57 +101,67 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
           onSubmit={handleSubmit}
           className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-hidden"
         >
-          <Input
-            id="homework-title"
-            label="Title"
-            placeholder="e.g. Chapter 4 exercises"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
+            {/* left column: details */}
+            <div className="flex min-w-0 flex-col gap-4">
+              <Input
+                id="homework-title"
+                label="Title"
+                placeholder="e.g. Chapter 4 exercises"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
 
-          <Dropdown
-            id="homework-subject"
-            label="Subject"
-            value={subjectId}
-            onChange={(e) => setSubjectId(e.target.value)}
-            options={subjectOptions}
-            placeholder="No subject"
-          />
+              <Dropdown
+                id="homework-subject"
+                label="Subject"
+                value={subjectId}
+                onChange={(e) => setSubjectId(e.target.value)}
+                options={subjectOptions}
+                placeholder="No subject"
+              />
 
-          <Input
-            id="homework-due-date"
-            label="Due date"
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
+              <div className="grid grid-cols-2 gap-4">
+                <Dropdown
+                  id="homework-priority"
+                  label="Priority"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  options={PRIORITY_OPTIONS}
+                />
+                <Dropdown
+                  id="homework-status"
+                  label="Status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  options={STATUS_OPTIONS}
+                />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Dropdown
-              id="homework-priority"
-              label="Priority"
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              options={PRIORITY_OPTIONS}
-            />
-            <Dropdown
-              id="homework-status"
-              label="Status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              options={STATUS_OPTIONS}
-            />
+              <div className="flex min-h-[110px] flex-1 flex-col [&>*]:flex [&>*]:flex-1 [&>*]:flex-col [&_textarea]:min-h-[84px] [&_textarea]:flex-1 [&_textarea]:resize-none">
+                <Textarea
+                  id="homework-notes"
+                  label="Notes (optional)"
+                  placeholder="Any extra details..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* right column: calendar (inline on desktop, sheet on phone) */}
+            <div className="flex min-w-0 flex-col">
+              <DatePicker
+                id="homework-due-date"
+                label="Due date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                placeholder="Select due date"
+              />
+            </div>
           </div>
 
-          <Textarea
-            id="homework-notes"
-            label="Notes (optional)"
-            placeholder="Any extra details..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-
-            {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
+          {error && <p className="text-sm text-[var(--color-danger)]">{error}</p>}
         </form>
 
         <CustomScrollbar scrollRef={scrollRef} />
