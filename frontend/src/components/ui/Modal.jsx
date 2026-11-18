@@ -1,6 +1,11 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-export default function Modal({ open, onClose, title, children, footer, elevated = false, mobileFullscreen = false }) {
+const SIZE_CLASS = {
+  md: "max-w-md",
+  lg: "max-w-3xl",
+};
+
+export default function Modal({ open, onClose, title, children, footer, elevated = false, mobileFullscreen = false, size = "md" }) {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -45,7 +50,7 @@ export default function Modal({ open, onClose, title, children, footer, elevated
           ${
             mobileFullscreen
               ? "w-full h-full max-w-none rounded-none sm:h-auto sm:max-h-[85vh] sm:max-w-md sm:rounded-xl"
-              : "w-full max-w-md rounded-xl"
+              : `w-full ${SIZE_CLASS[size] || SIZE_CLASS.md} rounded-xl`
           }
           ${visible ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-2"}`}
       >
