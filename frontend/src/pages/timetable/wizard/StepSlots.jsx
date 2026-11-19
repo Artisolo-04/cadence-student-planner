@@ -5,6 +5,7 @@ import Button from "../../../components/ui/Button";
 import { CustomScrollbar } from "../../../components/ui/CustomScrollbar";
 import ClearSlotsModal from "./ClearSlotsModal";
 import PresetGeneratorModal from "./PresetGeneratorModal";
+import TimePicker from "../../../components/ui/TimePicker";
 
 const inputClass =
   "h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 text-sm text-[var(--color-text)] outline-none placeholder:text-[var(--color-text-muted)] focus-visible:ring-1 focus-visible:ring-[var(--color-ring)]";
@@ -243,7 +244,7 @@ const StepSlots = forwardRef(function StepSlots(
           )}
         </section>
 
-        <aside className="flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
+        <aside data-picker-zone className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
           <div className="flex shrink-0 items-center justify-between gap-2 lg:gap-3 border-b border-[var(--color-border)] p-2 lg:p-4">
             <div className="hidden lg:block">
               <h3 className="text-sm font-semibold text-[var(--color-text)]">Your slots</h3>
@@ -298,16 +299,10 @@ const StepSlots = forwardRef(function StepSlots(
                             className={inputClass} />
                         </td>
                         <td className="px-5 py-2">
-                          <input aria-label={`Start time for slot ${index + 1}`} type="time"
-                            value={timeValue(slot.start_time)}
-                            onChange={(event) => updateLocalSlot(slot.id, "start_time", event.target.value)}
-                            className={inputClass} />
+                          <TimePicker ariaLabel={`Start time for slot ${index + 1}`} value={timeValue(slot.start_time)} onChange={(event) => updateLocalSlot(slot.id, "start_time", event.target.value)} />
                         </td>
                         <td className="px-5 py-2">
-                          <input aria-label={`End time for slot ${index + 1}`} type="time"
-                            value={timeValue(slot.end_time)}
-                            onChange={(event) => updateLocalSlot(slot.id, "end_time", event.target.value)}
-                            className={inputClass} />
+                          <TimePicker ariaLabel={`End time for slot ${index + 1}`} value={timeValue(slot.end_time)} onChange={(event) => updateLocalSlot(slot.id, "end_time", event.target.value)} />
                         </td>
                         <td className="px-5 py-2 text-right">
                           <button type="button" onClick={() => handleRemove(slot.id)}
