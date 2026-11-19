@@ -99,7 +99,7 @@ export default function HomeworkFormModal({ open, onClose, homework, subjects, o
           id="homework-form"
           ref={scrollRef}
           onSubmit={handleSubmit}
-          className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-hidden"
+          className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-hidden [&_label]:w-fit [&_label]:self-start [&_label]:rounded-md [&_label]:border [&_label]:border-[var(--color-border)] [&_label]:bg-[var(--color-surface-alt)] [&_label]:px-2 [&_label]:py-0.5 [&_label]:text-xs [&_label]:font-medium [&_label]:text-[var(--color-text-muted)] [&_[data-field-label]]:w-fit [&_[data-field-label]]:self-start [&_[data-field-label]]:rounded-md [&_[data-field-label]]:border [&_[data-field-label]]:border-[var(--color-border)] [&_[data-field-label]]:bg-[var(--color-surface-alt)] [&_[data-field-label]]:px-2 [&_[data-field-label]]:py-0.5 [&_[data-field-label]]:text-xs [&_[data-field-label]]:font-medium [&_[data-field-label]]:text-[var(--color-text-muted)]"
         >
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2">
             {/* left column: details */}

@@ -247,7 +247,7 @@ export default function DatePicker({
   if (showInline) {
     return (
       <div className="flex h-full min-h-0 flex-col gap-2">
-        {label && <span className="text-sm font-medium text-[var(--color-text)]">{label}</span>}
+        {label && <span data-field-label className="text-sm font-medium text-[var(--color-text)]">{label}</span>}
         <div className="min-h-0 flex-1">
           <CalendarPanel value={value} onPick={pick} fill />
         </div>
